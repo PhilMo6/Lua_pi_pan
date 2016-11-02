@@ -1,0 +1,238 @@
+local Cloneable			= require("obj.LED")
+local LED			= Cloneable:clone()
+--[[
+	RBG LED module.
+	Several functions are provided such as basic on, off, toggle, blink, cycle, and random color functions and also force on and off which is located in the baseObj
+]]
+LED.colors = {
+{0,0,1},
+{0,1,1},
+{0,1,0},
+{1,1,0},
+{1,0,0},
+{1,1,1},
+{0,1,0},
+{0,1,1},
+{0,0,1},
+{0,1,1},
+{0,1,0},
+{1,1,0}
+}
+
+function LED:initialize(pinR,pinB,pinG)
+	if not _G.LEDs then _G.LEDs = {name='LEDs'} _G.LEDIDs = {} table.insert(objects,LEDs) objects["LEDs"] = LEDs end
+	if not LEDs['LED_'..pinR..','..pinB..','..pinG] then
+		self.config = {
+			pinRed = pinR,
+			pinBlue = pinB,
+			pinGreen = pinG,
+			r = 1,
+			b = 1,
+			g = 1
+		}
+		self:setID(pinR..','..pinB..','..pinG)
+		self:setName('RBG_LED_'..self:getID())
+		table.insert(LEDs,self)
+		GPIO.setup(pinR, GPIO.OUT,false)
+		GPIO.setup(pinB, GPIO.OUT,false)
+		GPIO.setup(pinG, GPIO.OUT,false)
+	end
+end
+
+function LED:getHTMLcontrol()
+	return ('%s %s %s %s'):format(
+	([[<button onclick="myFunction('L %s on')">On</button >]]):format(self:getName()),
+	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(self:getName()),
+	([[<button onclick="myFunction('L %s test')">Test1</button >]]):format(self:getName()),
+	([[<button onclick="myFunction('L %s test 1')">Test2</button >]]):format(self:getName())
+	)
+end
+
+function LED:setID(id)
+	if self.config.id then LEDIDs[self.config.id] = nil end
+	self.config.id = id
+	LEDIDs[self.config.id] = self
+end
+
+function LED:setName(name)
+	if self.config.name then LEDs[self.config.name] = nil end
+	self.config.name = name
+	LEDs[self.config.name] = self
+end
+
+function LED:readO()
+	return self:getRedPin(),self:getBluePin(),self:getGreenPin()
+end
+
+function LED:setRedPin(s)
+	if s then self:setRed(s) end
+	GPIO.output(self.config.pinRed, self:getRed())
+end
+function LED:getRedPin()
+	return GPIO.input(self.config.pinRed)
+end
+function LED:setBluePin(s)
+	if s then self:setBlue(s) end
+	GPIO.output(self.config.pinBlue, self:getBlue())
+end
+function LED:getBluePin()
+	return GPIO.input(self.config.pinBlue)
+end
+function LED:setGreenPin(s)
+	if s then self:setGreen(s) end
+	GPIO.output(self.config.pinGreen, self:getGreen())
+end
+function LED:getGreenPin()
+	return GPIO.input(self.config.pinGreen)
+end
+
+function LED:setRed(s)
+	if s ~= 0 and s ~= 1 then s = 0 end
+	self.config.r = tonumber(s)
+end
+function LED:getRed()
+	return self.config.r
+end
+function LED:setBlue(s)
+	if s ~= 0 and s ~= 1 then s = 0 end
+	self.config.b = tonumber(s)
+end
+function LED:getBlue()
+	return self.config.b
+end
+function LED:setGreen(s)
+	if s ~= 0 and s ~= 1 then s = 0 end
+	self.config.g = tonumber(s)
+end
+function LED:getGreen()
+	return self.config.g
+end
+
+function LED:on(r,b,g,client)
+	self:forceCheck()
+	self:setRedPin(r)
+	self:setBluePin(b)
+	self:setGreenPin(g)
+	if not self.blinking and not self.cycling and self.masters then
+		self:updateMasters()
+	end
+	return true
+end
+
+function LED:off()
+
+	if self.cycling then
+		Scheduler:dequeue(self.cycling)
+		self.cycling = nil
+	end
+
+	GPIO.output(self.config.pinRed, false)
+	GPIO.output(self.config.pinBlue, false)
+	GPIO.output(self.config.pinGreen, false)
+	if not self.blinking and not self.cycling and self.masters then
+		self:updateMasters()
+	end
+	return true
+
+end
+
+function LED:blink(dir,count,client)
+	if not self.blinking then
+		local led = self
+		led.blinking = Event:new(function()
+			led:toggle()
+		end, dir or 1, true, count and count * 2 or 6)
+		led.blinking.onDone = function()
+			led.blinking = nil led:off()
+		end
+		Scheduler:queue(led.blinking)
+		if self.masters then
+			self:updateMasters()
+		end
+		return true
+	end
+	return false
+end
+
+function LED:toggle(client)
+	if self:readO() == false then
+		self:on(client)
+		return 'on'
+	else
+		self:off(client)
+		return 'off'
+	end
+end
+
+function LED:cycle(client)
+	if self.blinking then
+		Scheduler:dequeue(self.blinking)
+		self.blinking = nil
+	end
+	if self.cycling then
+		Scheduler:dequeue(self.cycling)
+		self.cycling = nil
+	end
+	if not self.cycling then
+		local led = self
+		local color = 0
+		led.cycling = Event:new(function()
+
+			if led.colors[color + 1] then color = color + 1 else color = 1 end
+
+			led:on(led.colors[color][1],led.colors[color][2],led.colors[color][3])
+		end, .2, true, 60*5)
+		led.cycling.onDone = function()
+			led.cycling = nil led:off()
+		end
+		Scheduler:queue(led.cycling)
+		if self.masters then
+			self:updateMasters()
+		end
+		return true
+	end
+end
+
+function LED:randomColor(client)
+	if self.blinking then
+		Scheduler:dequeue(self.blinking)
+		self.blinking = nil
+	end
+	if self.cycling then
+		Scheduler:dequeue(self.cycling)
+		self.cycling = nil
+	end
+
+	local led = self
+	led.cycling = Event:new(function()
+	local r,b,g = math.random(0,1),math.random(0,1),math.random(0,1)
+	while r == 0 and b == 0 and g == 0 do
+		r,b,g = math.random(0,1),math.random(0,1),math.random(0,1)
+	end
+		led:on(r,b,g)
+	end, .2, true, 60*5)
+	led.cycling.onDone = function()
+		led.cycling = nil led:off()
+	end
+	Scheduler:queue(led.cycling)
+	if self.masters then
+		self:updateMasters()
+	end
+	return true
+end
+
+function LED:test(i)
+	if tonumber(i) == 1 then
+		self:cycle()
+	else
+		self:randomColor()
+	end
+end
+
+--- Stringifier for Cloneables.
+function LED:toString()
+	local r,b,g = self:readO()
+	return string.format("[LED] %s %s %s,%s,%s",self:getID(),self:getName(),(r == true and 'true' or 'false'),(b == true and 'true' or 'false'),(g == true and 'true' or 'false'))
+end
+
+return LED

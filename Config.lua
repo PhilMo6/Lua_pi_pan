@@ -1,0 +1,75 @@
+
+--[[
+	config settings that determine the functionality of the program.
+]]
+
+local Config = {}
+Config.mainID 						= "IDhere"
+Config.homeDirectory 				= '/home/pi/Lua_pi_pan'--if installed elsewhere change this
+Config.masterList					= {} --example:{{id = 'room',ip = '192.168.1.149',port = 9696}}
+--when adding a node to the node list you may set an objects table that defines what objects a master will ask a given node for.
+Config.nodeList 					= {}--example:{{id = 'node1',ip = '192.168.1.111',port = 9696}}
+Config.mainEmail 					= 'YourEmailHere@gmail.com'
+Config.mainEmailPass				= 'YourPasswordHere'
+Config.users						= {}--{'5555555555@vtext.com'}
+Config.usersConfigDefault			= {msgProtocol='email'}--msgProtocol = 'email' or 'sms' this will send messages as a whole or respect sms 160 char limit and split into multi msg if needed
+Config.usersConfig					= {}--{['5555555555@vtext.com'] = {forwardTo = "adifferentemail@gmail.com",msgProtocol='email'}}
+
+Config.SQLFile						= "/home/pi/luaTest.db"
+Config.tempUpdateTime 				= 30--how often do sensors update
+Config.tempLogTime 					= 60*5--how often do sensors have their data logged into sql database
+Config.mailCheckTime 				= 60--if setup how often does mail get checked fro commands
+--default gpio mode is Board so assign pins accordingly
+--see modules at obj/"name".lua for options
+Config.lightSensorPins				= {}--pinValue
+--example:Config.lightSensorPin		= {15}
+Config.LEDPins 						= {}--pinValue
+--example:Config.LEDPins 			= {17,27}
+Config.RBG_LEDPins 					= {}--tableValue containing 3 pins
+--example:Config.RBG_LEDPins 		= {{14,17,27}}
+Config.buzzerPins 					= {}--pinValue
+--example:Config.buzzerPins 		= {22}
+Config.buttonPins 					= {}--pinValue
+--example:Config.buttonPins 		= {8,24,25,23}
+Config.M_buttonPins 				= {}--table value containing 1 pin and number of buttons
+--example:Config.M_buttonPins 		= {{14,5}}
+Config.relayPins					= {}--pinValue
+--example:Config.relayPins			= {9,10,20,21}
+Config.DHT22Pins					= {}--pinValue
+--example:Config.DHT22Pins			= {11}
+Config.StepperPins					= {}--pinValue
+--example:Config.StepperPins		= {19}
+Config.thermostatStartup			= {}--table value containing id and optional config table
+--example:Config.thermostatStartup	= {{'room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
+Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
+--example:Config.motionSensorStartup = {{'test',18}}
+Config.macScannerStartup			= {}--table value containing id and optional config table
+--example:Config.macScannerStartup	= {{'macScanner'}}
+Config.tcpPort						= 9696
+Config.startsite 					= false --really only master nodes need to start a site so the default is false
+Config.siteLinks					= {'dashboard','controls','graphs','status','events'}--These are the links that will be displyed by the site.
+
+for i,v in ipairs(Config.masterList) do Config.masterList[v.ip] = v end
+for i,v in ipairs(Config.nodeList) do Config.nodeList[v.ip] = v end
+for i,v in ipairs(Config.users) do Config.users[v] = v end
+
+--add all options to globle table for easy access
+--make new copys of all tables to preserve originals
+function Config.setup()
+	for i,v in pairs(Config) do
+		local ty = type(v)
+		if ty ~= "function" and ty ~= "table" then
+			_G[i] = v
+		elseif ty == "table" then
+			_G[i] = {}
+			for id,va in pairs(v) do
+				_G[i][id] = va
+			end
+		end
+	end
+end
+Config.setup()
+--retain default settings in its own config table
+--just incase we want to change settings while running we can always reset back to default using config.setup() function
+_G.config = Config
+return Config
