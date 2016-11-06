@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.baseObj")
+local Cloneable			= require("obj.Cloneable")
 local Relay			= Cloneable:clone()
 --[[
 	Object module for relays such as
@@ -16,7 +16,9 @@ function Relay:initialize(pin)
 		self:setID(pin)
 		self:setName('relay_'..pin)
 		table.insert(relays,self)
-		GPIO.setup(pin, GPIO.OUT,true)
+		self.gpio = RPIO(pin)
+		self.gpio:set_direction('out')
+		self.gpio:write(1)
 	end
 end
 
@@ -41,20 +43,20 @@ function Relay:setName(name)
 	relays[self.config.name] = self
 end
 
-function Relay:toggle(client)
-	if self:readO() == true then
-		self:on(client)
+function Relay:toggle()
+	if self:read() == 1 then
+		self:on()
 		return 'on'
 	else
-		self:off(client)
+		self:off()
 		return 'off'
 	end
 end
 
-function Relay:off(client)
+function Relay:off()
 	self:forceCheck()
-	if self:readO() == false and not self.stayOn then
-		GPIO.output(self:getID(), true)
+	if self:read() == 0 and not self.stayOn then
+		self.gpio:write(1)
 		if self.masters then
 			self:updateMasters()
 		end
@@ -63,20 +65,50 @@ function Relay:off(client)
 	return false
 end
 
-function Relay:on(client)
+function Relay:on()
 	self:forceCheck()
-	if self:readO() == true and not self.stayOff then
-		GPIO.output(self:getID(), false)
+	if self:read() == 1 and not self.stayOff then
+		self.gpio:write(0)
 		if self.masters then
 			self:updateMasters()
 		end
 		return true
 	end
 	return false
+end
+
+function Relay:getID()
+	return self.config.id
+end
+
+function Relay:getName()
+	return self.config.name
+end
+
+function Relay:read()
+	return self.gpio:read()
+end
+
+function Relay:forceOn(f)
+	self.stayOn = socket.gettime() + f
+	return self:on()
+end
+
+function Relay:forceOff(f)
+	self.stayOff = socket.gettime() + f
+	return self:off()
+end
+
+function Relay:forceCheck()
+	if self.stayOff and self.stayOff <= socket.gettime() then self.stayOff = nil end
+	if self.stayOn and self.stayOn <= socket.gettime() then self.stayOn = nil end
+end
+
+function Relay:test()
 end
 
 function Relay:toString()
-	return string.format("[relay] %s %s %s",self:getID(),self:getName(),(self:readO() == true and 'off' or 'on'))
+	return string.format("[relay] %s %s %s",self:getID(),self:getName(),(self:read() == 1 and 'off' or 'on'))
 end
 
 return Relay

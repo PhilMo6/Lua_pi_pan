@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.baseObj")
+local Cloneable			= require("obj.Button")
 local Button			= Cloneable:clone()
 --[[
 	Remote object for buttons/switchs/motion sensors attached to nodes.
@@ -39,14 +39,14 @@ function Button:setName(name)
 	buttons[self.config.name] = self
 end
 
-function Button:readO()
+function Button:read()
 	return false
 end
 
 function Button:press(f,client)
 	if not self.pressed then
-		self.readO = function()
-			self.readO = Button.readO
+		self.read = function()
+			self.read = Button.read
 			self.pressed = nil
 			return true end
 		if self.masters then
@@ -65,7 +65,7 @@ end
 
 --- Stringifier for Cloneables.
 function Button:toString()
-	return string.format("[Remote_Button] %s %s %s",self:getID(),self:getName(),(self:readO() == true and 'pressed' or 'not pressed'))
+	return string.format("[Remote_Button] %s %s %s",self:getID(),self:getName(),(self:read() == true and 'pressed' or 'not pressed'))
 end
 
 return Button

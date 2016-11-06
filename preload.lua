@@ -18,8 +18,6 @@ local LED = require("obj.LED")
 local RBG_LED = require("obj.RBG_LED")
 local Buzzer = require("obj.Buzzer")
 local Button = require("obj.Button")
-local Multi_Button = require("obj.Multi_Button")
-local Stepper = require("obj.Stepper")
 
 --found here https://gist.github.com/jesseadams/791673
 function _G.SecondsToClock(seconds)
@@ -79,11 +77,6 @@ function _G.loadObjects(conn,c)
 			Button:new(pin)
 		end
 	end
-	for i,op in ipairs(M_buttonPins) do
-		if type(op[1]) == 'number' then
-			Multi_Button:new(op[1],op[2])
-		end
-	end
 	for i,pin in ipairs(buzzerPins) do
 		if type(pin) == 'number' then
 			Buzzer:new(pin)
@@ -112,12 +105,6 @@ function _G.loadObjects(conn,c)
 	for i,pin in ipairs(DHT22Pins) do
 		if type(pin) == 'number' then
 			DHT22:new(pin)
-		end
-	end
-
-	for i,pin in ipairs(StepperPins) do
-		if type(pin) == 'number' then
-			Stepper:new(pin)
 		end
 	end
 
@@ -226,7 +213,7 @@ function _G.objectLoad(conn,c)
 	if cursor then
 		row = cursor:fetch ({}, "a")
 		while row do
-			if sensors[row.id] then
+			if sensors and sensors[row.id] then
 				sensors[row.id]:setName(row.name)
 			end
 			row = cursor:fetch (row, "a")
@@ -237,7 +224,7 @@ function _G.objectLoad(conn,c)
 	if cursor then
 		row = cursor:fetch ({}, "a")
 		while row do
-			if thermostats[row.id] then
+			if thermostats and thermostats[row.id] then
 				local bl = boxLoad(row.config)
 				if bl then thermostats[row.id]:setConfig(bl) end
 			end
@@ -249,7 +236,7 @@ function _G.objectLoad(conn,c)
 	if cursor then
 		row = cursor:fetch ({}, "a")
 		while row do
-			if motionSensors[row.id] then
+			if motionSensors and motionSensors[row.id] then
 				local bl = boxLoad(row.config)
 				if bl then motionSensors[row.id]:setConfig(bl) end
 			end
@@ -617,7 +604,7 @@ function _G.macscannerLoad(conn,c)
 end
 
 
---polls all the sensors to update their last readO
+--polls all the sensors to update their last read
 --if p then print the readings or er
 function _G.pollSensors(p,log)
 	local conn = env:connect(SQLFile)
@@ -629,7 +616,7 @@ function _G.pollSensors(p,log)
 		if sensors then
 			conn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
 			for i,v in ipairs(sensors) do
-				local t1,t2,er = v:readO()
+				local t1,t2,er = v:read()
 					if not er then
 					if log then
 						local status,errorString = conn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "','" .. t2 .. "')")
@@ -644,7 +631,7 @@ function _G.pollSensors(p,log)
 			conn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
 			conn:execute([[CREATE TABLE humidity (id TEXT, name TEXT, stamp time, tdate date, ttime time, hum INTEGER)]])
 			for i,v in ipairs(DHT22s) do
-				local t1,t2 = v:readO()
+				local t1,t2 = v:read()
 				local t3 = (t2 * 9 / 5  + 32)
 				if t1 then
 					if log then
@@ -660,7 +647,7 @@ function _G.pollSensors(p,log)
 		if lightsensors then
 			conn:execute([[CREATE TABLE light (id TEXT, name TEXT, stamp time, tdate date, ttime time, lightlevel INTEGER)]])
 			for i,v in ipairs(lightsensors) do
-				local t1,t2,er = v:readO()
+				local t1,t2,er = v:read()
 				if not er then
 					if log then
 						local status,errorString = conn:execute("INSERT INTO light values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")

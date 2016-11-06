@@ -46,7 +46,7 @@ function sensor:getLastRead()
 	return self.lastRead
 end
 
-function sensor:readO()
+function sensor:read()
 	local reading = nil
 	return reading
 end

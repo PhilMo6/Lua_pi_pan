@@ -47,7 +47,7 @@ function Sensor:setName(name)
 	lightsensors[self.config.name] = self
 end
 
-function Sensor:readO()
+function Sensor:read()
 	if not self.lastRead then
 		self.node:send('Request SenLight')
 		return nil,nil,'error'

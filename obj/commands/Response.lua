@@ -48,7 +48,8 @@ Response.orders["SenDHT22"] = function(input,user)
 				if type(v) == "table" then
 					local sensor = user.node.DHT22s[v.id]
 					if sensor and not v.er then
-						sensor:updateLastRead(v.h,v.t)
+						sensor.lastHRead = v.h
+						sensor.lastTRead = v.t
 						sensor.error = nil
 					elseif sensor then
 						sensor.error = (sensor.error and sensor.error + 1 or 1)
@@ -114,9 +115,9 @@ Response.orders["RlUp"] = function(input,user)
 						local relay = user.node.relays[v.id]
 						if relay then
 							relay.lastup = tonumber(relayData.stamp)
+							relay.lastRead = v.reading
 							relay.stayOn = v.stayOn
 							relay.stayOff = v.stayOff
-							relay:updateLastRead(v.reading)
 						end
 					end
 				end
@@ -137,10 +138,10 @@ Response.orders["LEDUp"] = function(input,user)
 						local LED = user.node.LEDs[v.id]
 						if LED then
 							LED.lastup = tonumber(LEDData.stamp)
+							LED.lastRead = v.reading
 							LED.blinking = v.blinking
 							LED.stayOn = v.stayOn
 							LED.stayOff = v.stayOff
-							LED:updateLastRead(v.reading)
 						end
 					end
 				end
@@ -157,11 +158,11 @@ Response.orders["ThUp"] = function(input,user)
 			local thermData = boxLoad(data)
 			if thermData then
 				for i,v in ipairs(thermData) do
-					if v.id and v.config then
+					if v.id and v.options then
 						local thermostat = user.node.thermostats[v.id]
 						if thermostat then
 							thermostat.lastup = tonumber(thermData.stamp)
-							thermostat:setConfig(v.config)
+							thermostat:setOptions(v.options)
 						end
 					end
 				end
@@ -178,11 +179,11 @@ Response.orders["MosUp"] = function(input,user)
 			local mosData = boxLoad(data)
 			if mosData then
 				for i,v in ipairs(mosData) do
-					if v.id and v.config then
+					if v.id and v.options then
 						local mos = user.node.motionSensors[v.id]
 						if mos then
 							mos.lastup = tonumber(mosData.stamp)
-							mos:setConfig(v.config)
+							mos:setOptions(v.options)
 						end
 					end
 				end

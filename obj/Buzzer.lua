@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.baseObj")
+local Cloneable			= require("obj.Cloneable")
 local Buzzer			= Cloneable:clone()
 
 --[[
@@ -13,7 +13,9 @@ function Buzzer:initialize(pin)
 		self:setID(pin)
 		self:setName('Buzzer_'..pin)
 		table.insert(buzzers,self)
-		GPIO.setup(pin, GPIO.OUT,false)
+		self.gpio = RPIO(pin)
+		self.gpio:set_direction('out')
+		self.gpio:write(0)
 	end
 end
 
@@ -62,9 +64,64 @@ function Buzzer:test()
 	self:beep()
 end
 
+function Buzzer:getID()
+	return self.config.id
+end
+
+function Buzzer:getName()
+	return self.config.name
+end
+
+function Buzzer:read()
+	return self.gpio:read()
+end
+
+function Buzzer:toggle()
+	if self:read() == true then
+		self:off()
+		return 'off'
+	else
+		self:on()
+		return 'on'
+	end
+end
+
+function Buzzer:on()
+	self:forceCheck()
+	if self:read() == 0 and not self.stayOff then
+		self.gpio:write(1)
+		return true
+	end
+	return false
+end
+
+function Buzzer:off()
+	self:forceCheck()
+	if self:read() == 1 and not self.stayOn then
+		self.gpio:write(0)
+		return true
+	end
+	return false
+end
+
+function Buzzer:forceOn(f)
+	self.stayOn = socket.gettime() + f
+	return self:on()
+end
+
+function Buzzer:forceOff(f)
+	self.stayOff = socket.gettime() + f
+	return self:off()
+end
+
+function Buzzer:forceCheck()
+	if self.stayOff and self.stayOff <= socket.gettime() then self.stayOff = nil end
+	if self.stayOn and self.stayOn <= socket.gettime() then self.stayOn = nil end
+end
+
 --- Stringifier for Cloneables.
 function Buzzer:toString()
-	return string.format("[Buzzer] %s %s %s",self:getID(),self:getName(),(self:readO() == true and 'on' or 'off'))
+	return string.format("[Buzzer] %s %s %s",self:getID(),self:getName(),(self:read() == true and 'on' or 'off'))
 end
 
 return Buzzer

@@ -77,7 +77,7 @@ function LED:test()
 end
 
 function LED:toggle(client)
-	if self:readO() == false then
+	if self:read() == 0 then
 		self:on(client)
 		return 'on'
 	else
@@ -87,7 +87,7 @@ function LED:toggle(client)
 end
 
 function LED:off(client)
-	if self:readO() == true and not self.stayOn then
+	if self:read() == 1 and not self.stayOn then
 		if client and self.node ~= client.node or not client then self.node:send(([[LED %s off]]):format(self:getID())) end
 		if self.masters then
 			self:updateMasters()
@@ -98,7 +98,7 @@ function LED:off(client)
 end
 
 function LED:on(client)
-	if self:readO() == false and not self.stayOff then
+	if self:read() == 0 and not self.stayOff then
 		if client and self.node ~= client.node or not client then self.node:send(([[LED %s on]]):format(self:getID())) end
 		if self.masters then
 			self:updateMasters()
@@ -108,7 +108,7 @@ function LED:on(client)
 	return false
 end
 
-function LED:readO()
+function LED:read()
 	if not self.lastRead then
 		self.node:send('Request LEDUp')
 		return 'error'
@@ -122,7 +122,7 @@ end
 
 --- Stringifier for Cloneables.
 function LED:toString()
-	return string.format("[Remote_LED] %s %s %s",self:getID(),self:getName(),(self.blinking and "blinking" or self:readO() == true and 'on' or 'off'))
+	return string.format("[Remote_LED] %s %s %s",self:getID(),self:getName(),(self.blinking and "blinking" or self:read() == 1 and 'on' or 'off'))
 end
 
 return LED

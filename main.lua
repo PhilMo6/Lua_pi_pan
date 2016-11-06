@@ -1,25 +1,28 @@
 
-package.path = package.path .. ";./?.lua;/usr/share/luajit-2.0.0/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua"
+package.path = package.path .. ";./?.lua;/usr/share/luajit-2.0.0/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua"--added for use with raspberry pi
 
 require("preload")
 require("socket")
+_G.bit32 = require("bit32")
+--require("logging")
+--require("logging.file")
+--require("logging.console")
 require("ext.table")
 require("ext.string")
 require("ext.math")
-local GPIO = require "GPIO"
+_G.Event = require("obj.Event")--Event object is used more then any other so load it globaly
+
+_G.RPIO = require "rpio"
 local Server = require "obj.Server"
 --modules
 require("Config")
 require("Mail")
 require("Scheduler")
 require("CommandParser")
-_G.Event = require("obj.Event")--Event object is used more then any other so load it globaly
 
 
 print('Starting Lua pi Pan')
 --do setup needed to run Lua pi pan
-GPIO.setwarnings(false)
-GPIO.setmode(GPIO.BCM)
 local luasql = require "luasql.sqlite3"
 _G.env = luasql.sqlite3() -- Create a database environment object
 local conn = env:connect(SQLFile) -- Open a database file
@@ -38,7 +41,7 @@ if sensors then
 	for i,v in ipairs(sensors) do
 		local erC = 0
 		for i=1,4 do
-			local t1,t2,er = v:readO()
+			local t1,t2,er = v:read()
 			if er then erC = erC + 1 end
 		end
 		if erC == 4 then sensors[i] = nil sensors[v:getID()] = nil sensors[v:getName()] = nil v = nil end
@@ -57,13 +60,13 @@ msg = nil
 pollSensors(true,true)
 
 --add main events to be queued on start to this table
---these are the events that run most of the programs functionality
+--these are the events the run all the programs functionality
 local mainEvents = {
 	Event:new(function()--button event
 		if buttons then
 			local b1,b2 = nil
-			if buttons[1] and not SHUTTINGDOWN then--button1 lowers temp
-				if buttons[1]:readO() == true then
+			if buttons[1] and not SHUTTINGDOWN then--button1 toggles fanHigh and windowClosed flags
+				if buttons[1]:read() == 0 then
 					b1 = true
 					if thermostats and thermostats['room'] then
 						thermostats['room']:setTemp(thermostats['room']:getTemp() - 1)
@@ -75,8 +78,8 @@ local mainEvents = {
 					if LEDs[1] then LEDs[1]:off() end
 				end
 			end
-			if buttons[2] and not SHUTTINGDOWN then--button2 raises temp
-				if buttons[2]:readO() == true then
+			if buttons[2] and not SHUTTINGDOWN then--button2 mutes all buzzers
+				if buttons[2]:read() == 0 then
 					b2 = true
 					if thermostats and thermostats['room'] then
 						thermostats['room']:setTemp(thermostats['room']:getTemp() + 1)
@@ -89,11 +92,11 @@ local mainEvents = {
 				end
 			end
 			if buttons[3] and not SHUTTINGDOWN then--fan on off toggle
-				if buttons[3]:readO() == true then
+				if buttons[3]:read() == 0 then
 					if relays[1] then relays[1]:toggle() sleep(.5) end
 				end
 			elseif buttons[3] and SHUTTINGDOWN then--if shutdown in progress then set reset flag
-				if buttons[3]:readO() == true then
+				if buttons[3]:read() == 0 then
 					resetC = (resetC or 0) + 1
 					if resetC > 3 then
 						print('Reseting!')
@@ -103,14 +106,14 @@ local mainEvents = {
 				end
 			end
 			if buttons[4] and not SHUTTINGDOWN then--print status
-				if buttons[4]:readO() == true then
+				if buttons[4]:read() == 0 then
 					print('')
 					print(getStatus())
 					print('')
 					sleep(.5)
 				end
 			elseif  buttons[4] and SHUTTINGDOWN then--if shutdown in progress then stop shutdown
-				if buttons[4]:readO() == true then
+				if buttons[4]:read() == 0 then
 					resetC = (resetC or 0) + 1
 					if resetC > 3 then
 						Scheduler:dequeue(SHUTTINGDOWN)
@@ -119,6 +122,13 @@ local mainEvents = {
 						print('Shutdown halted!')
 						sleep(.5)
 					end
+				end
+			end
+
+			if buttonIDs[14] and not SHUTTINGDOWN then--for testing capacitive multibutton
+				local re,button = buttonIDs[14]:read()
+				if button then
+					print(re,button)
 				end
 			end
 
@@ -140,18 +150,23 @@ local mainEvents = {
 		pollSensors(false,true)
 	end, tempLogTime, true, 0)
 	,
-	Event:new(function()--mac scanner based alarm!!!!!!!!!!!!!
+	Event:new(function()--alarm!!!!!!!!!!!!!
 		if macScanners and macScanners[1] and macScanners[1].started and not macScanners[1]:isID('my phone') then
 			if motionSensors and motionSensors[1] and motionSensors[1]:checkMotion() then
 				if buzzers[1] then
 					buzzers[1]:test()
-					sendMessage("Room Alarm", 'Room alarm at '.. os.date() ,'myEmail@gmail.com')
+					sendMessage("Room Alarm", 'Room alarm at '.. os.date() ,'philipmowrey@gmail.com')
 				end
 			end
 		end
 	end, 60, true, 0)
 	,
-	--Email checking event is defaulted to non function because of how much it slows the program. needs some work.
+	Event:new(function()--if relay is set power cycle battery for 5 min every hour
+		if relays and relays['battery'] then
+			relays['battery']:on()
+			Scheduler:queue(Event:new(function() relays['battery']:off() end, 60*5, false))
+		end
+	end, 60*60, true, 0)
 	--[[,
 	Event:new(function()--check email for any commands not yet parsed and if found find and run command if available.
 		local msg = receiveMessage()
@@ -226,7 +241,8 @@ if runningServer then runningServer:close() print('tcp closed') end
 if cursor then cursor:close() end
 if conn then conn:close() end
 if env then env:close() end
-GPIO.cleanup()
+local cleanup = RPIO()
+cleanup()
 collectgarbage()
 
 if startsite then

@@ -22,29 +22,30 @@ Config.mailCheckTime 				= 60--if setup how often does mail get checked fro comm
 --default gpio mode is Board so assign pins accordingly
 --see modules at obj/"name".lua for options
 Config.lightSensorPins				= {}--pinValue
---example:Config.lightSensorPin		= {15}
 Config.LEDPins 						= {}--pinValue
---example:Config.LEDPins 			= {17,27}
 Config.RBG_LEDPins 					= {}--tableValue containing 3 pins
---example:Config.RBG_LEDPins 		= {{14,17,27}}
 Config.buzzerPins 					= {}--pinValue
---example:Config.buzzerPins 		= {22}
 Config.buttonPins 					= {}--pinValue
---example:Config.buttonPins 		= {8,24,25,23}
 Config.M_buttonPins 				= {}--table value containing 1 pin and number of buttons
---example:Config.M_buttonPins 		= {{14,5}}
 Config.relayPins					= {}--pinValue
---example:Config.relayPins			= {9,10,20,21}
 Config.DHT22Pins					= {}--pinValue
---example:Config.DHT22Pins			= {11}
 Config.StepperPins					= {}--pinValue
---example:Config.StepperPins		= {19}
 Config.thermostatStartup			= {}--table value containing id and optional config table
---example:Config.thermostatStartup	= {{'room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
 Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
---example:Config.motionSensorStartup = {{'test',18}}
 Config.macScannerStartup			= {}--table value containing id and optional config table
---example:Config.macScannerStartup	= {{'macScanner'}}
+--[[example:
+Config.lightSensorPin		= {15}
+Config.LEDPins 			= {18,27}
+Config.RBG_LEDPins 		= {{14,17,27}}
+Config.buzzerPins 		= {22}
+Config.buttonPins 		= {8,24,25,23}
+Config.relayPins			= {9,10,20,21}
+Config.DHT22Pins			= {11}
+Config.thermostatStartup	= {{'room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
+Config.motionSensorStartup = {{'roomLight',19}}
+Config.macScannerStartup	= {{'macScanner'}}
+]]
+
 Config.tcpPort						= 9696
 Config.startsite 					= false --really only master nodes need to start a site so the default is false
 Config.siteLinks					= {'dashboard','controls','graphs','status','events'}--These are the links that will be displyed by the site.

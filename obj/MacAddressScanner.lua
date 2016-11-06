@@ -11,9 +11,14 @@ MacScanner.config.updateTime 			=  120
 MacScanner.config.timeout 				=  3
 MacScanner.config.scanTime 				=  30
 
---example mac set is random.
 MacScanner.knownMacs = {
-			{'55:f5:ff:ff:0f:55','a_phone'},
+			{'34:fc:ef:ec:90:22','my_phone'},
+			{'5c:70:a3:63:47:fe','freds_phone'},
+			{'00:e1:b0:18:52:15','rpi_greenhouse'},
+			{'b4:79:a7:03:fc:5d','grizs_phone'},
+			{'b8:27:eb:81:70:11','LibreELEC'},
+			{'30:10:b3:51:81:67','Karens_Laptop'},
+			{'84:38:38:25:a4:f7','Karens_phone'}
 		}
 
 --- Constructor for instance-style clones.
@@ -47,6 +52,7 @@ function MacScanner:initialize(id,options)
 		local conn = env:connect(SQLFile)
 		--conn:execute([[DROP TABLE IF EXISTS MacScanner;]])
 		conn:execute([[CREATE TABLE MacScanner (mac TEXT, date TEXT, time TIME, event TEXT)]])
+		--macscannerLoad(conn)
 		conn:close()
 
 
@@ -261,6 +267,7 @@ function MacScanner:setState(state)
 	end
 end
 
+
 function MacScanner:getHTMLcontrol()
 	local name = self:getName()
 	return ('<div style="font-size:15px">%s %s %s %s %s %s %s<br>%s</div>'):format(
@@ -275,6 +282,7 @@ function MacScanner:getHTMLcontrol()
 	)
 end
 
+
 function MacScanner:getID()
 	return self.config.id
 end
@@ -288,7 +296,7 @@ function MacScanner:getState()
 end
 
 
-function MacScanner:readO()
+function MacScanner:read()
 	return self:getState()
 end
 

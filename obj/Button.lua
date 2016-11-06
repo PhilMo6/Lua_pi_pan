@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.baseObj")
+local Cloneable			= require("obj.Cloneable")
 local Button			= Cloneable:clone()
 
 --[[
@@ -13,11 +13,8 @@ function Button:initialize(pin)
 		self:setID(pin)
 		self:setName('Button_'..pin)
 		table.insert(buttons,self)
-		GPIO.setup{
-		   channel=pin,
-		   direction=GPIO.IN,
-		   pull_up_down = GPIO.PUD_DOWN,
-		}
+		self.gpio = RPIO(pin)
+		self.gpio:set_direction('in')
 	end
 end
 
@@ -39,17 +36,25 @@ function Button:setName(name)
 	buttons[self.config.name] = self
 end
 
-function Button:readO()
-	local r = GPIO.input(self:getID())
-	if self.lastRead ~= r and r == true then
-		if self.lastRead ~= nil then logEvent(self:getName(),self:getName() .. ' readO:true') end
+function Button:getID()
+	return self.config.id
+end
+
+function Button:getName()
+	return self.config.name
+end
+
+function Button:read()
+	local r = self.gpio:read()
+	if self.lastRead ~= r and r == 0 then
+		if self.lastRead ~= nil then logEvent(self:getName(),self:getName() .. ' read:1') end
 		if self.masters then
 			for i,v in ipairs(self.masters) do
 				v:send(([[button %s_%s press]]):format(self:getName(),mainID))
 			end
 		end
-	elseif self.lastRead ~= r and r == false and self.lastRead ~= nil then
-		logEvent(self:getName(),self:getName() .. ' readO:false')
+	elseif self.lastRead ~= r and r == 1 and self.lastRead ~= nil then
+		logEvent(self:getName(),self:getName() .. ' read:0')
 	end
 	self.lastRead = r
 	return self.lastRead
@@ -58,8 +63,8 @@ end
 function Button:press(f,client)
 	if client and client.master then client = client.master end
 	if not self.pressed then
-		self.readO = function()
-			self.readO = Cloneable.readO
+		self.read = function()
+			self.read = Cloneable.read
 			self.lastRead = nil
 			self.pressed = nil
 			logEvent(self:getName(),self:getName() .. ' press:pressed')
@@ -68,7 +73,7 @@ function Button:press(f,client)
 					if v ~= client then v:send(([[button %s_%s press]]):format(self:getName(),mainID)) end
 				end
 			end
-			return true end
+			return 0 end
 		self.pressed = true
 		return true
 	end
@@ -78,7 +83,8 @@ end
 
 --- Stringifier for Cloneables.
 function Button:toString()
-	return string.format("[Button] %s %s %s",self:getID(),self:getName(),(self:readO() == true and 'pressed' or 'not pressed'))
+	local r = self:read()
+	return string.format("[Button] %s %s %s",self:getID(),self:getName(),r)
 end
 
 return Button

@@ -68,9 +68,9 @@ function Thermostat:runCoolLogic()
 	if sensors[self:getTempSensor()] then
 		if relays[self:getCoolRelay()] then
 			local t1,t2 = sensors[self:getTempSensor()]:getLastRead()
-			if t2 > (self:getTemp() + self:getTempTh()) and relays[self:getCoolRelay()]:readO() == true then
+			if t2 > (self:getTemp() + self:getTempTh()) and relays[self:getCoolRelay()]:read() == 1 then
 				if relays[self:getCoolRelay()]:on() then self:setAction('cooling') end
-			elseif t2 <= (self:getTemp() - self:getCoolTh()) and relays[self:getCoolRelay()]:readO() == false then
+			elseif t2 <= (self:getTemp() - self:getCoolTh()) and relays[self:getCoolRelay()]:read() == 0 then
 				if relays[self:getCoolRelay()]:off() then self:setAction() end
 			end
 		end
@@ -81,9 +81,9 @@ function Thermostat:runHeatLogic()
 	if sensors[self:getTempSensor()] then
 		if relays[self:getHeatRelay()] then
 			local t1,t2 = sensors[self:getTempSensor()]:getLastRead()
-			if t2 < (self:getTemp() - self:getTempTh()) and relays[self:getHeatRelay()]:readO() == true then
+			if t2 < (self:getTemp() - self:getTempTh()) and relays[self:getHeatRelay()]:read() == 1 then
 				if relays[self:getHeatRelay()]:on() then self:setAction('heating') end
-			elseif t2 >= (self:getTemp() + self:getHeatTh()) and relays[self:getHeatRelay()]:readO() == false then
+			elseif t2 >= (self:getTemp() + self:getHeatTh()) and relays[self:getHeatRelay()]:read() == 0 then
 				if relays[self:getHeatRelay()]:off() then self:setAction() end
 			end
 		end
@@ -269,7 +269,7 @@ function Thermostat:getAction()
 	return self.config.action or 'standby'
 end
 
-function Thermostat:readO()
+function Thermostat:read()
 	return self:getState()
 end
 

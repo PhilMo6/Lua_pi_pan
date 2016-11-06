@@ -28,6 +28,7 @@ function Sensor:initialize(pin)
 		self.lastRead = 0
 		table.insert(lightsensors,self)
 		self.lastUp = os.time()
+		self.gpio = RPIO(pin)
 		self:calibrate()
 		local sen = self
 		self.calibrateEvent = Event:new(function()--trigger event that trys to keep sensor calibrated for max reading speed
@@ -38,16 +39,16 @@ function Sensor:initialize(pin)
 end
 
 function Sensor:calibrate()
+
 	local cal = 1000
 	function readL(pin)
 		local reading = cal
-
-		GPIO.setup(pin, GPIO.OUT)
-		GPIO.output(pin, GPIO.LOW)
-		os.execute("sleep .1")
-		GPIO.setup(pin, GPIO.IN)
+		self.gpio:set_direction('out')
+		self.gpio:write(0)
+		sleep(.1)
+		self.gpio:set_direction('in')
 		local time1 = socket:gettime()*1000
-		while GPIO.input(pin) == GPIO.LOW do
+		while self.gpio:read() == 0 do
 			reading = reading - self.calibration
 			if reading <= 0 then return reading,time1,socket:gettime()*1000,true end
 		end
@@ -71,7 +72,7 @@ function Sensor:updateLastRead(v)
 	self.lastRead = v
 end
 
-function Sensor:readO()
+function Sensor:read()
 	local cal = self.maxRead
 	local calERROR = 0
 	local lastread = self.lastRead
@@ -80,11 +81,11 @@ function Sensor:readO()
 	function readL(pin)
 		local reading = self.maxRead
 		local time1 = socket:gettime()*1000
-		GPIO.setup(pin, GPIO.OUT)
-		GPIO.output(pin, GPIO.LOW)
-		os.execute("sleep .1")
-		GPIO.setup(pin, GPIO.IN)
-		while GPIO.input(pin) == GPIO.LOW do
+		self.gpio:set_direction('out')
+		self.gpio:write(0)
+		sleep(.1)
+		self.gpio:set_direction('in')
+		while self.gpio:read() == 0 do
 			reading = reading - self.calibration
 			if reading <= 0 then return math.round(socket:gettime()*1000 - time1,1),true end
 		end

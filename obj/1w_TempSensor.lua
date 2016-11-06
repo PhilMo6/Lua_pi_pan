@@ -24,7 +24,7 @@ function Sensor:updateLastRead(v)
 	self.lastRead = v
 end
 
-function Sensor:readO()
+function Sensor:read()
 	local tempC = 0
 	local tempF = 0
 	local sensor = io.open("/sys/bus/w1/devices/" .. self:getID() .. "/w1_slave","r")

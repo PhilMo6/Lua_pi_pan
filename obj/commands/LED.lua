@@ -42,8 +42,8 @@ LED.orders["rename"] = function(led,name)
 end
 LED.orders["re"] = LED.orders["rename"]
 LED.orders["read"] = function(led)
-	local r1 = led:readO()
-	return string.format("%s is %s",led:getName(),r1 == true and 'on' or 'off')
+	local r1 = led:read()
+	return string.format("%s is %s",led:getName(),r1)
 end
 LED.orders["r"] = LED.orders["read"]
 

@@ -46,7 +46,7 @@ function DHT22:updateLastRead(hv,tv)
 	end
 end
 
-function DHT22:readO()
+function DHT22:read()
 	return self:getLastRead()
 end
 

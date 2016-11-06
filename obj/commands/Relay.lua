@@ -41,8 +41,8 @@ Relay.orders["rename"] = function(relay,name,void,user)
 end
 Relay.orders["re"] = Relay.orders["rename"]
 Relay.orders["read"] = function(relay)
-	local r1 = relay:readO()
-	return string.format("%s is %s",relay:getName(),r1 == true and 'off' or 'on')
+	local r1 = relay:read()
+	return string.format("%s is %s",relay:getName(),r1 == 1 and 'off' or 'on')
 end
 Relay.orders["r"] = Relay.orders["read"]
 

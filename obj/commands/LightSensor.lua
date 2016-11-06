@@ -42,7 +42,7 @@ Sensor.orders["rename"] = function(sensor,name)
 end
 Sensor.orders["re"] = Sensor.orders["rename"]
 Sensor.orders["read"] = function(sensor)
-	local r1,r2,er = sensor:readO()
+	local r1,r2,er = sensor:read()
 	return string.format("%s %s",sensor:getName(),(not er and r1 .. (r2 and "  " ..r2 or "") or er))
 end
 Sensor.orders["r"] = Sensor.orders["read"]

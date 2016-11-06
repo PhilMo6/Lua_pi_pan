@@ -43,7 +43,7 @@ end
 Button.orders["re"] = Button.orders["rename"]
 
 Button.orders["press"] = function(button,f,user)
-	if not button.pressed and not button:readO() then
+	if not button.pressed and not button:read() == 0 then
 		button:press(f,user)
 		return string.format("Button %s has been pressed.",button:getName())
 	else

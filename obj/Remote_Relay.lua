@@ -62,7 +62,7 @@ function Relay:updateLastRead(v)
 end
 
 function Relay:toggle(client)
-	if self:readO() == true then
+	if self:read() == 1 then
 		self:on(client)
 		return 'on'
 	else
@@ -72,7 +72,7 @@ function Relay:toggle(client)
 end
 
 function Relay:off(client)
-	if self:readO() == false and not self.stayOn then
+	if self:read() == 0 and not self.stayOn then
 		self.node:send(([[R %s off]]):format(self:getID()))
 		return true
 	end
@@ -80,14 +80,14 @@ function Relay:off(client)
 end
 
 function Relay:on(client)
-	if self:readO() == true and not self.stayOff then
+	if self:read() == 1 and not self.stayOff then
 		self.node:send(([[R %s on]]):format(self:getID()))
 		return true
 	end
 	return false
 end
 
-function Relay:readO()
+function Relay:read()
 	if self.lastRead == nil then
 		self.node:send('Request RlUp')
 		return 'error'
@@ -100,7 +100,7 @@ function Relay:getLastRead()
 end
 
 function Relay:toString()
-	return string.format("[Remote_relay] %s %s %s",self:getID(),self:getName(),(self:readO() == true and 'off' or 'on'))
+	return string.format("[Remote_relay] %s %s %s",self:getID(),self:getName(),(self:read() == 1 and 'off' or 'on'))
 end
 
 return Relay

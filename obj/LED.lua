@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.baseObj")
+local Cloneable			= require("obj.Cloneable")
 local LED			= Cloneable:clone()
 --[[
 	1 color LED module.
@@ -14,7 +14,9 @@ function LED:initialize(pin)
 		self:setID(pin)
 		self:setName('LED_'..pin)
 		table.insert(LEDs,self)
-		GPIO.setup(pin, GPIO.OUT,false)
+		self.gpio = RPIO(pin)
+		self.gpio:set_direction('out')
+		self.gpio:write(0)
 	end
 end
 
@@ -40,8 +42,8 @@ end
 
 function LED:on(client)
 	self:forceCheck()
-	if self:readO() == false and not self.stayOff then
-		GPIO.output(self:getID(), true)
+	if self:read() == 0 and not self.stayOff then
+		self.gpio:write(1)
 		if not self.blinking and self.masters then
 			self:updateMasters()
 		end
@@ -52,8 +54,8 @@ end
 
 function LED:off(client)
 	self:forceCheck()
-	if self:readO() == true and not self.stayOn then
-		GPIO.output(self:getID(), false)
+	if self:read() == 1 and not self.stayOn then
+		self.gpio:write(0)
 		if not self.blinking and self.masters then
 			self:updateMasters()
 		end
@@ -81,13 +83,40 @@ function LED:blink(dir,count,client)
 end
 
 function LED:toggle(client)
-	if self:readO() == false then
+	if self:read() == 0 then
 		self:on(client)
 		return 'on'
 	else
 		self:off(client)
 		return 'off'
 	end
+end
+
+function LED:getID()
+	return self.config.id
+end
+
+function LED:getName()
+	return self.config.name
+end
+
+function LED:read()
+	return self.gpio:read()
+end
+
+function LED:forceOn(f)
+	self.stayOn = socket.gettime() + f
+	return self:on()
+end
+
+function LED:forceOff(f)
+	self.stayOff = socket.gettime() + f
+	return self:off()
+end
+
+function LED:forceCheck()
+	if self.stayOff and self.stayOff <= socket.gettime() then self.stayOff = nil end
+	if self.stayOn and self.stayOn <= socket.gettime() then self.stayOn = nil end
 end
 
 function LED:test()
@@ -97,7 +126,7 @@ end
 
 --- Stringifier for Cloneables.
 function LED:toString()
-	return string.format("[LED] %s %s %s",self:getID(),self:getName(),(self.blinking and "blinking" or self:readO() == true and 'on' or 'off'))
+	return string.format("[LED] %s %s %s",self:getID(),self:getName(),(self.blinking and "blinking" or self:read() == 1 and 'on' or 'off'))
 end
 
 return LED

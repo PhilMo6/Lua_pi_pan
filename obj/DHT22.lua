@@ -19,7 +19,8 @@ function DHT22:initialize(pin)
 		self.lastTRead = 0
 		self.lastHRead = 0
 		table.insert(DHT22s,self)
-		self:readO()
+		self.gpio = RPIO(pin)
+		self:read()
 	end
 end
 
@@ -35,7 +36,7 @@ function DHT22:setName(name)
 	DHT22s[self.config.name] = self
 end
 
-function DHT22:readO()
+function DHT22:read()
 	local h,t
 	for i=1,6 do
 		h,t = self:pollSensor()
@@ -64,10 +65,6 @@ function DHT22:pollSensor()
 	local tRead = 0
 
 	checksum = 0
-
-	-- Use Markus Gritsch trick to speed up read/write on GPIO
-	local GPIO_read = GPIO.input
-
 	local bitStream = {}
 	for j = 1, 40, 1 do
 		bitStream[j] = 0
@@ -77,30 +74,30 @@ function DHT22:pollSensor()
 	local c2=0
 
 	-- Step 1:  send out start signal to DHT22
-	GPIO.setup(pin, GPIO.OUT)
-	GPIO.output(pin, true)
+	self.gpio:set_direction('out')
+	self.gpio:write(1)
 	sleep(0.0015)
-	GPIO.output(pin, false)
+	self.gpio:write(0)
 	sleep(0.004)
-	GPIO.setup(pin, GPIO.IN)
+	self.gpio:set_direction('in')
 
 	-- Step 2:  DHT22 send response signal
 	-- bus will always let up eventually, don't bother with timeout
-	while (GPIO_read(pin) == false ) do end
-	while (GPIO_read(pin) == true and c1 < 100) do c1 = c1 + 1 end
+	while (self.gpio:read() == 0 ) do end
+	while (self.gpio:read() == 1 and c1 < 100) do c1 = c1 + 1 end
 	-- bus will always let up eventually, don't bother with timeout
-	while (GPIO_read(pin) == false ) do end
-	while (GPIO_read(pin) == true and c2 < 100) do c2 = c2 + 1 end
-	while (GPIO_read(pin) == false) do end
+	while (self.gpio:read() == 0 ) do end
+	while (self.gpio:read() == 1 and c2 < 100) do c2 = c2 + 1 end
+	while (self.gpio:read() == 0) do end
 
 	-- Step 3: DHT22 send data
 	for j = 1, 40, 1 do
-		while (GPIO_read(pin) == true and bitlength < 60) do
+		while (self.gpio:read() == 1 and bitlength < 60) do
 			bitlength = bitlength + 1
 		end
 		bitStream[j] = bitlength
 		bitlength = 0
-		while (GPIO_read(pin) == false) do end
+		while (self.gpio:read() == 0) do end
 	end
 
 	local biterr = 25
@@ -133,8 +130,8 @@ function DHT22:pollSensor()
 		hRead = nil
 	end
 
-	GPIO.setup(pin, GPIO.OUT)
-	GPIO.output(pin, true)
+	self.gpio:set_direction('out')
+	self.gpio:write(1)
 	return (hRead and ((hRead - (hRead % 10)) / 10).."."..(hRead % 10) or nil),(tRead and ((tRead-(tRead % 10)) / 10).."."..(tRead % 10) or nil)
 
 end

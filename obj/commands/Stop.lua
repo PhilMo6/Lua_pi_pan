@@ -13,7 +13,7 @@ function Stop:execute(input,user)
 	if input2 == "restart" or input2 == "reboot" or input2 == "re" then _G.RESET = true end
 	run = false
 
-	return 'Lua pi pan shutting down'
+	return 'GHC shutting down'
 
 end
 

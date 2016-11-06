@@ -33,9 +33,15 @@ function LED:initialize(pinR,pinB,pinG)
 		self:setID(pinR..','..pinB..','..pinG)
 		self:setName('RBG_LED_'..self:getID())
 		table.insert(LEDs,self)
-		GPIO.setup(pinR, GPIO.OUT,false)
-		GPIO.setup(pinB, GPIO.OUT,false)
-		GPIO.setup(pinG, GPIO.OUT,false)
+		self.gpioR = RPIO(pinR)
+		self.gpioR:set_direction('out')
+		self.gpioR:write(0)
+		self.gpioB = RPIO(pinB)
+		self.gpioB:set_direction('out')
+		self.gpioB:write(0)
+		self.gpioG = RPIO(pinG)
+		self.gpioG:set_direction('out')
+		self.gpioG:write(0)
 	end
 end
 
@@ -60,30 +66,30 @@ function LED:setName(name)
 	LEDs[self.config.name] = self
 end
 
-function LED:readO()
+function LED:read()
 	return self:getRedPin(),self:getBluePin(),self:getGreenPin()
 end
 
 function LED:setRedPin(s)
 	if s then self:setRed(s) end
-	GPIO.output(self.config.pinRed, self:getRed())
+	self.gpioR:write(self:getRed())
 end
 function LED:getRedPin()
-	return GPIO.input(self.config.pinRed)
+	return self.gpioR:read()
 end
 function LED:setBluePin(s)
 	if s then self:setBlue(s) end
-	GPIO.output(self.config.pinBlue, self:getBlue())
+	self.gpioB:write(self:getBlue())
 end
 function LED:getBluePin()
-	return GPIO.input(self.config.pinBlue)
+	return self.gpioB:read()
 end
 function LED:setGreenPin(s)
 	if s then self:setGreen(s) end
-	GPIO.output(self.config.pinGreen, self:getGreen())
+	self.gpioG:write(self:getGreen())
 end
 function LED:getGreenPin()
-	return GPIO.input(self.config.pinGreen)
+	return self.gpioG:read()
 end
 
 function LED:setRed(s)
@@ -126,9 +132,9 @@ function LED:off()
 		self.cycling = nil
 	end
 
-	GPIO.output(self.config.pinRed, false)
-	GPIO.output(self.config.pinBlue, false)
-	GPIO.output(self.config.pinGreen, false)
+	self.gpioR:write(0)
+	self.gpioB:write(0)
+	self.gpioG:write(0)
 	if not self.blinking and not self.cycling and self.masters then
 		self:updateMasters()
 	end
@@ -155,12 +161,13 @@ function LED:blink(dir,count,client)
 end
 
 function LED:toggle(client)
-	if self:readO() == false then
-		self:on(client)
-		return 'on'
-	else
+	local r,b,g = self:read()
+	if r == 1 or b == 1 or g == 1 then
 		self:off(client)
 		return 'off'
+	else
+		self:on(client)
+		return 'on'
 	end
 end
 
@@ -231,8 +238,8 @@ end
 
 --- Stringifier for Cloneables.
 function LED:toString()
-	local r,b,g = self:readO()
-	return string.format("[LED] %s %s %s,%s,%s",self:getID(),self:getName(),(r == true and 'true' or 'false'),(b == true and 'true' or 'false'),(g == true and 'true' or 'false'))
+	local r,b,g = self:read()
+	return string.format("[LED] %s %s %s,%s,%s",self:getID(),self:getName(),(r == 1 and 'on' or 'off'),(b == 1 and 'on' or 'off'),(g == 1 and 'on' or 'off'))
 end
 
 return LED

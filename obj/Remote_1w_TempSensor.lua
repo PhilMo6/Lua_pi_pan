@@ -57,7 +57,7 @@ function Sensor:updateLastRead(v)
 	end
 end
 
-function Sensor:readO()
+function Sensor:read()
 	return self:getLastRead()
 end
 

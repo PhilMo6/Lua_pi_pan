@@ -7,7 +7,10 @@ Ping.keywords	= {"PING"}
 
 --- Execute the command
 function Ping:execute(input,user,par)
-	return "PONG"
+	if par == 'tcp' then
+		user:send('PONG')
+	end
+	return false
 end
 
 return Ping
