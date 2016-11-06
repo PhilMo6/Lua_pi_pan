@@ -51,8 +51,6 @@ Install will take several minutes and requires user input several times.
 This will update your pi and install all needed lua libraries as well as sqlite, Mako Server, and Tshark.
 It will also modify your the pi's config to look for 1 wire temperature sensors.
 
-At the moment the lua gpio library used is not comparable with the raspberry pi 3 and so lua pi pan will not work with one until I switch to a different library.
-
 Lua pi pan makes use of the following external programs.
 Mako Server https://makoserver.net/
 Tshark https://www.wireshark.org/docs/man-pages/tshark.html
@@ -61,7 +59,7 @@ sqlite https://sqlite.org/
 As well as the following libraries.
 lua-sql-sqlite3
 lua-socket
-rpi-gpio
+rpio
 lua-pop3
 lua-imap4
 
