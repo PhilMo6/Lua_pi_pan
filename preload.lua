@@ -604,6 +604,21 @@ function _G.macscannerLoad(conn,c)
 end
 
 
+function _G.startPollSensorEvent()
+	if not _G.pollSensorEvent then
+		_G.pollSensorEvent = Event:new(function()--sensor update event
+			pollSensors()
+		end, sensorUpdateTime, true, 0)
+		Scheduler:queue(_G.pollSensorEvent)
+    end
+	if not _G.logSensorEvent then
+		_G.logSensorEvent = Event:new(function()--log sensors event
+			pollSensors(false,true)
+		end, sensorLogTime, true, 0)
+		Scheduler:queue(_G.logSensorEvent)
+	end
+end
+
 --polls all the sensors to update their last read
 --if p then print the readings or er
 function _G.pollSensors(p,log)

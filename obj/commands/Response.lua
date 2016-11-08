@@ -158,11 +158,11 @@ Response.orders["ThUp"] = function(input,user)
 			local thermData = boxLoad(data)
 			if thermData then
 				for i,v in ipairs(thermData) do
-					if v.id and v.options then
+					if v.id and v.config then
 						local thermostat = user.node.thermostats[v.id]
 						if thermostat then
 							thermostat.lastup = tonumber(thermData.stamp)
-							thermostat:setOptions(v.options)
+							thermostat:setConfig(v.config)
 						end
 					end
 				end
@@ -179,11 +179,11 @@ Response.orders["MosUp"] = function(input,user)
 			local mosData = boxLoad(data)
 			if mosData then
 				for i,v in ipairs(mosData) do
-					if v.id and v.options then
+					if v.id and v.config then
 						local mos = user.node.motionSensors[v.id]
 						if mos then
 							mos.lastup = tonumber(mosData.stamp)
-							mos:setOptions(v.options)
+							mos:setConfig(v.config)
 						end
 					end
 				end

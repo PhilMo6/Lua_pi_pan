@@ -97,7 +97,7 @@ end
 
 function Sensor:checkMotion()
 	if buttons and buttons[self:getButton()] then
-		return buttons[self:getButton()]:read()
+		return (buttons[self:getButton()]:read() == 1 and true or false)
 	else
 		return false
 	end

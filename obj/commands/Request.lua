@@ -58,7 +58,7 @@ Request.orders["SenTemp"] = function(sensorID,user)
 		local stamp = os.time(os.date("*t"))
 		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
 		for i,v in ipairs(sensors) do
-			if not sensorID or v:getID() == sensorID then
+			if not sensorID or v:getName() == sensorID then
 				local t1,t2,er = v:getLastRead()
 				if not er then
 					data = ("%s,{name='%s',id='%s',%s,%s}"):format(data,v:getName(),v:getID(),t1,t2)
@@ -145,7 +145,7 @@ Request.orders["ThUp"] = function(ThermID,user)
 		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
 		for i,v in ipairs(thermostats) do
 			if not ThermID or ThermID == v:getName() then
-				data = ([[%s,{id='%s',options={temperature=%s,temperatureThreshold=%s,heatThreshold=%s,coolThreshold=%s,updateTime=%s,tempSensor="%s",heatingRelay="%s",coolingRelay="%s",state="%s",action="%s"}}]]):format(data,v:getID()
+				data = ([[%s,{id='%s',config={temperature=%s,temperatureThreshold=%s,heatThreshold=%s,coolThreshold=%s,updateTime=%s,tempSensor="%s",heatingRelay="%s",coolingRelay="%s",state="%s",action="%s"}}]]):format(data,v:getID()
 				,v:getTemp(),v:getTempTh(),v:getHeatTh(),v:getCoolTh(),v:getUpTime(),v:getTempSensorID(),v:getHeatRelay(),v:getCoolRelay(),v:getState(),v:getAction())
 				if ThermID then break end
 			end
@@ -165,7 +165,7 @@ Request.orders["MosUp"] = function(MosID,user)
 		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
 		for i,v in ipairs(motionSensors) do
 			if not MosID or MosID == v:getName() then
-				data = ([[%s,{id='%s',options={lightSensitivity=%s,lightSensor="%s",button="%s",relay="%s",LED="%s",buzzer="%s",sensitivity=%s,timeOut=%s,state="%s",action="%s"}}]]):format(data,v:getID()
+				data = ([[%s,{id='%s',config={lightSensitivity=%s,lightSensor="%s",button="%s",relay="%s",LED="%s",buzzer="%s",sensitivity=%s,timeOut=%s,state="%s",action="%s"}}]]):format(data,v:getID()
 				,v:getLightSensitivity(),v:getLightSensor(),v:getButton(),v:getRelay(),v:getLED(),v:getBuzzer(),v:getSensitivity(),v:getTimeOut(),v:getState(),v:getAction())
 				if MosID then break end
 			end

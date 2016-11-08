@@ -48,6 +48,7 @@ function Thermostat:initialize(id,config)
 				therm:runLogic()
 			end, therm:getUpTime(), true, 0)
 			Scheduler:queue(therm.updateLogic)
+			therm:setAction()
 			therm:runLogic()
 		end, 15, false))
 	end

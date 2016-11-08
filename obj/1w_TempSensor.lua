@@ -9,7 +9,7 @@ local Sensor			= Cloneable:clone()
 Sensor.updateCmd = "Request SenTemp"
 
 function Sensor:initialize(id)
-	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors end
+	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors startPollSensorEvent() end
 	if not sensors[id] then
 		self.config = {}
 		self:setID(id)

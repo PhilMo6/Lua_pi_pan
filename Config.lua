@@ -16,8 +16,8 @@ Config.usersConfigDefault			= {msgProtocol='email'}--msgProtocol = 'email' or 's
 Config.usersConfig					= {}--{['5555555555@vtext.com'] = {forwardTo = "adifferentemail@gmail.com",msgProtocol='email'}}
 
 Config.SQLFile						= "/home/pi/luaTest.db"
-Config.tempUpdateTime 				= 30--how often do sensors update
-Config.tempLogTime 					= 60*5--how often do sensors have their data logged into sql database
+Config.sensorUpdateTime 			= 30--how often do sensors update
+Config.sensorLogTime 				= 60*5--how often do sensors have their data logged into sql database
 Config.mailCheckTime 				= 60--if setup how often does mail get checked fro commands
 --default gpio mode is Board so assign pins accordingly
 --see modules at obj/"name".lua for options
@@ -33,7 +33,7 @@ Config.StepperPins					= {}--pinValue
 Config.thermostatStartup			= {}--table value containing id and optional config table
 Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
 Config.macScannerStartup			= {}--table value containing id and optional config table
---[[example:
+--[[example setup:
 Config.lightSensorPin		= {15}
 Config.LEDPins 			= {18,27}
 Config.RBG_LEDPins 		= {{14,17,27}}

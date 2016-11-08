@@ -11,7 +11,7 @@ local DHT22			= Cloneable:clone()
 DHT22.updateCmd = "Request SenDHT22"
 
 function DHT22:initialize(pin)
-	if not _G.DHT22s then _G.DHT22s = {name='DHT22s'} table.insert(objects,DHT22s) objects["DHT22s"] = DHT22s end
+	if not _G.DHT22s then _G.DHT22s = {name='DHT22s'} table.insert(objects,DHT22s) objects["DHT22s"] = DHT22s startPollSensorEvent() end
 	if not DHT22s['DHT22_' ..pin] then
 		self.config = {}
 		self:setID(pin)

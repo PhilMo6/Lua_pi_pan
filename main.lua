@@ -61,6 +61,9 @@ pollSensors(true,true)
 
 --add main events to be queued on start to this table
 --these are the events the run all the programs functionality
+local mainEvents = {}
+
+--[[Example events showing some basic possible functionality
 local mainEvents = {
 	Event:new(function()--button event
 		if buttons then
@@ -142,14 +145,6 @@ local mainEvents = {
 		end
 	end, .1, true, 0)
 	,
-	Event:new(function()--sensor update event
-		pollSensors()
-	end, tempUpdateTime, true, 0)
-	,
-	Event:new(function()--log sensors event
-		pollSensors(false,true)
-	end, tempLogTime, true, 0)
-	,
 	Event:new(function()--alarm!!!!!!!!!!!!!
 		if macScanners and macScanners[1] and macScanners[1].started and not macScanners[1]:isID('my phone') then
 			if motionSensors and motionSensors[1] and motionSensors[1]:checkMotion() then
@@ -159,15 +154,15 @@ local mainEvents = {
 				end
 			end
 		end
-	end, 60, true, 0)
+	end, 20, true, 0)
 	,
-	Event:new(function()--if relay is set power cycle battery for 5 min every hour
+	Event:new(function()--if battery relay is set power cycle battery for 5 min every hour
 		if relays and relays['battery'] then
 			relays['battery']:on()
 			Scheduler:queue(Event:new(function() relays['battery']:off() end, 60*5, false))
 		end
 	end, 60*60, true, 0)
-	--[[,
+	,
 	Event:new(function()--check email for any commands not yet parsed and if found find and run command if available.
 		local msg = receiveMessage()
 		if msg then
@@ -189,13 +184,14 @@ local mainEvents = {
 			end
 		end
 	end, mailCheckTime, true, 0)
-	,]]
-}
+}]]
+
+
+
 for i,v in ipairs(mainEvents) do--schedule all main events
 	Scheduler:queue(v)
 end
 mainEvents = nil
-
 
 
 if tcpPort then
