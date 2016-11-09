@@ -8,14 +8,14 @@ Node.keywords	= {}
 --- Execute the command
 function Node:execute(input,user,par)
 	if par == "tcp" then
-		if user.node or user.master then
-			return Request:subexecute(input,user,par)
-		end
+		return Node:subexecute(input,user,par)
 	end
 	return false
 end
 
 function Node:subexecute(input,user,par)
+	local words = string.Words(input)
+	local input1, input2, input3 ,input4 = words[1],words[2],words[3],words[4]
 	if input2 then--input2 should be the index of a Node
 		local node = nodes[input2]
 		if node then --That is a vaild Node
