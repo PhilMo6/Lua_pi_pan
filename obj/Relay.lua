@@ -23,10 +23,12 @@ function Relay:initialize(pin)
 end
 
 function Relay:getHTMLcontrol()
-	return ([[%s %s <form id="%s"> for <input type="text" name='com'></form>]]):format(
-	([[<button onclick="myFunction('r %s on','%s')">On</button >]]):format(self:getName(),self:getName()),
-	([[<button onclick="myFunction('r %s off','%s')">Off</button >]]):format(self:getName(),self:getName())
-	,self:getName()
+	local name = self:getName()
+	return ([[%s %s %s <form id="%s"><input type="text" name='com'></form> ]]):format(
+	([[<button onclick="myFunction('r %s on','%s')">On</button >]]):format(name,name),
+	([[<button onclick="myFunction('r %s off','%s')">Off</button >]]):format(name,name),
+	([[<button onclick="myFunction('r %s re','%s')">Rename</button >]]):format(name,name),
+	name
 	)
 end
 

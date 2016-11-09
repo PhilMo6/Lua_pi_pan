@@ -42,7 +42,7 @@ Thermostat.orders["heatRelay"] = function(thermostat,relayID)
 	if relayID then
 		thermostat:setHeatRelay(relayID)
 		updateThermostatInfo()
-		return ("Thermostat temp sensor now set to %s."):format(thermostat:getTempSensor())
+		return ("Thermostat heating relay now set to %s."):format(thermostat:getTempSensor())
 	else
 		return "Must supply a relay ID."
 	end
@@ -52,7 +52,7 @@ Thermostat.orders["coldRelay"] = function(thermostat,relayID)
 	if relayID then
 		thermostat:setCoolRelay(relayID)
 		updateThermostatInfo()
-		return ("Thermostat temp sensor now set to %s."):format(thermostat:getCoolRelay())
+		return ("Thermostat cooling relay now set to %s."):format(thermostat:getCoolRelay())
 	else
 		return "Must supply a relay ID."
 	end

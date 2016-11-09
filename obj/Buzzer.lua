@@ -20,11 +20,14 @@ function Buzzer:initialize(pin)
 end
 
 function Buzzer:getHTMLcontrol()
-	return ('%s %s %s %s'):format(
-	([[<button onclick="myFunction('B %s on')">On</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('B %s off')">Off</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('B %s stop')">Stop</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('B %s test')">Test</button >]]):format(self:getName())
+	local name = self:getName()
+	return ([[%s %s %s %s %s <form id="%s"><input type="text" name='com'></form>]]):format(
+	([[<button onclick="myFunction('B %s on')">On</button >]]):format(name),
+	([[<button onclick="myFunction('B %s off')">Off</button >]]):format(name),
+	([[<button onclick="myFunction('B %s stop')">Stop</button >]]):format(name),
+	([[<button onclick="myFunction('B %s test')">Test</button >]]):format(name),
+	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
+	name
 	)
 end
 

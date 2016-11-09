@@ -21,10 +21,13 @@ function LED:initialize(pin)
 end
 
 function LED:getHTMLcontrol()
-	return ('%s %s %s'):format(
-	([[<button onclick="myFunction('L %s on')">On</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('L %s test')">Test</button >]]):format(self:getName())
+	local name = self:getName()
+	return ([[%s %s %s %s <form id="%s"><input type="text" name='com'></form>]]):format(
+	([[<button onclick="myFunction('L %s on')">On</button >]]):format(name),
+	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(name),
+	([[<button onclick="myFunction('L %s test')">Test</button >]]):format(name),
+	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
+	name
 	)
 end
 

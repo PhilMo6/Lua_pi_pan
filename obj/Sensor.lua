@@ -25,7 +25,12 @@ function sensor:setID(id)
 end
 
 function sensor:getHTMLcontrol()
-	return ([[<button onclick="myFunction('s %s r')">Read</button >]]):format(self:getName())
+	local name = self:getName()
+	return ([[%s %s <form id="%s"><input type="text" name='com'></form>]]):format(
+	([[<button onclick="myFunction('s %s r')">Read</button >]]):format(name,name),
+	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
+	name
+	)
 end
 
 function sensor:setName(name)

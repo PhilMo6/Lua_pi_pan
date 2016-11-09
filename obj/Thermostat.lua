@@ -238,7 +238,7 @@ end
 
 function Thermostat:getHTMLcontrol()
 	local name = self:getName()
-	return ('<div style="font-size:15px">%s %s <br>Temp %s %s <br> Temp Threshold %s %s <br> Cooling Threshold  %s %s <br> Heating Threshold %s %s <br>%s</div>'):format(
+	return ('<div style="font-size:15px">%s %s <br>Temp %s %s <br> Temp Threshold %s %s <br> Cooling Threshold  %s %s  %s Cooling Relay<br> Heating Threshold %s %s %s  Heating Relay<br>%s</div>'):format(
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s stat')">Status</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s toggle')">Toggle</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s up','%s')">+</button >]]):format(name,name),
@@ -247,9 +247,11 @@ function Thermostat:getHTMLcontrol()
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s thd','%s')">-</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s ctu','%s')">+</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s ctd','%s')">-</button >]]):format(name,name),
+	([[<button style="font-size:15px" onclick="myFunction('Therm %s coldRelay','%s')">Set</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s htu','%s')">+</button >]]):format(name,name),
 	([[<button style="font-size:15px" onclick="myFunction('Therm %s htd','%s')">-</button >]]):format(name,name),
-	([[<form id="%s"> Adust by:<input type="text" name='com'></form>]]):format(name)
+	([[<button style="font-size:15px" onclick="myFunction('Therm %s heatRelay','%s')">Set</button >]]):format(name,name),
+	([[<form id="%s"><input type="text" name='com'></form>]]):format(name)
 	)
 end
 

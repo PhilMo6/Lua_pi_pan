@@ -19,8 +19,11 @@ function Button:initialize(pin)
 end
 
 function Button:getHTMLcontrol()
-	return ('%s'):format(
-	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(self:getName())
+	local name = self:getName()
+	return ([[%s %s <form id="%s"><input type="text" name='com'></form>]]):format(
+	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(name),
+	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
+	name
 	)
 end
 
