@@ -39,14 +39,14 @@ end
 
 Response.orders = {}
 
-Response.orders["SenDHT22"] = function(input,user)
+Response.orders["SenDHT"] = function(input,user)
 	local data = string.match(input, '|(.+)|')
 	if data then
 		local data = boxLoad(data)
 		if data then
 			for i,v in ipairs(data) do
 				if type(v) == "table" then
-					local sensor = user.node.DHT22s[v.id]
+					local sensor = user.node.DHTs[v.id]
 					if sensor and not v.er then
 						sensor.lastHRead = v.h
 						sensor.lastTRead = v.t
@@ -235,8 +235,8 @@ Response.orders["objects"] = function(input,user)
 						end
 					end
 				end
-				if objects.DHT22s then
-					for i,v in ipairs(objects.DHT22s) do
+				if objects.DHTs then
+					for i,v in ipairs(objects.DHTs) do
 						if type(v) == "table" then
 							RemoteDHT22:new(v.id,v.name,user.node)
 						end

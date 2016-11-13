@@ -2,7 +2,7 @@ local Cloneable			= require("obj.Sensor")
 local DHT22			= Cloneable:clone()
 
 --[[
-	DHT22 tempature and humidity sensor. Connect as in the following
+	DHT22 tempature and humidity sensor. connect as in the following
 	https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/wiring
 	NOT APPLICABLE TO DHT11. will work on that in the future.
 ]]
@@ -10,27 +10,27 @@ local DHT22			= Cloneable:clone()
 DHT22.updateCmd = "Request SenDHT22"
 
 function DHT22:initialize(pin)
-	if not _G.DHT22s then require("source.readDHT") _G.DHT22s = {name='DHT22s'} table.insert(objects,DHT22s) objects["DHT22s"] = DHT22s startPollSensorEvent() end
-	if not DHT22s['DHT22_' ..pin] then
+	if not _G.DHTs then require("source.readDHT") _G.DHTs = {name='DHTs'} table.insert(objects,DHTs) objects["DHTs"] = DHTs startPollSensorEvent() end
+	if not DHTs['DHT22_' ..pin] then
 		self.config = {}
 		self:setID(pin)
 		self:setName('DHT22_' ..pin)
 		self.lastTRead = 0
 		self.lastHRead = 0
-		table.insert(DHT22s,self)
+		table.insert(DHTs,self)
 	end
 end
 
 function DHT22:setID(id)
-	if self.config.id then DHT22s[self.config.id] = nil end
+	if self.config.id then DHTs[self.config.id] = nil end
 	self.config.id = id
-	DHT22s[self.config.id] = self
+	DHTs[self.config.id] = self
 end
 
 function DHT22:setName(name)
-	if self.config.name then DHT22s[self.config.name] = nil end
+	if self.config.name then DHTs[self.config.name] = nil end
 	self.config.name = name
-	DHT22s[self.config.name] = self
+	DHTs[self.config.name] = self
 end
 
 function DHT22:read()
@@ -70,9 +70,8 @@ end
 --- Stringifier for Cloneables.
 function DHT22:toString()
 	local h,t = self:getLastRead()
-	local t2
-	if t then t2 = = t * 9 / 5  + 32 end
-	return string.format("[DHT22] %s %s %sC %sF %s%%",self:getID(),self:getName(),t or 'nil',t2 or 'nil',h or 'nil')
+	local t2 = t * 9 / 5  + 32
+	return string.format("[DHT22] %s %s %sC %s %s%%",self:getID(),self:getName(),t or 'nil',t2 or 'nil',h or 'nil')
 end
 
 return DHT22

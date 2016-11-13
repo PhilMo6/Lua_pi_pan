@@ -30,15 +30,15 @@ function Master:addButton(button)
 	end
 end
 
-function Master:addDHT22(DHT22)
-	if self.DHT22s == nil then
-		self.DHT22s = {}
+function Master:addDHT(DHT)
+	if self.DHTs == nil then
+		self.DHTs = {}
 	end
-	if not self.DHT22s[DHT22] then
-		self.DHT22s[DHT22] = DHT22
-		self.DHT22s[DHT22:getName()] = DHT22
-		table.insert(self.DHT22s, DHT22)
-		DHT22:addMaster(self)
+	if not self.DHTs[DHT] then
+		self.DHTs[DHT] = DHT
+		self.DHTs[DHT:getName()] = DHT
+		table.insert(self.DHTs, DHT)
+		DHT:addMaster(self)
 	end
 end
 
@@ -136,13 +136,13 @@ function Master:removeButton(button)
 	end
 end
 
-function Master:removeDHT22(DHT22)
-	self.DHT22s[DHT22] = nil
-	self.DHT22s[DHT22:getName()] = nil
-	while table.removeValue(self.DHT22s, DHT22) do end
-	DHT22:removeMaster(self)
-	if #self.DHT22s == 0 then
-		self.DHT22s = nil
+function Master:removeDHT(DHT)
+	self.DHTs[DHT] = nil
+	self.DHTs[DHT:getName()] = nil
+	while table.removeValue(self.DHTs, DHT) do end
+	DHT:removeMaster(self)
+	if #self.DHTs == 0 then
+		self.DHTs = nil
 	end
 end
 
@@ -253,9 +253,9 @@ function Master:destoy()
 			self:removeButton(v)
 		end
 	end
-	if self.DHT22s then
-		for i,v in pairs(self.DHT22s) do
-			self:removeDHT22(v)
+	if self.DHTs then
+		for i,v in pairs(self.DHTs) do
+			self:removeDHT(v)
 		end
 	end
 	if self.sensors then

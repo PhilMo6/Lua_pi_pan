@@ -40,6 +40,24 @@ function Cloneable:getConfig()
 	end
 end
 
+function Cloneable:setConfig(config)
+	if not config or not self.config then return end
+	local up = nil
+	for i,v in pairs(self.config) do
+		if config[i] and config[i] ~= v then
+			if i == 'name' then
+				self:setName(config[i])
+			elseif i == 'id' then
+				self:setID(config[i])
+			else
+				self.config[i] = config[i]
+			end
+			up = true
+		end
+	end
+	if up then	self:updateMasters() end
+end
+
 function Cloneable:addMaster(master)
 	if not self.masters then
 		self.masters = {}

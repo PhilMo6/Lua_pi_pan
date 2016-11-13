@@ -11,7 +11,7 @@ function Sensor:execute(input,user)
 	local input1, input2, input3 ,input4 = words[1],words[2],words[3],words[4]
 
 	if input2 then--input2 should be the id or index of a sensor
-		local sensor = sensors[input2] or sensors[tonumber(input2)] or lightsensors and (lightsensors[input2] or lightsensors[tonumber(input2)]) or DHT22s and (DHT22s[input2] or DHT22s[tonumber(input2)])
+		local sensor = sensors[input2] or sensors[tonumber(input2)] or lightsensors and (lightsensors[input2] or lightsensors[tonumber(input2)]) or DHTs and (DHTs[input2] or DHTs[tonumber(input2)])
 		if sensor then --That is a vaild sensor
 			if input3 then--input3 should be the order to execute
 				if Sensor.orders[input3] then--This is a valid order

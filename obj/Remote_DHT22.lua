@@ -6,22 +6,22 @@ local DHT22			= Cloneable:clone()
 ]]
 
 function DHT22:initialize(id,name,node)
-	if not _G.DHT22s then _G.DHT22s = {name='DHT22s'} table.insert(objects,DHT22s) objects["DHT22s"] = DHT22s end
-	if not DHT22s[name..'_'..node:getID()] then
+	if not _G.DHTs then _G.DHTs = {name='DHTs'} table.insert(objects,DHTs) objects["DHTs"] = DHTs end
+	if not DHTs[name..'_'..node:getID()] then
 		self.config = {}
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
 		self.lastTRead = 0
 		self.lastHRead = 0
-		table.insert(DHT22s,self)
+		table.insert(DHTs,self)
 		node:addDHT22(self)
 	end
 end
 
 function DHT22:removeSensor()
-	DHT22s[self:getName()] = nil
-	DHT22s[self:getID()] = nil
-	while table.removeValue(DHT22s, self) do end
+	DHTs[self:getName()] = nil
+	DHTs[self:getID()] = nil
+	while table.removeValue(DHTs, self) do end
 	if self.node then local node=self.node self.node=nil node:removeSensor(self) end
 end
 
@@ -30,9 +30,9 @@ function DHT22:setID(id)
 end
 
 function DHT22:setName(name)
-	if self.config.name then DHT22s[self.config.name] = nil end
+	if self.config.name then DHTs[self.config.name] = nil end
 	self.config.name = name
-	DHT22s[self.config.name] = self
+	DHTs[self.config.name] = self
 end
 
 function DHT22:updateLastRead(hv,tv)

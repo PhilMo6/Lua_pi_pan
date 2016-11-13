@@ -7,6 +7,9 @@
 
 _G.masters						= {}
 _G.nodes						= {}
+
+
+local StepperMotor = require("obj.StepperMotor")
 local MacScanner = require("obj.MacAddressScanner")
 local Thermostat = require("obj.Thermostat")
 local MotionSensor = require("obj.MotionSensor")
@@ -18,6 +21,55 @@ local LED = require("obj.LED")
 local RBG_LED = require("obj.RBG_LED")
 local Buzzer = require("obj.Buzzer")
 local Button = require("obj.Button")
+
+
+--[[
+The speed that the program runs events at is gotten with the getFrequency() function.
+Objects can request a boost in frequency but must also reset the boost after whatever task is compleated.
+Each step increse in frequency doubles the percent of needed processor to manage events.
+Only set frequency with boostFrequency() function.
+]]
+local freqs = {[1]=0.1,[2]=0.01,[3]=0.001,[4]=0.0001}
+local frequency = 1
+local frequencyBoost = {}
+function _G.resetBoost(obj)
+	if frequencyBoost and frequencyBoost[obj] then
+		frequencyBoost[obj] = nil
+		table.removeValue(frequencyBoost,obj)
+		setFrequency(1)
+		if #frequencyBoost > 0 then
+			for i,v in ipairs(frequencyBoost) do
+				if frequency < v then setFrequency(v) end
+			end
+		end
+	end
+end
+function _G.boostFrequency(obj,v)
+	if not freqs[v] then return false end
+	if not frequencyBoost[obj] then
+		frequencyBoost[obj] = v
+		table.insert(frequencyBoost,obj)
+		if frequency < v then setFrequency(v) end
+		return true
+	end
+	return false
+end
+function setFrequency(v)
+	if v and freqs[v] then
+		frequency = v
+	else
+		frequency = 1
+	end
+end
+function _G.getFrequency()
+	return (frequency and freqs[frequency] or freqs[1])
+end
+
+function _G.sleep(t)
+	local d = socket.gettime() + t
+	while socket.gettime() < d do end
+	return
+end
 
 --found here https://gist.github.com/jesseadams/791673
 function _G.SecondsToClock(seconds)
@@ -107,6 +159,11 @@ function _G.loadObjects(conn,c)
 			DHT22:new(pin)
 		end
 	end
+	for i,pins in ipairs(stepperPins) do
+		if type(pins) == 'table' then
+			StepperMotor:new(pins[1],pins[2],pins[3],pins[4])
+		end
+	end
 
 	--check for 1 wire sensors to add to the sensors table
 	--only temp sensors for now
@@ -147,6 +204,8 @@ function _G.objectUpdate(conn,c)
 	updateSiteLinks(conn)
 	updateSensorLinks(conn)
 	updateMacScannerInfo(conn)
+	updateDHTInfo(conn)
+	updateStepperMotorInfo(conn)
 	if not c then conn:close() else return conn end
 end
 
@@ -245,6 +304,8 @@ function _G.objectLoad(conn,c)
 		cursor:close()
 	end
 	macscannerLoad(conn)
+	StepperMotorInfoLoad(conn)
+	DHTInfoLoad(conn)
 
 	if not c then conn:close() else return conn end
 end
@@ -324,8 +385,8 @@ function _G.updateSensorLinks(conn,c)
 			addtodatabase(sensor:getName(),'temp')
 		end
 	end
-	if DHT22s then
-		for i,sensor in ipairs(DHT22s) do
+	if DHTs then
+		for i,sensor in ipairs(DHTs) do
 			addtodatabase(sensor:getName()..'_h','humidity')
 			addtodatabase(sensor:getName()..'_t','temp')
 		end
@@ -499,6 +560,47 @@ function _G.updateSensorNames(conn,c)
 	end
 	if not c then conn:close() else return conn end
 end
+
+function _G.updateDHTInfo(conn,c)
+	if not DHTs then return end
+	if not conn then conn = env:connect(SQLFile) else c = true end
+	--conn:execute([[DROP TABLE IF EXISTS DHTSensors;]])
+	conn:execute([[CREATE TABLE DHTSensors (id TEXT, name TEXT, config TEXT);]])
+	for i,v in ipairs(DHTs) do
+		local cursor,errorString = conn:execute(("select * from DHTSensors where id='%s';"):format(v:getID()))
+		if cursor then
+			local row = cursor:fetch ({}, "a")
+			if row then
+				conn:execute(([[UPDATE DHTSensors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
+			else
+				conn:execute(([[INSERT INTO DHTSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+			end
+			cursor:close()
+		else
+			conn:execute(([[INSERT INTO DHTSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+		end
+	end
+	if not c then conn:close() else return conn end
+end
+function _G.DHTInfoLoad(conn,c)
+	if not DHTs then return end
+	if not conn then conn = env:connect(SQLFile) else c = true end
+	--retrieve saved info for macscanner
+	local cursor,errorString = conn:execute([[select * from DHTSensors;]])
+	if cursor then
+		row = cursor:fetch ({}, "a")
+		while row do
+			if DHTs[row.id] then
+				local bl = boxLoad(row.config)
+				if bl then DHTs[row.id]:setConfig(bl) end
+			end
+			row = cursor:fetch (row, "a")
+		end
+		cursor:close()
+	end
+	if not c then conn:close() else return conn end
+end
+
 function _G.updateLSensorNames(conn,c)
 	if not lightsensors then return end
 	if not conn then conn = env:connect(SQLFile) else c = true end
@@ -520,6 +622,47 @@ function _G.updateLSensorNames(conn,c)
 	end
 	if not c then conn:close() else return conn end
 end
+
+function _G.updateStepperMotorInfo(conn,c)
+	if not stepperMotors then return end
+	if not conn then conn = env:connect(SQLFile) else c = true end
+	--conn:execute([[DROP TABLE IF EXISTS DHTSensors;]])
+	conn:execute([[CREATE TABLE StepperMotors (id TEXT, name TEXT, config TEXT);]])
+	for i,v in ipairs(stepperMotors) do
+		local cursor,errorString = conn:execute(("select * from StepperMotors where id='%s';"):format(v:getID()))
+		if cursor then
+			local row = cursor:fetch ({}, "a")
+			if row then
+				conn:execute(([[UPDATE StepperMotors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
+			else
+				conn:execute(([[INSERT INTO StepperMotors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+			end
+			cursor:close()
+		else
+			conn:execute(([[INSERT INTO StepperMotors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+		end
+	end
+	if not c then conn:close() else return conn end
+end
+function _G.StepperMotorInfoLoad(conn,c)
+	if not stepperMotors then return end
+	if not conn then conn = env:connect(SQLFile) else c = true end
+	--retrieve saved info for macscanner
+	local cursor,errorString = conn:execute([[select * from StepperMotors;]])
+	if cursor then
+		row = cursor:fetch ({}, "a")
+		while row do
+			if stepperMotors[row.id] then
+				local bl = boxLoad(row.config)
+				if bl then stepperMotors[row.id]:setConfig(bl) end
+			end
+			row = cursor:fetch (row, "a")
+		end
+		cursor:close()
+	end
+	if not c then conn:close() else return conn end
+end
+
 function _G.updateThermostatInfo(conn,c)
 	if not thermostats then return end
 	if not conn then conn = env:connect(SQLFile) else c = true end
@@ -642,10 +785,10 @@ function _G.pollSensors(p,log)
 				end
 			end
 		end
-		if DHT22s then
+		if DHTs then
 			conn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
 			conn:execute([[CREATE TABLE humidity (id TEXT, name TEXT, stamp time, tdate date, ttime time, hum INTEGER)]])
-			for i,v in ipairs(DHT22s) do
+			for i,v in ipairs(DHTs) do
 				local t1,t2 = v:read()
 				local t3 = (t2 * 9 / 5  + 32)
 				if t1 then

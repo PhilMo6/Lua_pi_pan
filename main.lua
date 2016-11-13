@@ -228,7 +228,7 @@ _G.lastCommand = false
 _G.run = true
 --main loop
 while run == true do
-	socket.select(nil,nil,0.1)
+	socket.select(nil,nil,getFrequency())
 	Scheduler:poll(socket.gettime())
 end
 print('Stopping system')

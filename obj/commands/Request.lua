@@ -36,7 +36,7 @@ Request.orders["SenDHT22"] = function(sensorID,user)
 		time = time.hour..":"..time.min..":"..time.sec
 		local stamp = os.time(os.date("*t"))
 		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
-		for i,v in ipairs(DHT22s) do
+		for i,v in ipairs(DHTs) do
 			local h,t = v:getLastRead()
 			if h then
 				data = ("%s,{name='%s',id='%s',h=%s,t=%s}"):format(data,v:getName(),v:getID(),h,t)
@@ -232,12 +232,12 @@ Request.orders["objects"] = function(objs,user)
 		end
 		data = ("%s}"):format(data)
 	end
-	if DHT22s and objs['DHT22s'] then
-		data = ("%s,DHT22s={'void'"):format(data)
-		for i,v in ipairs(DHT22s) do
+	if DHTs and objs['DHTs'] then
+		data = ("%s,DHTs={'void'"):format(data)
+		for i,v in ipairs(DHTs) do
 			if not user.node or not v:isNode(user.node) then
 				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getName())
-				if user.master then user.master:addDHT22(v) end
+				if user.master then user.master:addDHT(v) end
 			end
 		end
 		data = ("%s}"):format(data)
