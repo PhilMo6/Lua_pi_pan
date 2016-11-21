@@ -93,14 +93,13 @@ function Cloneable:isNode(node)
 end
 
 function Cloneable:updateMasters()
-	if self.masters and self.lastMasterUp ~= os.time() then
+	if self.masters then
 		local cmd = self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
 		if cmd then
 			for i,v in ipairs(self.masters) do
 				runningServer:parseCmd(cmd,v.client)
 			end
 		end
-		self.lastMasterUp = os.time()
 	end
 end
 

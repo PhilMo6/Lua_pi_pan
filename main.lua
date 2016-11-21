@@ -1,8 +1,6 @@
 
 package.path = package.path .. ";./?.lua;/usr/share/luajit-2.0.0/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua"--added for use with raspberry pi
 
-
-
 require("preload")
 require("socket")
 _G.bit32 = require("bit32")

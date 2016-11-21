@@ -14,6 +14,7 @@ local ssl = require 'ssl'
 local https = require 'ssl.https'
 
 function _G.sendMessage(subject,msg,rec)
+	if not mainEmail then return print('Mail send failed, email not configured') end
 	--define local functions we dont want exposed gloabaly
 	--these do the actual work of sending the message
 	local function sslCreate()
@@ -78,6 +79,7 @@ end
 local imap4   = require "imap4"
 local Message = require "pop3.message"
 function _G.receiveMessage()
+	if not mainEmail then return print('Mail receive failed, email not configured') end
 	local connection,er = imap4('imap.gmail.com', 993, {protocol = 'tlsv1'})
 	if connection then
 		local logged,er = connection:login(mainEmail, mainEmailPass)

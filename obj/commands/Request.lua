@@ -28,6 +28,28 @@ end
 
 Request.orders = {}
 
+Request.orders["StepMs"] = function(motorID,user)
+	if stepperMotors and #stepperMotors > 0 then
+		local data = "Response StepMs "
+		local time = os.date('*t')
+		local date = time.year.."-"..time.month.."-"..time.day
+		time = time.hour..":"..time.min..":"..time.sec
+		local stamp = os.time(os.date("*t"))
+		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
+		for i,v in ipairs(stepperMotors) do
+			if not motorID or motorID == v:getName() then
+				if v.stepping then
+					data = ([[%s,{name='%s',id='%s',stepping='%s'}]]):format(data,v:getName(),v:getID(),v:getDirection())
+				else
+					data = ("%s,{name='%s',id='%s',stepping=nil}"):format(data,v:getName(),v:getID())
+				end
+			end
+		end
+		data = ("%s}|"):format(data)
+	return data
+	end
+end
+
 Request.orders["SenDHT22"] = function(sensorID,user)
 	if sensors and #sensors > 0 then
 		local data = "Response SenDHT22 "
@@ -36,7 +58,7 @@ Request.orders["SenDHT22"] = function(sensorID,user)
 		time = time.hour..":"..time.min..":"..time.sec
 		local stamp = os.time(os.date("*t"))
 		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
-		for i,v in ipairs(DHTs) do
+		for i,v in ipairs(DHT22s) do
 			local h,t = v:getLastRead()
 			if h then
 				data = ("%s,{name='%s',id='%s',h=%s,t=%s}"):format(data,v:getName(),v:getID(),h,t)
@@ -212,6 +234,16 @@ Request.orders["objects"] = function(objs,user)
 		end
 	end
 	local data = ("Response objects |return {id='%s'"):format(mainID)
+	if stepperMotors and objs['stepperMotors'] then
+		data = ("%s,stepperMotors={'void'"):format(data)
+		for i,v in ipairs(stepperMotors) do
+			if not user.node or not v:isNode(user.node) then
+				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getID())
+				if user.master then user.master:addStepperMotors(v) end
+			end
+		end
+		data = ("%s}"):format(data)
+	end
 	if sensors and objs['sensors'] then
 		data = ("%s,sensors={'void'"):format(data)
 		for i,v in ipairs(sensors) do
@@ -232,12 +264,12 @@ Request.orders["objects"] = function(objs,user)
 		end
 		data = ("%s}"):format(data)
 	end
-	if DHTs and objs['DHTs'] then
-		data = ("%s,DHTs={'void'"):format(data)
-		for i,v in ipairs(DHTs) do
+	if DHT22s and objs['DHT22s'] then
+		data = ("%s,DHT22s={'void'"):format(data)
+		for i,v in ipairs(DHT22s) do
 			if not user.node or not v:isNode(user.node) then
 				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getName())
-				if user.master then user.master:addDHT(v) end
+				if user.master then user.master:addDHT22(v) end
 			end
 		end
 		data = ("%s}"):format(data)

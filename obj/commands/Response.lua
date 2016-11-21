@@ -1,4 +1,5 @@
 local Command	= require("obj.Command")
+local RemoteStepperMotors = require("obj.Remote_StepperMotor")
 local RemoteButton = require("obj.Remote_Button")
 local RemoteDHT22 = require("obj.Remote_DHT22")
 local RemoteSensor = require("obj.Remote_1w_TempSensor")
@@ -39,14 +40,33 @@ end
 
 Response.orders = {}
 
-Response.orders["SenDHT"] = function(input,user)
+Response.orders["StepMs"] = function(input,user)
 	local data = string.match(input, '|(.+)|')
 	if data then
 		local data = boxLoad(data)
 		if data then
 			for i,v in ipairs(data) do
 				if type(v) == "table" then
-					local sensor = user.node.DHTs[v.id]
+					local motor = (user.node.stepperMotors and user.node.stepperMotors[v.id])
+					if motor then
+						motor.lastup = tonumber(data.stamp)
+						motor.stepping = v.stepping
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
+Response.orders["SenDHT22"] = function(input,user)
+	local data = string.match(input, '|(.+)|')
+	if data then
+		local data = boxLoad(data)
+		if data then
+			for i,v in ipairs(data) do
+				if type(v) == "table" then
+					local sensor = user.node.DHT22s[v.id]
 					if sensor and not v.er then
 						sensor.lastHRead = v.h
 						sensor.lastTRead = v.t
@@ -221,6 +241,13 @@ Response.orders["objects"] = function(input,user)
 		if data then
 			local objects = boxLoad(data)
 			if objects then
+				if objects.stepperMotors then
+					for i,v in ipairs(objects.stepperMotors) do
+						if type(v) == "table" then
+							RemoteStepperMotors:new(v.id,v.name,user.node)
+						end
+					end
+				end
 				if objects.sensors then
 					for i,v in ipairs(objects.sensors) do
 						if type(v) == "table" then
@@ -235,8 +262,8 @@ Response.orders["objects"] = function(input,user)
 						end
 					end
 				end
-				if objects.DHTs then
-					for i,v in ipairs(objects.DHTs) do
+				if objects.DHT22s then
+					for i,v in ipairs(objects.DHT22s) do
 						if type(v) == "table" then
 							RemoteDHT22:new(v.id,v.name,user.node)
 						end

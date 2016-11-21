@@ -65,6 +65,19 @@ function Node:getID()
 	return nodeList[self.ip].id
 end
 
+function Node:addStepperMotors(motor)
+	if self.stepperMotors == nil then
+		self.stepperMotors = {}
+		self:send('Request StepMs')
+	end
+	if self.stepperMotors[motor:getID()] == nil then
+		self.stepperMotors[motor:getID()] = motor
+		self.stepperMotors[motor:getName()] = motor
+		table.insert(self.stepperMotors, motor)
+		motor.node = self
+	end
+end
+
 function Node:addButton(button)
 	if self.buttons == nil then
 		self.buttons = {}
@@ -77,16 +90,16 @@ function Node:addButton(button)
 	end
 end
 
-function Node:addDHT(DHT)
-	if self.DHTs == nil then
-		self.DHTs = {}
-		self:send('Request SenDHT')
+function Node:addDHT22(DHT22)
+	if self.DHT22s == nil then
+		self.DHT22s = {}
+		self:send('Request SenDHT22')
 	end
-	if self.DHTs[DHT:getID()] == nil then
-		self.DHTs[DHT:getID()] = DHT
-		self.DHTs[DHT:getName()] = DHT
-		table.insert(self.DHTs, DHT)
-		DHT.node = self
+	if self.DHT22s[DHT22:getID()] == nil then
+		self.DHT22s[DHT22:getID()] = DHT22
+		self.DHT22s[DHT22:getName()] = DHT22
+		table.insert(self.DHT22s, DHT22)
+		DHT22.node = self
 	end
 end
 
@@ -180,6 +193,16 @@ function Node:addMacScanner(scanner)
 	end
 end
 
+function Node:removeStepperMotors(motor)
+	self.stepperMotors[motor:getID()] = nil
+	self.stepperMotors[motor:getName()] = nil
+	while table.removeValue(self.stepperMotors, motor) do end
+	if motor.node then motor.node = nil motor:removeSelf() end
+	if #self.stepperMotors == 0 then
+		self.stepperMotors = nil
+	end
+end
+
 function Node:removeButton(button)
 	self.buttons[button:getID()] = nil
 	self.buttons[button:getName()] = nil
@@ -190,14 +213,14 @@ function Node:removeButton(button)
 	end
 end
 
-function Node:removeDHT(DHT)
-	self.DHTs[DHT:getID()] = nil
-	self.DHTs[DHT:getName()] = nil
-	while table.removeValue(self.DHTs, DHT) do end
-	if DHT.node then DHT.node = nil DHT:removeSensor() end
-	if #self.DHTs == 0 then
-		self.DHTs = nil
-		if self.updateDHTs then Scheduler:dequeue(self.updateDHTs) self.updateDHTs = nil end
+function Node:removeDHT22(DHT22)
+	self.DHT22s[DHT22:getID()] = nil
+	self.DHT22s[DHT22:getName()] = nil
+	while table.removeValue(self.DHT22s, DHT22) do end
+	if DHT22.node then DHT22.node = nil DHT22:removeSensor() end
+	if #self.DHT22s == 0 then
+		self.DHT22s = nil
+		if self.updateDHT22s then Scheduler:dequeue(self.updateDHT22s) self.updateDHT22s = nil end
 	end
 end
 
@@ -277,9 +300,9 @@ function Node:destoy()
 			self:removeButton(v)
 		end
 	end
-	if self.DHTs then
-		for i,v in pairs(self.DHTs) do
-			self:removeDHT(v)
+	if self.DHT22s then
+		for i,v in pairs(self.DHT22s) do
+			self:removeDHT22(v)
 		end
 	end
 	if self.sensors then

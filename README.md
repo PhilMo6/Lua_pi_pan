@@ -59,7 +59,7 @@ sqlite https://sqlite.org/
 As well as the following libraries.
 lua-sql-sqlite3
 lua-socket
-rpio
+rpi-gpio
 lua-pop3
 lua-imap4
 
