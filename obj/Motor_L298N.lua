@@ -8,25 +8,21 @@ Driver.updateCmd = "Request DriverMs"
 
 
 --- Constructor for instance-style clones.
-function Driver:initialize(pin)
+function Driver:initialize(pin1,pin2)
 	if not _G.driverMotors then _G.driverMotors = {name='driverMotors'} table.insert(objects,driverMotors) objects["driverMotors"] = driverMotors end
-	if not driverMotors[pin1..','..pin2..','..pin3..','..pin4] then
+	if not driverMotors[pin1..','..pin2] then
 		self.config = {}
 		self.position = 1
-		self:setID(pin)
+		self:setID(pin1..','..pin2)
 		self:setName('Driver_')
 		table.insert(driverMotors,self)
+		self.pins = {RPIO(pin1),RPIO(pin2)}
 		self:test()
 	end
 end
 
 function Driver:getDirectionA()
 	return (self.movingA or 'stopped')
-end
-
-
-function Driver:getDirectionB()
-	return (self.movingB or 'stopped')
 end
 
 function Driver:setID(id)
@@ -46,66 +42,43 @@ function Driver:getHTMLcontrol()
 end
 
 function Driver:read()
-	local r = "is " .. self:getDirection()
+	local r = self:getDirectionA() .. " " .. self:getDirectionB()
 	return r
 end
 
 function Driver:setupPins()
-	for i,v in ipairs(self.pinsA) do
+	for i,v in ipairs(self.pins) do
 		v:set_direction('out')
 	end
 end
 
-function Driver:setPins()
-	for i,v in ipairs(self.pinsA) do
-		v:write(self.seq[step][i])
-	end
-end
-
-function Driver:stopA(up)
+function Driver:stop(up)
 	--resetBoost(self)
-	if self.movingA then
+	if self.moving then
 
 	end
-	for i,v in ipairs(self.pinsA) do
+	for i,v in ipairs(self.pins) do
 		v:write(0)
 	end
 	if not up then self:updateMasters() end
 	return true
 end
 
-function Driver:forwardA()
-	if not self.movingA then
+function Driver:forward()
+	if not self.moving then
 
 		return true
 	end
 	return false
 end
 
-function Driver:reverseA()
-	if not self.movingA then
+function Driver:reverse()
+	if not self.moving then
 
 		return true
 	end
 	return false
 end
-
-function Driver:forwardB()
-	if not self.movingB then
-
-		return true
-	end
-	return false
-end
-
-function Driver:reverseB()
-	if not self.movingB then
-
-		return true
-	end
-	return false
-end
-
 
 function Driver:test()
 
