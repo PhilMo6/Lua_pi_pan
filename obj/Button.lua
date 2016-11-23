@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Button			= Cloneable:clone()
 
 --[[
@@ -37,14 +37,6 @@ function Button:setName(name)
 	if self.config.name then buttons[self.config.name] = nil logEvent(self:getName(),self:getName() .. ' setName:'..name ) end
 	self.config.name = name
 	buttons[self.config.name] = self
-end
-
-function Button:getID()
-	return self.config.id
-end
-
-function Button:getName()
-	return self.config.name
 end
 
 function Button:read()

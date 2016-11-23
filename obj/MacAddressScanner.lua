@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local MacScanner			= Cloneable:clone()
 --[[
 	Object module handling wlan scanning and logging of mac addresses and maintaining a list of known addresses
@@ -280,15 +280,6 @@ function MacScanner:getHTMLcontrol()
 	([[<button style="font-size:15px" onclick="myFunction('MacScan %s toggle')">Toggle</button >]]):format(name),
 	([[<form id="%s"> find:<input type="text" name='com'></form>]]):format(name)
 	)
-end
-
-
-function MacScanner:getID()
-	return self.config.id
-end
-
-function MacScanner:getName()
-	return self.config.name
 end
 
 function MacScanner:getState()

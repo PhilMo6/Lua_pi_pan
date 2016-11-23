@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Sensor			= Cloneable:clone()
 local Button = require("obj.Button")
 --[[
@@ -344,10 +344,6 @@ function Sensor:getHTMLcontrol()
 	)
 end
 
-function Sensor:getID()
-	return self.config.id
-end
-
 function Sensor:setID(id)
 	if self.config.id then motionSensors[self.config.id] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setID:'..id) end
 	self.config.id = id
@@ -358,10 +354,6 @@ function Sensor:setName(name)
 	if self.config.name then motionSensors[self.config.name] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setName:'..name) end
 	self.config.name = name
 	motionSensors[self.config.name] = self
-end
-
-function Sensor:getName()
-	return self.config.name
 end
 
 function Sensor:getStatus()

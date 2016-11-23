@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Buzzer			= Cloneable:clone()
 
 --[[
@@ -65,14 +65,6 @@ end
 function Buzzer:test()
 	self.stayOff = nil
 	self:beep()
-end
-
-function Buzzer:getID()
-	return self.config.id
-end
-
-function Buzzer:getName()
-	return self.config.name
 end
 
 function Buzzer:read()

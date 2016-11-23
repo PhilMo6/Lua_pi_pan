@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Relay			= Cloneable:clone()
 --[[
 	Object module for relays such as
@@ -77,14 +77,6 @@ function Relay:on()
 		return true
 	end
 	return false
-end
-
-function Relay:getID()
-	return self.config.id
-end
-
-function Relay:getName()
-	return self.config.name
 end
 
 function Relay:read()

@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Thermostat			= Cloneable:clone()
 --[[
 	Object module for thermostats
@@ -255,14 +255,6 @@ function Thermostat:getHTMLcontrol()
 	)
 end
 
-
-function Thermostat:getID()
-	return self.config.id
-end
-
-function Thermostat:getName()
-	return self.config.name
-end
 
 function Thermostat:getState()
 	return self.config.state or 'off'

@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Stepper			= Cloneable:clone()
 --[[
 	Object used to drive stepper motors. Must be connect though a driver board.
@@ -48,15 +48,6 @@ end
 
 function Stepper:getHTMLcontrol()
 	return ([[<button onclick="myFunction('Stm %s test')">Test</button >]]):format(self:getName())
-end
-
-
-function Stepper:getID()
-	return self.config.id
-end
-
-function Stepper:getName()
-	return self.config.name
 end
 
 function Stepper:read()

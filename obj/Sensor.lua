@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local sensor			= Cloneable:clone()
 
 --[[
@@ -37,14 +37,6 @@ function sensor:setName(name)
 	if self.config.name then sensors[self.config.name] = nil end
 	self.config.name = name
 	sensors[self.config.name] = self
-end
-
-function sensor:getID()
-	return self.config.id
-end
-
-function sensor:getName()
-	return self.config.name
 end
 
 function sensor:getLastRead()

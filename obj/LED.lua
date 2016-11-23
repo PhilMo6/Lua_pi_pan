@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local LED			= Cloneable:clone()
 --[[
 	1 color LED module.
@@ -93,14 +93,6 @@ function LED:toggle(client)
 		self:off(client)
 		return 'off'
 	end
-end
-
-function LED:getID()
-	return self.config.id
-end
-
-function LED:getName()
-	return self.config.name
 end
 
 function LED:read()

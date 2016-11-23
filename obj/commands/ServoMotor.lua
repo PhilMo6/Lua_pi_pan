@@ -51,7 +51,7 @@ ServoMotor.orders["middle"] = function()
 	return string.format("Use the forward or backward commands to step motor.",motor:getName())
 end
 
-ServoMotor.orders["top"] = function(motor,count)
+ServoMotor.orders["forward"] = function(motor,count)
 	motor:off(true)
 	local step = motor:stepF(tonumber(count or 1000))
 	if step then
@@ -60,7 +60,7 @@ ServoMotor.orders["top"] = function(motor,count)
 end
 ServoMotor.orders["f"] = ServoMotor.orders["forward"]
 
-ServoMotor.orders["bottom"] = function(motor,count)
+ServoMotor.orders["backward"] = function(motor,count)
 	motor:off(true)
 	local step = motor:stepB(tonumber(count or 1000))
 	if step then

@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Cloneable")
+local Cloneable			= require("obj.Common")
 local Servo			= Cloneable:clone()
 --[[
 	Object used to drive 3 position Servo motors.
@@ -39,14 +39,6 @@ end
 
 function Servo:getHTMLcontrol()
 	return ([[<button onclick="myFunction('Som %s test')">Test</button >]]):format(self:getName())
-end
-
-function Servo:getID()
-	return self.config.id
-end
-
-function Servo:getName()
-	return self.config.name
 end
 
 function Servo:read()
