@@ -239,6 +239,7 @@ if conn then conn:close() end
 if env then env:close() end
 local cleanup = RPIO()
 cleanup()
+if PWMstop then PWMstop() end
 collectgarbage()
 
 if startsite then

@@ -10,7 +10,7 @@ local DHT22			= Cloneable:clone()
 DHT22.updateCmd = "Request SenDHT22"
 
 function DHT22:initialize(pin)
-	if not _G.DHTs then require("source.readDHT") _G.DHTs = {name='DHTs'} table.insert(objects,DHTs) objects["DHTs"] = DHTs startPollSensorEvent() end
+	if not _G.DHTs then require("source.wpiLuaWrap") _G.DHTs = {name='DHTs'} table.insert(objects,DHTs) objects["DHTs"] = DHTs startPollSensorEvent() end
 	if not DHTs['DHT22_' ..pin] then
 		self.config = {}
 		self:setID(pin)

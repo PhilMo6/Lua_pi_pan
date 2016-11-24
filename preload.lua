@@ -8,7 +8,8 @@
 _G.masters						= {}
 _G.nodes						= {}
 
-
+local Motor = require("obj.Motor_L298N")
+local ServorMotor = require("obj.ServoMotor")
 local StepperMotor = require("obj.StepperMotor")
 local MacScanner = require("obj.MacAddressScanner")
 local Thermostat = require("obj.Thermostat")
@@ -162,6 +163,16 @@ function _G.loadObjects(conn,c)
 	for i,pins in ipairs(stepperPins) do
 		if type(pins) == 'table' then
 			StepperMotor:new(pins[1],pins[2],pins[3],pins[4])
+		end
+	end
+	for i,pin in ipairs(servoPins) do
+		if type(pin) == 'number' then
+			ServorMotor:new(pin)
+		end
+	end
+	for i,pins in ipairs(motorPins) do
+		if type(pins) == 'table' then
+			Motor:new(pins[1],pins[2],pins[3],pins[4])
 		end
 	end
 

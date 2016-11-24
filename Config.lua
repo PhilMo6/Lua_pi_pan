@@ -30,10 +30,12 @@ Config.M_buttonPins 				= {}--table value containing 1 pin and number of buttons
 Config.relayPins					= {}--pinValue
 Config.DHT22Pins					= {}--pinValue
 Config.stepperPins					= {}--table value containing 4 pins
+Config.servoPins					= {}--pinValue
+Config.motorPins					= {}--table value containing 2 pins and optional pmw settings
 Config.thermostatStartup			= {}--table value containing id and optional config table
 Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
 Config.macScannerStartup			= {}--table value containing id and optional config table
---[[examples:WARNING DO NOT SET PINS FOR MORE THEN 1 OBJECT
+--[[examples:WARNING DO NOT SET ANY GIVEN PIN ON MORE THEN 1 OBJECT
 Config.lightSensorPin		= {15}
 Config.LEDPins 			= {18,27}
 Config.RBG_LEDPins 		= {{14,17,27}}

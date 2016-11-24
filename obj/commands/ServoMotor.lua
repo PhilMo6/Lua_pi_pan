@@ -3,7 +3,7 @@ local Command	= require("obj.Command")
 --- test command
 local ServoMotor	= Command:clone()
 ServoMotor.name = "ServoMotor"
-ServoMotor.keywords	= {"servomotor","Stm","Servo","servo","Ser","ser"}
+ServoMotor.keywords	= {"servomotor","Svm","Servo","servo","Ser","ser"}
 
 --- Execute the command
 function ServoMotor:execute(input,user,par)

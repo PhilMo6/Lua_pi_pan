@@ -1,1 +1,1 @@
-cc -o readDHT.so readDHT.c -shared -I/usr/include/lua5.1 -llua5.1 -lwiringPi
+cc -o wpiLuaWrap.so wpiLuaWrap.c -shared -I/usr/include/lua5.1 -llua5.1 -lwiringPi

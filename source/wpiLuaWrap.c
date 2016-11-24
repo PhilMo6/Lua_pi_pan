@@ -1,4 +1,4 @@
-// lua wrapper for dht
+// lua wrapper for wiring pi
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -107,9 +107,30 @@ int fastReadPin(lua_State *L)
 	return(1);
 }
 
+int PWMsetup(lua_State *L)
+{
+	int pin = 18
+	pinMode(pin, PWM_OUTPUT);
+	return(0);
+}
+
+int PWMset(lua_State *L)
+{
+	int r = lua_tonumber(L, 1);
+	int c = lua_tonumber(L, 2);
+	pwmSetRange(r);
+	pwmSetClock(c) ;
+	pwmWrite (18, 5);
+	return(0);
+}
+
+
+
 int luaopen_source_readDHT (lua_State *L) {
 	wiringPiSetupGpio();
 	lua_register(L,"readDHT",read_dht_data);
 	lua_register(L,"fastReadPin",fastReadPin);
+	lua_register(L,"PWMsetup",PWMsetup);
+	lua_register(L,"PWMset",PWMset);
 	return 0;
 }
