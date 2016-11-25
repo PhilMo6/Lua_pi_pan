@@ -172,7 +172,7 @@ function _G.loadObjects(conn,c)
 	end
 	for i,pins in ipairs(motorPins) do
 		if type(pins) == 'table' then
-			Motor:new(pins[1],pins[2],pins[3],pins[4])
+			Motor:new(pins[1],pins[2],pins.pwm)
 		end
 	end
 

@@ -6,14 +6,20 @@ local Servo			= Cloneable:clone()
 
 Servo.updateCmd = "Request ServoMs"
 
-Servo.positions = {'top','mid','bot'}
+Servo.config = {}
+Servo.config.positions = {'top','mid','bot'}
+Servo.config.values = {top=100,mid=150,bot=200}
+Servo.config.pmwR = 192
+Servo.config.pmwC = 2000
+
 
 --- Constructor for instance-style clones.
-function Servo:initialize(pin)
-	if not _G.servoMotors then _G.servoMotors = {name='servoMotors'} table.insert(objects,servoMotors) objects["servoMotors"] = servoMotors end
-	if not servoMotors[pin1..','..pin2..','..pin3..','..pin4] then
+function Servo:initialize(pmwr,pmwc)
+	if not _G.servoMotors then require("source.wpiLuaWrap") _G.servoMotors = {name='servoMotors'} table.insert(objects,servoMotors) objects["servoMotors"] = servoMotors end
+	if not servoMotors[pin] then
 		self.config = {}
-		self.position = 1
+		self.pmwR = pmwr
+		self.pmwC = pmwc
 		self:setID(pin)
 		self:setName('Servo_')
 		table.insert(servoMotors,self)
@@ -22,7 +28,8 @@ function Servo:initialize(pin)
 end
 
 function Servo:getPosition()
-	return (self.position and Servo.positions[self.position])
+	local positions = self.config.positions or Servo.config.positions
+	return (self.position and positions[self.position])
 end
 
 function Servo:setID(id)
@@ -46,30 +53,34 @@ function Servo:read()
 	return r
 end
 
-
 function Servo:off(up)
-	resetBoost(self)
-	if self.stepping then
-		Scheduler:dequeue(self.stepping)
-		self.stepping = nil
-	end
-	for i,v in ipairs(self.pins) do
-		v:write(0)
-	end
+	PWMstop()
 	if not up then self:updateMasters() end
 	return true
 end
 
-function Servo:setStep(step)
-	if self.seq[step] then
-		self.config.step = step
+function Servo:setPosition(pos)
+	local positions = self.config.positions or Servo.config.positions
+	if positions[pos] then
+		self.config.position = pos
+		self:setPMW()
 		return true
 	end
 	return false
 end
 
-function Servo:getStep()
-	return self.config.step
+function Servo:setupPins()
+	PWMsetup()
+	self.config.position = 1
+	PWMCRset(self.pmwR,self.pmw)
+end
+
+function Servo:setPMW()
+	local positions = self.config.positions or Servo.config.positions
+	local values = self.config.values or Servo.config.values
+	if positions[self.config.position] and values[positions[self.config.position]] then
+		PWMset(values[positions[self.config.position]])
+	end
 end
 
 

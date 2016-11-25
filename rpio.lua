@@ -1,4 +1,5 @@
 local gpio_subsystem = '/sys/class/gpio/'
+local pwm_subsystem = '/sys/class/rpi-pwm/pwm0/'
 if not _G.usedGPIO then _G.usedGPIO = {} end
 
 local rpio = {}
