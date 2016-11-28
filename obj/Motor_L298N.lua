@@ -6,8 +6,8 @@ local Driver			= Cloneable:clone()
 
 Driver.updateCmd = "Request DriverMs"
 Driver.config = {}
-Driver.config.speeds = {'slow','mid','fast'}
-Driver.config.values = {slow=100,mid=150,fast=200}
+Driver.config.speeds = {'crawl','slow','mid','fast','full'}
+Driver.config.values = {crawl=100,slow=125,mid=150,fast=175,full=200}
 Driver.config.speed = 1
 
 --- Constructor for instance-style clones.

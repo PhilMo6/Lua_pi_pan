@@ -34,7 +34,7 @@ StepperMotor.orders = {}
 StepperMotor.orders["rename"] = function(motor,name)
 	if name then
 		motor:setName(name)
-		updateStepperMotorinfo()
+		updateStepperMotorInfo()
 		return string.format("Stepper Motor %s has been renamed %s.",motor:getID(),motor:getName())
 	else
 		return "Must supply a name to rename a Stepper Motor."

@@ -26,7 +26,8 @@ function Stepper:initialize(pin1,pin2,pin3,pin4)
 		table.insert(stepperMotors,self)
 		self.pins = {RPIO(pin1),RPIO(pin2),RPIO(pin3),RPIO(pin4)}
 		self:setupPins()
-		self:test()
+		self:off()
+		--self:test()
 	end
 end
 
@@ -161,8 +162,17 @@ function Stepper:stepB(count,ondone)
 	return false
 end
 
-function Stepper:test()
-	self:stepF(10000,function() self:stepB(10000) end)
+function Stepper:test(c)
+if not c then c = 0 end
+print('test',c)
+	self:stepF(2000,function()
+		if c <= 20 then
+			c = c + 1
+			self:stepB(500,function() self:test(c) end)
+		else
+			self:stepB(2000,function() self:off() end)
+		end
+	end)
 end
 
 --- Stringifier for Cloneables.
