@@ -23,6 +23,9 @@ function LED:initialize(pinR,pinB,pinG)
 	if not _G.LEDs then _G.LEDs = {name='LEDs'} _G.LEDIDs = {} table.insert(objects,LEDs) objects["LEDs"] = LEDs end
 	if not LEDs['LED_'..pinR..','..pinB..','..pinG] then
 		self.config = {
+			blinking=false,
+			cycling=false,
+			random=false,
 			pinRed = pinR,
 			pinBlue = pinB,
 			pinGreen = pinG,
@@ -130,15 +133,21 @@ end
 
 function LED:off()
 
+	if self.blinking then
+		Scheduler:dequeue(self.blinking)
+		self.blinking = nil
+		self.config.blinking = false
+	end
 	if self.cycling then
 		Scheduler:dequeue(self.cycling)
 		self.cycling = nil
+		self.config.cycling = false
 	end
 
 	self.gpioR:write(0)
 	self.gpioB:write(0)
 	self.gpioG:write(0)
-	if not self.blinking and not self.cycling and self.masters then
+	if not self.blinking then
 		self:updateMasters()
 	end
 	return true
@@ -178,13 +187,16 @@ function LED:cycle(client)
 	if self.blinking then
 		Scheduler:dequeue(self.blinking)
 		self.blinking = nil
+		self.config.blinking = false
 	end
 	if self.cycling then
 		Scheduler:dequeue(self.cycling)
 		self.cycling = nil
+		self.config.cycling = false
 	end
 	if not self.cycling then
 		local led = self
+		led.config.cycling = true
 		local color = 0
 		led.cycling = Event:new(function()
 
@@ -207,13 +219,16 @@ function LED:randomColor(client)
 	if self.blinking then
 		Scheduler:dequeue(self.blinking)
 		self.blinking = nil
+		self.config.blinking = false
 	end
 	if self.cycling then
 		Scheduler:dequeue(self.cycling)
 		self.cycling = nil
+		self.config.cycling = false
 	end
 
 	local led = self
+	led.config.cycling = true
 	led.cycling = Event:new(function()
 	local r,b,g = math.random(0,1),math.random(0,1),math.random(0,1)
 	while r == 0 and b == 0 and g == 0 do
@@ -242,7 +257,7 @@ end
 --- Stringifier for Cloneables.
 function LED:toString()
 	local r,b,g = self:read()
-	return string.format("[LED] %s %s %s,%s,%s",self:getID(),self:getName(),(r == 1 and 'on' or 'off'),(b == 1 and 'on' or 'off'),(g == 1 and 'on' or 'off'))
+	return string.format("[RBG_LED] %s %s %s,%s,%s",self:getID(),self:getName(),(r == 1 and 'on' or 'off'),(b == 1 and 'on' or 'off'),(g == 1 and 'on' or 'off'))
 end
 
 return LED

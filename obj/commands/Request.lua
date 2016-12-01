@@ -19,7 +19,7 @@ function Request:subexecute(input,user,par)
 	local words = string.Words(input)
 	local input1, input2, input3 ,input4,input5 = words[1],words[2],words[3],words[4],words[5]
 	if Request.orders[input2] then--This is a valid order
-		return Request.orders[input2](input3,user,par)
+		return Request.orders[input2](input3,input4,user,par)
 	else
 		return "That is not a vaild order."
 	end
@@ -28,7 +28,7 @@ end
 
 Request.orders = {}
 
-Request.orders["StepMs"] = function(motorID,user)
+Request.orders["StepMs"] = function(motorID,_,user)
 	if stepperMotors and #stepperMotors > 0 then
 		local data = "Response StepMs "
 		local time = os.date('*t')
@@ -50,7 +50,7 @@ Request.orders["StepMs"] = function(motorID,user)
 	end
 end
 
-Request.orders["SenDHT22"] = function(sensorID,user)
+Request.orders["SenDHT22"] = function(sensorID,_,user)
 	if sensors and #sensors > 0 then
 		local data = "Response SenDHT22 "
 		local time = os.date('*t')
@@ -71,7 +71,7 @@ Request.orders["SenDHT22"] = function(sensorID,user)
 	end
 end
 
-Request.orders["SenTemp"] = function(sensorID,user)
+Request.orders["SenTemp"] = function(sensorID,_,user)
 	if sensors and #sensors > 0 then
 		local data = "Response SenTemp "
 		local time = os.date('*t')
@@ -95,7 +95,7 @@ Request.orders["SenTemp"] = function(sensorID,user)
 	end
 end
 
-Request.orders["SenLight"] = function(sensorID,user)
+Request.orders["SenLight"] = function(sensorID,_,user)
 	if lightsensors and #lightsensors > 0 then
 		local data = "Response SenLight "
 		local time = os.date('*t')
@@ -119,7 +119,7 @@ Request.orders["SenLight"] = function(sensorID,user)
 	end
 end
 
-Request.orders["RlUp"] = function(relayId,user)
+Request.orders["RlUp"] = function(relayId,_,user)
 	if relays and #relays > 0 then
 		local data = "Response RlUp "
 		local time = os.date('*t')
@@ -138,7 +138,7 @@ Request.orders["RlUp"] = function(relayId,user)
 	end
 end
 
-Request.orders["LEDUp"] = function(LEDid,user)
+Request.orders["LEDUp"] = function(LEDid,_,user)
 	if LEDs and #LEDs > 0 then
 		local data = "Response LEDUp "
 		local time = os.date('*t')
@@ -157,7 +157,7 @@ Request.orders["LEDUp"] = function(LEDid,user)
 	end
 end
 
-Request.orders["ThUp"] = function(ThermID,user)
+Request.orders["ThUp"] = function(ThermID,_,user)
 	if thermostats and #thermostats > 0 then
 		local data = "Response ThUp "
 		local time = os.date('*t')
@@ -177,7 +177,7 @@ Request.orders["ThUp"] = function(ThermID,user)
 	end
 end
 
-Request.orders["MosUp"] = function(MosID,user)
+Request.orders["MosUp"] = function(MosID,_,user)
 	if motionSensors and #motionSensors > 0 then
 		local data = "Response MosUp "
 		local time = os.date('*t')
@@ -198,7 +198,7 @@ Request.orders["MosUp"] = function(MosID,user)
 end
 
 
-Request.orders["MASUp"] = function(MASID,user)
+Request.orders["MASUp"] = function(MASID,_,user)
 	if macScanners and #macScanners > 0 then
 		local data = "Response MASUp "
 		local time = os.date('*t')
@@ -227,7 +227,7 @@ Request.orders["objectUpdate"] = function(loc,ID,user)
 		local stamp = os.time(os.date("*t"))
 		data = ("%s |return {stamp='%s',date='%s',time='%s',loc='%s'"):format(data,stamp,date,time,loc)
 		local obj = objects[loc][ID]
-		data = ([[%s,{id='%s',config=%s}]]):format(data,v:getID(),table.savetoString(v.config))
+		data = ([[%s,{id='%s',config=%s}]]):format(data,obj:getID(),table.savetoString(obj.config))
 		data = ("%s}|"):format(data)
 	return data
 	end
@@ -235,7 +235,7 @@ end
 
 
 
-Request.orders["objects"] = function(objs,user)
+Request.orders["objects"] = function(objs,_,user)
 	if objs then
 		objs = string.gsub(objs,'[%(%)]',"")
 		local words = string.Words(objs)

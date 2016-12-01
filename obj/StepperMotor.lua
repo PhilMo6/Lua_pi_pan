@@ -4,6 +4,7 @@ local Stepper			= Cloneable:clone()
 	Object used to drive stepper motors. Must be connect though a driver board.
 ]]
 
+Stepper.location = 'stepperMotors'
 Stepper.updateCmd = "Request StepMs"
 
 Stepper.seq = {{1,0,0,1},
@@ -19,7 +20,7 @@ Stepper.seq = {{1,0,0,1},
 function Stepper:initialize(pin1,pin2,pin3,pin4)
 	if not _G.stepperMotors then _G.stepperMotors = {name='stepperMotors'} table.insert(objects,stepperMotors) objects["stepperMotors"] = stepperMotors end
 	if not stepperMotors[pin1..','..pin2..','..pin3..','..pin4] then
-		self.config = {speed=.001,step=1}
+		self.config = {speed=.001,step=1,stepping=false}
 		self.step = 1
 		self:setID(pin1..','..pin2..','..pin3..','..pin4)
 		self:setName('stepper_'..pin1..','..pin2..','..pin3..','..pin4)
@@ -76,6 +77,7 @@ function Stepper:off(up)
 	if self.stepping then
 		Scheduler:dequeue(self.stepping)
 		self.stepping = nil
+		self.config.stepping = false
 	end
 	for i,v in ipairs(self.pins) do
 		v:write(0)
@@ -112,6 +114,7 @@ function Stepper:stepF(count,ondone)
 	if not self.stepping then
 		boostFrequency(self,3)
 		local motor = self
+		motor.config.stepping = true
 		motor.stepping = Event:new(function()
 			local step = motor:getStep() + 1
 			if motor.seq[step] then
@@ -124,6 +127,7 @@ function Stepper:stepF(count,ondone)
 		end, motor:getSpeed(), true, count or 60)
 		motor.stepping.onDone = function()
 			motor.stepping = nil
+			self.config.stepping = false
 			motor:off()
 			if ondone then ondone() end
 		end
@@ -139,6 +143,7 @@ function Stepper:stepB(count,ondone)
 	if not self.stepping then
 		boostFrequency(self,3)
 		local motor = self
+		motor.config.stepping = true
 		motor.stepping = Event:new(function()
 			local step = motor:getStep() - 1
 			if motor.seq[step] then
@@ -151,6 +156,7 @@ function Stepper:stepB(count,ondone)
 		end, motor:getSpeed(), true, count or 60)
 		motor.stepping.onDone = function()
 			motor.stepping = nil
+			self.config.stepping = false
 			motor:off()
 			if ondone then ondone() end
 		end

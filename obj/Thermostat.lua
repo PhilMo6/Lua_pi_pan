@@ -10,6 +10,7 @@ local Thermostat			= Cloneable:clone()
 	The thermostat state can be set to active(default), heating, cooling, or off
 ]]
 
+Thermostat.location = 'thermostats'
 Thermostat.updateCmd = "Request ThUp"
 Thermostat.config = {}
 Thermostat.config.temperature 					=  70

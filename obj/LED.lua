@@ -6,11 +6,12 @@ local LED			= Cloneable:clone()
 ]]
 
 LED.updateCmd = "Request LEDUp"
+LED.location = 'LEDs'
 
 function LED:initialize(pin)
 	if not _G.LEDs then _G.LEDs = {name='LEDs'} _G.LEDIDs = {} table.insert(objects,LEDs) objects["LEDs"] = LEDs end
 	if not LEDs['LED_'..pin] then
-		self.config = {}
+		self.config = {blinking=false}
 		self:setID(pin)
 		self:setName('LED_'..pin)
 		table.insert(LEDs,self)
@@ -70,11 +71,12 @@ end
 function LED:blink(dir,count,client)
 	if not self.blinking then
 		local led = self
+		led.config.blinking = true
 		led.blinking = Event:new(function()
 			led:toggle()
 		end, dir or 1, true, count and count * 2 or 6)
 		led.blinking.onDone = function()
-			led:on() led.blinking = nil led:off()
+			led:on() led.blinking = nil led.config.blinking = false led:off()
 		end
 		Scheduler:queue(led.blinking)
 		if self.masters then

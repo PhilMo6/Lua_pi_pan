@@ -12,14 +12,15 @@ MacScanner.config.timeout 				=  3
 MacScanner.config.scanTime 				=  30
 
 MacScanner.knownMacs = {
-			{'34:fc:ef:ec:90:22','my_phone'},
-			{'5c:70:a3:63:47:fe','freds_phone'},
-			{'00:e1:b0:18:52:15','rpi_greenhouse'},
-			{'b4:79:a7:03:fc:5d','grizs_phone'},
-			{'b8:27:eb:81:70:11','LibreELEC'},
-			{'30:10:b3:51:81:67','Karens_Laptop'},
-			{'84:38:38:25:a4:f7','Karens_phone'}
 		}
+
+--[[Example.knownMacs = {
+			{'34:ec:eq:ec:91:12','my_phone'},
+			{'fc:c0:b3:73:47:5e','frends_phone'},
+			{'01:e0:b0:19:32:14','rpi_greenhouse'}
+		}
+	]]
+MacScanner.location = 'macScanners'
 
 --- Constructor for instance-style clones.
 function MacScanner:initialize(id,options)

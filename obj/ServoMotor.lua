@@ -5,6 +5,7 @@ local Servo			= Cloneable:clone()
 ]]
 
 Servo.updateCmd = "Request ServoMs"
+Servo.location = 'servoMotors'
 
 Servo.config = {}
 Servo.config.positions = {'top','mid','bot'}

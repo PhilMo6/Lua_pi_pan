@@ -41,6 +41,32 @@ end
 
 
 
+function Node:addObject(motor)
+	if self[obj.location] == nil then
+		self[obj.location] = {}
+		--self:send('Request StepMs')
+	end
+	if self[obj.location][obj:getID()] == nil then
+		self[obj.location][obj:getID()] = obj
+		self[obj.location][v:getName()] = obj
+		table.insert(self[obj.location], obj)
+		motor.node = self
+	end
+end
+function Node:removeObject(obj)
+	if self[obj.location] then
+		self[obj.location][obj:getID()] = nil
+		self[obj.location][obj:getName()] = nil
+		while table.removeValue(self[obj.location], obj) do end
+		if obj.node then obj.node = nil obj:removeSelf() end
+		if #self[obj.location] == 0 then
+			self[obj.location] = nil
+		end
+	end
+end
+
+
+
 function Node:toString()
 	if not self.client then
 		return "Node@nil"

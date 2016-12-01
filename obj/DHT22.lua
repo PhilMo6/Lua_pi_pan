@@ -9,6 +9,8 @@ local DHT22			= Cloneable:clone()
 
 DHT22.updateCmd = "Request SenDHT22"
 
+DHT22.location = 'DHTs'
+
 function DHT22:initialize(pin)
 	if not _G.DHTs then require("source.wpiLuaWrap") _G.DHTs = {name='DHTs'} table.insert(objects,DHTs) objects["DHTs"] = DHTs startPollSensorEvent() end
 	if not DHTs['DHT22_' ..pin] then
@@ -44,6 +46,7 @@ function DHT22:read()
 		if self.masters and up then
 			self:updateMasters()
 		end
+		self:updateLastRead(h..'|'..t)
 		return h,t
 	end
 end

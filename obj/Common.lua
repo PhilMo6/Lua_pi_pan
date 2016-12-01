@@ -4,6 +4,15 @@ local Common			= Cloneable:clone()
 	Common object to hold functions used by most other objects.
 ]]
 
+function Common:removeSelf()
+	if _G[self.location] then
+		_G[self.location][self:getName()] = nil
+		while table.removeValue(_G[self.location], self) do end
+		if self.node then local node=self.node self.node=nil node:removeObject(self) end
+		if self.masters then for i,v in ipairs(self.masters) do self:removeMaster(v) end end
+	end
+end
+
 function Common:getID()
 	return (self.config and self.config.id)
 end
@@ -23,7 +32,6 @@ function Common:getConfig()
 		return ""
 	end
 end
-
 
 function Common:updateLastRead(v)
 	self.config.lastRead = v
@@ -55,7 +63,6 @@ function Common:addMaster(master)
 	end
 	if not self.masters[master:getID()] then
 		table.insert(self.masters,master)
-		self.masters[master] = master
 		self.masters[master:getID()] = master
 	end
 end
@@ -64,13 +71,14 @@ function Common:removeMaster(master)
 	if self.masters[master:getID()] then
 		while table.removeValue(self.masters, master) do end
 	end
+	master:removeObject(self)
 	if self.masters == 0 then
 		self.masters = nil
 	end
 end
 
 function Common:isMaster(master)
-	if self.masters and self.masters[master] then
+	if self.masters and self.masters[master:getID()] then
 		return true
 	end
 	return false
@@ -85,7 +93,7 @@ end
 
 function Common:updateMasters()
 	if self.masters then
-		local cmd = self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
+		local cmd = self.location and "Request objectUpdate "..self.location.." "..self:getName() or nil --self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
 		if cmd then
 			for i,v in ipairs(self.masters) do
 				runningServer:parseCmd(cmd,v.client)

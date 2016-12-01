@@ -5,15 +5,16 @@ local Feeder			= Cloneable:clone()
 ]]
 
 Feeder.updateCmd = "Request Feeder"
+Feeder.location = 'feeders'
 
 --- Constructor for instance-style clones.
 function Feeder:initialize(id,count,stepper,timing)
-	if not _G.feeder then _G.feeder = {name='feeder'} table.insert(objects,feeder) objects["feeder"] = feeder end
-	if not feeder[id] then
-		self.config = {count=count,stepper=stepper,timing=timing,lastfeed={}}
+	if not _G.feeder then _G.feeders = {name='feeders'} table.insert(objects,feeders) objects["feeders"] = feeders end
+	if not feeders[id] then
+		self.config = {count=count,stepper=stepper,timing=timing,lastfeed={},feeding=false}
 		self:setID(id)
 		self:setName('Feeder_'..id)
-		table.insert(feeder,self)
+		table.insert(feeders,self)
 		self:startTimer()
 	end
 end
@@ -34,15 +35,15 @@ function Feeder:startTimer()
 end
 
 function Feeder:setID(id)
-	if self.config.id then feeder[self.config.id] = nil end
+	if self.config.id then feeders[self.config.id] = nil end
 	self.config.id = id
-	feeder[self.config.id] = self
+	feeders[self.config.id] = self
 end
 
 function Feeder:setName(name)
-	if self.config.name then feeder[self.config.name] = nil end
+	if self.config.name then feeders[self.config.name] = nil end
 	self.config.name = name
-	feeder[self.config.name] = self
+	feeders[self.config.name] = self
 end
 
 function Feeder:getHTMLcontrol()
@@ -57,6 +58,7 @@ function Feeder:feed()
 	local stepper = stepperMotors and stepperMotors[self.config.stepper]
 	if stepper and not self.feeding then
 		local f = self
+		f.config.feeding=true
 		f.feeding = function(c)
 			if not c then c = 0 end
 			stepper:stepF(2000,function()
@@ -64,7 +66,7 @@ function Feeder:feed()
 					c = c + 1
 					stepper:stepB(500,function() f.feeding(c) end)
 				else
-					stepper:stepB(2000,function() stepper:off() f.feeding = nil end)
+					stepper:stepB(2000,function() stepper:off() f.feeding = nil f.config.feeding=false end)
 				end
 			end)
 		end

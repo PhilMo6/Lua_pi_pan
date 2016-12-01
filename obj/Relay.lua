@@ -8,6 +8,7 @@ local Relay			= Cloneable:clone()
 ]]
 
 Relay.updateCmd = "Request RlUp"
+Relay.location = 'relays'
 
 function Relay:initialize(pin)
 	if not _G.relays then _G.relays = {name='relays'} _G.relayIDs = {} table.insert(objects,relays) objects["relays"] = relays end
@@ -59,9 +60,7 @@ function Relay:off()
 	self:forceCheck()
 	if self:read() == 0 and not self.stayOn then
 		self.gpio:write(1)
-		if self.masters then
-			self:updateMasters()
-		end
+		self:updateMasters()
 		return true
 	end
 	return false
@@ -71,16 +70,15 @@ function Relay:on()
 	self:forceCheck()
 	if self:read() == 1 and not self.stayOff then
 		self.gpio:write(0)
-		if self.masters then
-			self:updateMasters()
-		end
+		self:updateMasters()
 		return true
 	end
 	return false
 end
 
 function Relay:read()
-	return self.gpio:read()
+	self:updateLastRead(self.gpio:read())
+	return self.config.lastRead
 end
 
 function Relay:forceOn(f)

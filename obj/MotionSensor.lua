@@ -11,6 +11,7 @@ local Button = require("obj.Button")
 	Setting timeout will change how long objects will stay on after motion has stoppped being detected.
 ]]
 
+Sensor.location = 'motionSensors'
 Sensor.updateCmd = "Request MosUp"
 Sensor.config = {}--default config
 Sensor.config.lightSensor 		= "lightSensor"

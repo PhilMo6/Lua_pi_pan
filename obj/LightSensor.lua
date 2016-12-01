@@ -22,6 +22,8 @@ Sensor.maxRead = 4000--highest starting value for read
 If you dont need to detect low light conditions and want faster readings you can restrict maxRead and or accuracy if you are ok with a greater error margin.
 ]]
 
+Sensor.location = 'lightsensors'
+
 function Sensor:initialize(pin)
 	if not _G.lightsensors then _G.lightsensors = {name='lightsensors'} _G.lightsensorIDs = {} table.insert(objects,lightsensors) objects["lightsensors"] = lightsensors startPollSensorEvent() end
 	if not lightsensors['LightSensor_'..pin] then
@@ -32,19 +34,15 @@ function Sensor:initialize(pin)
 		}
 		self:setID(pin)
 		self:setName('LightSensor_'..pin)
-		self.lastRead = 0
+		self.config.lastRead = 0
 		table.insert(lightsensors,self)
 		self.lastUp = os.time()
 		self.gpio = RPIO(pin)
 	end
 end
 
-function Sensor:updateLastRead(v)
-	self.lastRead = v
-end
-
 function Sensor:read()
-	local lastread = self.lastRead
+	local lastread = self.config.lastRead
 	local lastup = self.lastUp
 	local accuracy = self.adjAccuracy or self.config.accuracy
 	function readL(pin)
@@ -72,17 +70,17 @@ function Sensor:read()
 		self.adjAccuracy = nil
 		self:updateLastRead(table.median(reads))
 		self.lastUp = os.time()
-		if self.masters and lastread ~= self.lastRead and lastup ~= self.lastUp then
+		if self.masters and lastread ~= self.config.lastRead and lastup ~= self.lastUp then
 			self:updateMasters()
 		end
-		return self.lastRead,self:lightLevel(self.lastRead)
+		return self.config.lastRead,self:lightLevel(self.config.lastRead)
 	else
 		if not self.adjAccuracy then
 			self.adjAccuracy = self.config.accuracy - 1
 		elseif self.adjAccuracy > 2 then
 			self.adjAccuracy = self.adjAccuracy - 1
 		end
-		self:updateLastRead(800)
+		self:updateLastRead(self.config.lastRead + 100)
 		return nil,nil,'error'
 	end
 end
@@ -112,7 +110,7 @@ function Sensor:setName(name)
 end
 
 function Sensor:getLastRead()
-	return self.lastRead,self:lightLevel(self.lastRead)
+	return self.config.lastRead,self:lightLevel(self.config.lastRead)
 end
 
 --- Stringifier for Cloneables.

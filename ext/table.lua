@@ -20,6 +20,8 @@ function table.savetoString(t)
 				txt = ([[%s"%s"]]):format(txt,prepString(v))
 			elseif t2 == "number" then
 				txt = ([[%s%s]]):format(txt,v)
+			elseif t2 == "boolean" then
+				txt = ([[%s%s]]):format(txt,v==true and 'true' or 'false')
 			end
 		else
 			txt = ([[%s%s]]):format(txt,table.savetoString(v))
@@ -47,6 +49,8 @@ function table.writetoString(t,pre)
 				txt = ([[%s"%s"]]):format(txt,v)
 			elseif t2 == "number" then
 				txt = ([[%s%s]]):format(txt,v)
+			elseif t2 == "boolean" then
+				txt = ([[%s%s]]):format(txt,v==true and 'true' or 'false')
 			end
 		else
 			txt = ([[%s%s]]):format(txt,table.writetoString(v,pre..' '))

@@ -6,10 +6,18 @@ local Button			= Cloneable:clone()
 	A press can be simulated with the press function.
 ]]
 
-function Button:initialize(pin)
+Button.location = 'buttons'
+Button.states = {
+	[1]='open',
+	[2]='pressed',
+	[3]='held',
+	[4]='released'
+}
+
+function Button:initialize(pin,edge)
 	if not _G.buttons then  _G.buttons = {name='buttons'} _G.buttonIDs ={} table.insert(objects,buttons) objects["buttons"] = buttons end
 	if not buttons['Button_'..pin] then
-		self.config = {}
+		self.config = {lastRead=0,edge=(edge == 0 and edge or 1),state=1}
 		self:setID(pin)
 		self:setName('Button_'..pin)
 		table.insert(buttons,self)
@@ -39,20 +47,29 @@ function Button:setName(name)
 	buttons[self.config.name] = self
 end
 
+function Button:nextState()
+	if Button.states[self.config.state + 1] then self.config.state = self.config.state + 1 logEvent(self:getName(),self:getName() .. ' '..self:getState()) self:updateMasters() end
+end
+
+function Button:resetState()
+	self.config.state = 1
+	logEvent(self:getName(),self:getName() .. ' '..self:getState())
+	self:updateMasters()
+end
+
+function Button:getState()
+	return Button.states[self.config.state]
+end
+
 function Button:read()
 	local r = self.gpio:read()
-	if self.lastRead ~= r and r == 0 then
-		if self.lastRead ~= nil then logEvent(self:getName(),self:getName() .. ' read:1') end
-		if self.masters then
-			for i,v in ipairs(self.masters) do
-				v:send(([[button %s_%s press]]):format(self:getName(),mainID))
-			end
-		end
-	elseif self.lastRead ~= r and r == 1 and self.lastRead ~= nil then
-		logEvent(self:getName(),self:getName() .. ' read:0')
+	if r == self.config.edge then
+		self:nextState()
+	elseif r ~= self.config.edge then
+		self:resetState()
 	end
-	self.lastRead = r
-	return self.lastRead
+	self:updateLastRead(r)
+	return self.config.lastRead
 end
 
 function Button:press(f,client)
@@ -60,7 +77,7 @@ function Button:press(f,client)
 	if not self.pressed then
 		self.read = function()
 			self.read = Cloneable.read
-			self.lastRead = nil
+			self.config.lastRead = self.config.edge == 0 and 1 or 0
 			self.pressed = nil
 			logEvent(self:getName(),self:getName() .. ' press:pressed')
 			if self.masters then

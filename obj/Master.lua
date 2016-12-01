@@ -18,6 +18,31 @@ print('NEW MASTER')
 	runningServer:ping(self)
 end
 
+function Master:addObject(obj)
+	if self[obj.location] == nil then
+		self[obj.location] = {}
+	end
+	if self[obj.location][obj:getID()] == nil then
+		self[obj.location][obj:getID()] = obj
+		self[obj.location][obj:getName()] = obj
+		table.insert(self[obj.location], obj)
+		obj:addMaster(self)
+	end
+end
+function Master:removeObject(obj)
+	if self[obj.location]
+		self[obj.location][obj:getID()] = nil
+		self[obj.location][obj:getName()] = nil
+		while table.removeValue(self[obj.location], obj) do end
+		obj:removeMaster(self)
+		if #self[obj.location] == 0 then
+			self[obj.location] = nil
+		end
+	end
+end
+
+
+
 function Master:addStepperMotors(motor)
 	if self.stepperMotors == nil then
 		self.stepperMotors = {}

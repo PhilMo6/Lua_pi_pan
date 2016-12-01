@@ -6,10 +6,12 @@ local Buzzer			= Cloneable:clone()
 	working on making a better variety of noises.
 ]]
 
+Buzzer.location = 'buzzers'
+
 function Buzzer:initialize(pin)
 	if not _G.buzzers then _G.buzzers = {name='buzzers'} _G.buzzerIDs = {} table.insert(objects,buzzers) objects["buzzers"] = buzzers end
 	if not buzzers['Buzzer_'..pin] then
-		self.config = {}
+		self.config = {beeping=false}
 		self:setID(pin)
 		self:setName('Buzzer_'..pin)
 		table.insert(buzzers,self)
@@ -51,11 +53,12 @@ end
 
 function Buzzer:beep(num,leng)
 	if not self.beeping then
+		self.config.beeping = true
 		local b = self
 		b.beeping = Event:new(function()
 			b:toggle()
 		end, leng or .1, true, num and num * 2 or 6)
-		b.beeping.onDone = function() b.beeping = nil b:off() end
+		b.beeping.onDone = function() b.beeping = nil self.config.beeping = false b:off() end
 		Scheduler:queue(b.beeping)
 		return true
 	end
@@ -68,7 +71,8 @@ function Buzzer:test()
 end
 
 function Buzzer:read()
-	return self.gpio:read()
+	self:updateLastRead(self.gpio:read())
+	return self.config.lastRead
 end
 
 function Buzzer:toggle()
@@ -116,7 +120,7 @@ end
 
 --- Stringifier for Cloneables.
 function Buzzer:toString()
-	return string.format("[Buzzer] %s %s %s",self:getID(),self:getName(),(self:read() == true and 'on' or 'off'))
+	return string.format("[Buzzer] %s %s %s",self:getID(),self:getName(),(self:read() == 1 and 'on' or 'off'))
 end
 
 return Buzzer

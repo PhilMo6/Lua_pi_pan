@@ -4,6 +4,7 @@ local Driver			= Cloneable:clone()
 	Object used to drive motors connected with a L298N board.
 ]]
 
+Driver.location = 'motors'
 Driver.updateCmd = "Request DriverMs"
 Driver.config = {}
 Driver.config.speeds = {'crawl','slow','mid','fast','full'}
@@ -14,7 +15,7 @@ Driver.config.speed = 1
 function Driver:initialize(pin1,pin2,pwm)
 	if not _G.motors then require("source.wpiLuaWrap") _G.motors = {name='motors'} table.insert(objects,motors) objects["motors"] = motors end
 	if not motors[pin1..','..pin2] then
-		self.config = {}
+		self.config = {moving=false}
 		if pwm then self.pwm = false end
 		self:setID(pin1..','..pin2)
 		self:setName('Driver_'..pin1..','..pin2)
@@ -26,7 +27,7 @@ function Driver:initialize(pin1,pin2,pwm)
 end
 
 function Driver:getDirection()
-	return (self.moving or 'stopped')
+	return (self.config.moving or 'stopped')
 end
 
 function Driver:setID(id)
@@ -79,8 +80,8 @@ end
 
 function Driver:stop(up)
 	--resetBoost(self)
-	if self.moving then
-		self.moving = nil
+	if self.config.moving then
+		self.config.moving = false
 		for i,v in ipairs(self.pins) do
 			v:write(0)
 		end
@@ -92,8 +93,8 @@ end
 
 function Driver:forward()
 	if self.pwm == false then self:startPwm() end
-	if not self.moving or self.moving ~= 'forward' then
-		self.moving = 'forward'
+	if not self.config.moving or self.config.moving ~= 'forward' then
+		self.config.moving = 'forward'
 		self.pins[2]:write(0)
 		self.pins[1]:write(1)
 		return true
@@ -103,8 +104,8 @@ end
 
 function Driver:reverse()
 	if self.pwm == false then self:startPwm() end
-	if not self.moving or self.moving ~= 'reverse' then
-		self.moving = 'reverse'
+	if not self.config.moving or self.config.moving ~= 'reverse' then
+		self.config.moving = 'reverse'
 		self.pins[1]:write(0)
 		self.pins[2]:write(1)
 		return true

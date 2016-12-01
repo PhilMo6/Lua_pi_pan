@@ -40,7 +40,7 @@ function Sensor:read()
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
 			tempF = tempC * 9 / 5  + 32
-			if self.masters and lastread ~= self.config.lastRead and lastup ~= self.lastUp then
+			if lastread ~= self.config.lastRead and lastup ~= self.lastUp then
 				self:updateMasters()
 			end
 			return tempC,tempF,(tempF <= 32 and "read error low" or tempF >= 180 and "read error high" or nil)
