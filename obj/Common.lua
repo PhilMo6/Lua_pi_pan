@@ -24,6 +24,11 @@ function Common:getConfig()
 	end
 end
 
+
+function Common:updateLastRead(v)
+	self.config.lastRead = v
+end
+
 function Common:setConfig(config)
 	if not config or not self.config then return end
 	local up = nil
@@ -33,6 +38,8 @@ function Common:setConfig(config)
 				self:setName(config[i])
 			elseif i == 'id' then
 				self:setID(config[i])
+			elseif i == 'lastRead' then
+				self:setLastRead(config[i])
 			else
 				self.config[i] = config[i]
 			end

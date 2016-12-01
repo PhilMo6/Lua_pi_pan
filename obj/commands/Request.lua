@@ -218,6 +218,22 @@ Request.orders["MASUp"] = function(MASID,user)
 end
 
 
+Request.orders["objectUpdate"] = function(loc,ID,user)
+	if objects[loc] and objects[loc][ID] then
+		local data = "Response objectUpdate "
+		local time = os.date('*t')
+		local date = time.year.."-"..time.month.."-"..time.day
+		time = time.hour..":"..time.min..":"..time.sec
+		local stamp = os.time(os.date("*t"))
+		data = ("%s |return {stamp='%s',date='%s',time='%s',loc='%s'"):format(data,stamp,date,time,loc)
+		local obj = objects[loc][ID]
+		data = ([[%s,{id='%s',config=%s}]]):format(data,v:getID(),table.savetoString(v.config))
+		data = ("%s}|"):format(data)
+	return data
+	end
+end
+
+
 
 Request.orders["objects"] = function(objs,user)
 	if objs then

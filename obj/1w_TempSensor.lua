@@ -7,6 +7,7 @@ local Sensor			= Cloneable:clone()
 ]]
 
 Sensor.updateCmd = "Request SenTemp"
+Sensor.location = 'sensors'
 
 function Sensor:initialize(id)
 	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors startPollSensorEvent() end
@@ -14,21 +15,21 @@ function Sensor:initialize(id)
 		self.config = {}
 		self:setID(id)
 		self:setName(id)
-		self.lastRead = 0
+		self.config.lastRead = 0
 		self.lastUp = os.time()
 		table.insert(sensors,self)
 	end
 end
 
 function Sensor:updateLastRead(v)
-	self.lastRead = v
+	self.config.lastRead = v
 end
 
 function Sensor:read()
 	local tempC = 0
 	local tempF = 0
 	local sensor = io.open("/sys/bus/w1/devices/" .. self:getID() .. "/w1_slave","r")
-	local lastread = self.lastRead
+	local lastread = self.config.lastRead
 	local lastup = self.lastUp
 	if sensor then
 		local raw = sensor:read('*all')
@@ -39,7 +40,7 @@ function Sensor:read()
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
 			tempF = tempC * 9 / 5  + 32
-			if self.masters and lastread ~= self.lastRead and lastup ~= self.lastUp then
+			if self.masters and lastread ~= self.config.lastRead and lastup ~= self.lastUp then
 				self:updateMasters()
 			end
 			return tempC,tempF,(tempF <= 32 and "read error low" or tempF >= 180 and "read error high" or nil)
@@ -53,7 +54,7 @@ function Sensor:read()
 end
 
 function Sensor:getLastRead()
-	return self.lastRead,(self.lastRead * 9 / 5  + 32)
+	return self.config.lastRead,(self.config.lastRead * 9 / 5  + 32)
 end
 
 --- Stringifier for Cloneables.

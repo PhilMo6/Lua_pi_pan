@@ -11,7 +11,7 @@ function Sensor:initialize(id,name,node)
 		self.config = {}
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
-		self.lastRead = 0
+		self.config.lastRead = 0
 		node:addSensor(self)
 		table.insert(sensors,self)
 	end
