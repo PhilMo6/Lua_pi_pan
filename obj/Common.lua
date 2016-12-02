@@ -4,6 +4,17 @@ local Common			= Cloneable:clone()
 	Common object to hold functions used by most other objects.
 ]]
 
+function Common:initialize(id,options)
+	if not _G[self.location] then _G[self.location] = {name=self.location} table.insert(objects,_G[self.location]) objects[self.location] = _G[self.location] end
+	if not _G[self.location][id] then
+		self.config = {lastRead=false}
+		self:setID(id)
+		self:setName('sensor_'..id)
+		table.insert(sensors,self)
+		if self.setup then self:setup(options) end
+	end
+end
+
 function Common:removeSelf()
 	if _G[self.location] then
 		_G[self.location][self:getName()] = nil
@@ -21,6 +32,31 @@ function Common:getName()
 	return (self.config and self.config.name)
 end
 
+function Common:setID(id)
+	if self.config.id and self.config.id ~= id then
+		_G[self.location][self.config.id] = nil
+		if self.node then
+			self.node[self.location][self.config.id] = nil
+			self.node[self.location][id] = self
+		end
+	end
+	self.config.id = id
+	_G[self.location][self.config.id] = self
+end
+
+function Common:setName(name)
+	if self.config.name and self.config.name ~= name then
+		_G[self.location][self.config.name] = nil
+		if self.node then
+			self.node:send(([[S %s rename %s]]):format(self:getID(),name))
+			self.node[self.location][self.config.name] = nil
+			self.node[self.location][name] = self
+		end
+	end
+	self.config.name = name
+	_G[self.location][self.config.name] = self
+end
+
 function Common:toString()
 	return "[Common]"
 end
@@ -33,8 +69,16 @@ function Common:getConfig()
 	end
 end
 
+function Common:getLastRead()
+	return self.config.lastRead
+end
+
 function Common:updateLastRead(v)
+	local lastread = self.config.lastRead
 	self.config.lastRead = v
+	if self.masters and lastread ~= self.config.lastRead then
+		self:updateMasters()
+	end
 end
 
 function Common:setConfig(config)

@@ -8,22 +8,17 @@ local Button			= Cloneable:clone()
 
 Button.location = 'buttons'
 Button.states = {
+	[0]='released'
 	[1]='open',
 	[2]='pressed',
 	[3]='held',
-	[4]='released'
 }
 
-function Button:initialize(pin,edge)
-	if not _G.buttons then  _G.buttons = {name='buttons'} _G.buttonIDs ={} table.insert(objects,buttons) objects["buttons"] = buttons end
-	if not buttons['Button_'..pin] then
-		self.config = {lastRead=0,edge=(edge == 0 and edge or 1),state=1}
-		self:setID(pin)
-		self:setName('Button_'..pin)
-		table.insert(buttons,self)
-		self.gpio = RPIO(pin)
-		self.gpio:set_direction('in')
-	end
+function Button:setup(options)
+	local pin,edge = options[1],options[2]
+	self.gpio = RPIO(pin)
+	self.gpio:set_direction('in')
+	self.config.edge = edge
 end
 
 function Button:getHTMLcontrol()
@@ -52,9 +47,13 @@ function Button:nextState()
 end
 
 function Button:resetState()
-	self.config.state = 1
-	logEvent(self:getName(),self:getName() .. ' '..self:getState())
-	self:updateMasters()
+	if self.config.state > 1 then
+		self.config.state = 0
+		logEvent(self:getName(),self:getName() .. ' '..self:getState()
+	elseif self.config.state ~= 1 then
+		self.config.state = 1
+		logEvent(self:getName(),self:getName() .. ' '..self:getState()
+	end
 end
 
 function Button:getState()
@@ -69,14 +68,14 @@ function Button:read()
 		self:resetState()
 	end
 	self:updateLastRead(r)
-	return self.config.lastRead
+	return self:getLastRead()
 end
 
 function Button:press(f,client)
 	if client and client.master then client = client.master end
 	if not self.pressed then
 		self.read = function()
-			self.read = Cloneable.read
+			self.read = Button.read
 			self.config.lastRead = self.config.edge == 0 and 1 or 0
 			self.pressed = nil
 			logEvent(self:getName(),self:getName() .. ' press:pressed')

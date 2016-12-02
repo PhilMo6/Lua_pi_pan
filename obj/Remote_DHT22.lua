@@ -18,13 +18,6 @@ function DHT22:initialize(id,name,node)
 	end
 end
 
-function DHT22:removeSensor()
-	DHT22s[self:getName()] = nil
-	DHT22s[self:getID()] = nil
-	while table.removeValue(DHT22s, self) do end
-	if self.node then local node=self.node self.node=nil node:removeSensor(self) end
-end
-
 function DHT22:setID(id)
 	self.config.id = id
 end
@@ -35,12 +28,14 @@ function DHT22:setName(name)
 	DHT22s[self.config.name] = self
 end
 
-function DHT22:updateLastRead(hv,tv)
+function DHT22:updateLastRead(lr)
+	local hv,tv = lr:match('(%d+)|(%d+)')
+	self.config.lastRead = lr
 	if hv then
 		local up = (self.lastHRead ~= h and true or self.lastTRead ~= t and true or nil)
 		self.lastHRead = h
 		self.lastTRead = t
-		if self.masters and up then
+		if up then
 			self:updateMasters()
 		end
 	end

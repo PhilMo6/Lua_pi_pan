@@ -128,11 +128,15 @@ function _G.loadObjects(conn,c)
 	for i,pin in ipairs(buttonPins) do
 		if type(pin) == 'number' then
 			Button:new(pin)
+		elseif type(pin) == 'table' then
+			Button:new(pin[1],pin[2])
 		end
 	end
 	for i,pin in ipairs(buzzerPins) do
 		if type(pin) == 'number' then
 			Buzzer:new(pin)
+		elseif type(pin) == 'table' then--options are pin and edge
+			Buzzer:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(LEDPins) do

@@ -6,31 +6,23 @@ local Sensor			= Cloneable:clone()
 	https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing/hardware
 ]]
 
-Sensor.updateCmd = "Request SenTemp"
 Sensor.location = 'sensors'
 
 function Sensor:initialize(id)
 	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors startPollSensorEvent() end
 	if not sensors[id] then
-		self.config = {}
+		self.config = {lastRead = false}
 		self:setID(id)
 		self:setName(id)
-		self.config.lastRead = 0
 		self.lastUp = os.time()
 		table.insert(sensors,self)
 	end
-end
-
-function Sensor:updateLastRead(v)
-	self.config.lastRead = v
 end
 
 function Sensor:read()
 	local tempC = 0
 	local tempF = 0
 	local sensor = io.open("/sys/bus/w1/devices/" .. self:getID() .. "/w1_slave","r")
-	local lastread = self.config.lastRead
-	local lastup = self.lastUp
 	if sensor then
 		local raw = sensor:read('*all')
 		sensor:close()
@@ -40,9 +32,6 @@ function Sensor:read()
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
 			tempF = tempC * 9 / 5  + 32
-			if lastread ~= self.config.lastRead and lastup ~= self.lastUp then
-				self:updateMasters()
-			end
 			return tempC,tempF,(tempF <= 32 and "read error low" or tempF >= 180 and "read error high" or nil)
 		else
 			return tempC,tempF,"read error"

@@ -17,15 +17,8 @@ function Sensor:initialize(id,name,node)
 	end
 end
 
-function Sensor:removeSensor()
-	sensors[self:getName()] = nil
-	sensors[self:getID()] = nil
-	while table.removeValue(sensors, self) do end
-	if self.node then local node=self.node self.node=nil node:removeSensor(self) end
-end
-
 function Sensor:setID(id)
-	if self.config.id then
+	if self.config.id and self.config.id ~= id then
 		sensors[self.config.id] = nil
 		if self.node then
 			self.node.sensors[self.config.id] = nil
@@ -37,7 +30,7 @@ function Sensor:setID(id)
 end
 
 function Sensor:setName(name)
-	if self.config.name then
+	if self.config.name and self.config.name ~= name then
 		sensors[self.config.name] = nil
 		if self.node then
 			self.node:send(([[S %s rename %s]]):format(self:getID(),name))
@@ -47,14 +40,6 @@ function Sensor:setName(name)
 	end
 	self.config.name = name
 	sensors[self.config.name] = self
-end
-
-function Sensor:updateLastRead(v)
-	local lastread = self.lastRead
-	self.lastRead = v
-	if self.masters and lastread ~= self.lastRead then
-		self:updateMasters()
-	end
 end
 
 function Sensor:read()

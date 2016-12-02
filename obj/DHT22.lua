@@ -43,7 +43,7 @@ function DHT22:read()
 		local up = (self.lastHRead ~= h and true or self.lastTRead ~= t and true or nil)
 		self.lastHRead = h
 		self.lastTRead = t
-		if self.masters and up then
+		if up then
 			self:updateMasters()
 		end
 		self:updateLastRead(h..'|'..t)

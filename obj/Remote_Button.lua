@@ -17,12 +17,6 @@ function Button:initialize(id,name,node)
 	end
 end
 
-function Button:removeButton()
-	buttons[self:getName()] = nil
-	while table.removeValue(buttons, self) do end
-	if self.node then local node=self.node self.node=nil node:removeButton(buttons) end
-end
-
 function Button:getHTMLcontrol()
 	return ('%s'):format(
 	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(self:getName())
@@ -31,12 +25,6 @@ end
 
 function Button:setID(id)
 	self.config.id = id
-end
-
-function Button:setName(name)
-	if self.config.name then buttons[self.config.name] = nil end
-	self.config.name = name
-	buttons[self.config.name] = self
 end
 
 function Button:read()
