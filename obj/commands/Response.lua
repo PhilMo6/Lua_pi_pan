@@ -234,8 +234,6 @@ Response.orders["MASUp"] = function(input,user)
 	return false
 end
 
-
-
 Response.orders["objectUpdate"] = function(input,loc,user)
 	if user.node and user.node[loc] then
 		local data = string.match(input, '|(.+)|')
@@ -257,8 +255,6 @@ Response.orders["objectUpdate"] = function(input,loc,user)
 	return false
 end
 
-
-
 Response.orders["objects"] = function(input,user)
 	if user.node then
 		local data = string.match(input, '|(.+)|')
@@ -268,67 +264,66 @@ Response.orders["objects"] = function(input,user)
 				if objects.stepperMotors then
 					for i,v in ipairs(objects.stepperMotors) do
 						if type(v) == "table" then
-							RemoteStepperMotors:new(v.id,v.name,user.node)
+							RemoteStepperMotors:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.sensors then
 					for i,v in ipairs(objects.sensors) do
 						if type(v) == "table" then
-							RemoteSensor:new(v.id,v.name,user.node)
+							RemoteSensor:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.buttons then
 					for i,v in ipairs(objects.buttons) do
 						if type(v) == "table" then
-							RemoteButton:new(v.id,v.name,user.node)
+							RemoteButton:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.DHT22s then
 					for i,v in ipairs(objects.DHT22s) do
 						if type(v) == "table" then
-							RemoteDHT22:new(v.id,v.name,user.node)
+							RemoteDHT22:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.lightsensors then
 					for i,v in ipairs(objects.lightsensors) do
 						if type(v) == "table" then
-							RemoteLightSensor:new(v.id,v.name,user.node)
+							RemoteLightSensor:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.relays then
 					for i,v in ipairs(objects.relays) do
 						if type(v) == "table" then
-							RemoteRelay:new(v.id,v.name,user.node)
+							RemoteRelay:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.LEDs then
 					for i,v in ipairs(objects.LEDs) do
 						if type(v) == "table" then
-							RemoteLED:new(v.id,v.name,user.node)
+							RemoteLED:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.thermostats then
 					for i,v in ipairs(objects.thermostats) do
 						if type(v) == "table" then
-							RemoteThermostat:new(v.id,{},user.node)
+							RemoteThermostat:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
 				if objects.motionSensors then
 					for i,v in ipairs(objects.motionSensors) do
 						if type(v) == "table" then
-							RemoteMotionSensor:new(v.id,{},user.node)
+							RemoteMotionSensor:new(v.id,v.name,v.config,user.node)
 						end
 					end
 				end
-
 				if objects.macScanners then
 					for i,v in ipairs(objects.macScanners) do
 						if type(v) == "table" then

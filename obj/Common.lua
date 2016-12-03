@@ -48,7 +48,7 @@ function Common:setName(name)
 	if self.config.name and self.config.name ~= name then
 		_G[self.location][self.config.name] = nil
 		if self.node then
-			self.node:send(([[S %s rename %s]]):format(self:getID(),name))
+			--self.node:send(([[S %s rename %s]]):format(self:getID(),name))
 			self.node[self.location][self.config.name] = nil
 			self.node[self.location][name] = self
 		end

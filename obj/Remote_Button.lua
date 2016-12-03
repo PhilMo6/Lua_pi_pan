@@ -7,20 +7,14 @@ local Button			= Cloneable:clone()
 ]]
 
 function Button:initialize(id,name,node)
-	if not _G.buttons then _G.buttons = {name='buttons'} table.insert(objects,buttons) objects["buttons"] = buttons end
-	if not buttons[name..'_'..node:getID()] then
-		self.config = {}
+	if not _G[self.location] then _G[self.location] = {name=self.location} table.insert(objects,_G[self.location]) objects[self.location] = _G[self.location] end
+	if not _G[self.location][id] then
+		self.config = {edge=false}
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
 		table.insert(buttons,self)
-		node:addButton(self)
+		node:addObject(self)
 	end
-end
-
-function Button:getHTMLcontrol()
-	return ('%s'):format(
-	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(self:getName())
-	)
 end
 
 function Button:setID(id)
@@ -28,7 +22,7 @@ function Button:setID(id)
 end
 
 function Button:read()
-	return false
+	return self:getLastRead()
 end
 
 function Button:press(f,client)

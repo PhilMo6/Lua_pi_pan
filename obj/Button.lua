@@ -15,9 +15,10 @@ Button.states = {
 }
 
 function Button:setup(options)
-	local pin,edge = options[1],options[2]
+	local pin,edge = options.pin,options.edge
 	self.gpio = RPIO(pin)
 	self.gpio:set_direction('in')
+	self.config.pin = pin
 	self.config.edge = edge
 end
 
@@ -28,18 +29,6 @@ function Button:getHTMLcontrol()
 	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
 	name
 	)
-end
-
-function Button:setID(id)
-	if self.config.id then buttonIDs[self.config.id] = nil logEvent(self:getName(),self:getName() .. ' setID:'..id ) end
-	self.config.id = id
-	buttonIDs[self.config.id] = self
-end
-
-function Button:setName(name)
-	if self.config.name then buttons[self.config.name] = nil logEvent(self:getName(),self:getName() .. ' setName:'..name ) end
-	self.config.name = name
-	buttons[self.config.name] = self
 end
 
 function Button:nextState()

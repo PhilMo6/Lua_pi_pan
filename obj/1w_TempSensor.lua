@@ -8,17 +8,6 @@ local Sensor			= Cloneable:clone()
 
 Sensor.location = 'sensors'
 
-function Sensor:initialize(id)
-	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors startPollSensorEvent() end
-	if not sensors[id] then
-		self.config = {lastRead = false}
-		self:setID(id)
-		self:setName(id)
-		self.lastUp = os.time()
-		table.insert(sensors,self)
-	end
-end
-
 function Sensor:read()
 	local tempC = 0
 	local tempF = 0
@@ -28,7 +17,6 @@ function Sensor:read()
 		sensor:close()
 		tempC = string.match(raw,'t=(%d+)')
 		if tempC then
-			self.lastUp = os.time()
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
 			tempF = tempC * 9 / 5  + 32

@@ -250,11 +250,23 @@ Request.orders["objects"] = function(objs,_,user)
 		end
 	end
 	local data = ("Response objects |return {id='%s'"):format(mainID)
-	if stepperMotors and objs['stepperMotors'] then
+	for i,obj in ipairs(objects) do
+		if objs[obj.name] then
+			data = ("%s,%s={'void'"):format(obj.name)
+			for i,v in ipairs(v) do
+				if not user.node or not v:isNode(user.node) then
+					data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID(),v:getConfig())
+					if user.master then user.master:addObject(v) end
+				end
+			end
+			data = ("%s}"):format(data)
+		end
+	end
+	--[[if stepperMotors and objs['stepperMotors'] then
 		data = ("%s,stepperMotors={'void'"):format(data)
 		for i,v in ipairs(stepperMotors) do
 			if not user.node or not v:isNode(user.node) then
-				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getID())
+				data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID())
 				if user.master then user.master:addStepperMotors(v) end
 			end
 		end
@@ -264,7 +276,7 @@ Request.orders["objects"] = function(objs,_,user)
 		data = ("%s,sensors={'void'"):format(data)
 		for i,v in ipairs(sensors) do
 			if not user.node or not v:isNode(user.node) then
-				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getID())
+				data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID())
 				if user.master then user.master:addSensor(v) end
 			end
 		end
@@ -274,7 +286,7 @@ Request.orders["objects"] = function(objs,_,user)
 		data = ("%s,buttons={'void'"):format(data)
 		for i,v in ipairs(buttons) do
 			if not user.node or not v:isNode(user.node) then
-				data = ("%s,{name='%s',id='%s'}"):format(data,v:getName(),v:getName())
+				data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getName())
 				if user.master then user.master:addButton(v) end
 			end
 		end
@@ -349,7 +361,7 @@ Request.orders["objects"] = function(objs,_,user)
 			end
 		end
 		data = ("%s}"):format(data)
-	end
+	end]]
 
 	data = ("%s}|"):format(data)
 	return data

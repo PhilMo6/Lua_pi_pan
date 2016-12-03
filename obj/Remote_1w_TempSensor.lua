@@ -5,14 +5,13 @@ local Sensor			= Cloneable:clone()
 	Node will update the remote sensors last read as the sensors tempature changes.
 ]]
 
-function Sensor:initialize(id,name,node)
-	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors end
-	if not sensors[id] then
-		self.config = {}
+function Sensor:initialize(id,name,config,node)
+	if not _G[self.location] then _G[self.location] = {name=self.location} table.insert(objects,_G[self.location]) objects[self.location] = _G[self.location] end
+	if not _G[self.location][id] then
+		self.config = config
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
-		self.config.lastRead = 0
-		node:addSensor(self)
+		node:addObject(self)
 		table.insert(sensors,self)
 	end
 end
@@ -40,10 +39,6 @@ function Sensor:setName(name)
 	end
 	self.config.name = name
 	sensors[self.config.name] = self
-end
-
-function Sensor:read()
-	return self:getLastRead()
 end
 
 --- Stringifier for Cloneables.
