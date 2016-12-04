@@ -24,26 +24,17 @@ If you dont need to detect low light conditions and want faster readings you can
 
 Sensor.location = 'lightsensors'
 
-function Sensor:initialize(pin)
-	if not _G.lightsensors then _G.lightsensors = {name='lightsensors'} _G.lightsensorIDs = {} table.insert(objects,lightsensors) objects["lightsensors"] = lightsensors startPollSensorEvent() end
-	if not lightsensors['LightSensor_'..pin] then
-		self.config = {
-			calibration=Sensor.calibration,
-			accuracy=Sensor.accuracy,
-			maxRead=Sensor.maxRead
-		}
-		self:setID(pin)
-		self:setName('LightSensor_'..pin)
-		self.config.lastRead = 0
-		table.insert(lightsensors,self)
-		self.lastUp = os.time()
-		self.gpio = RPIO(pin)
-	end
+function Sensor:setup(options)
+	self.config.calibration=options.calibration or Sensor.calibration,
+	self.config.accuracy=options.accuracy or Sensor.accuracy,
+	self.config.maxRead=options.maxRead or Sensor.maxRead
+	local pin = options.pin
+	self.config.pin = pin
+	self.gpio = RPIO(pin)
 end
 
 function Sensor:read()
 	local lastread = self.config.lastRead
-	local lastup = self.lastUp
 	local accuracy = self.adjAccuracy or self.config.accuracy
 	function readL(pin)
 		local reading = self.config.maxRead
@@ -69,10 +60,6 @@ function Sensor:read()
 	if #reads > 1 then
 		self.adjAccuracy = nil
 		self:updateLastRead(table.median(reads))
-		self.lastUp = os.time()
-		if self.masters and lastread ~= self.config.lastRead and lastup ~= self.lastUp then
-			self:updateMasters()
-		end
 		return self.config.lastRead,self:lightLevel(self.config.lastRead)
 	else
 		if not self.adjAccuracy then
@@ -80,7 +67,7 @@ function Sensor:read()
 		elseif self.adjAccuracy > 2 then
 			self.adjAccuracy = self.adjAccuracy - 1
 		end
-		self:updateLastRead(self.config.lastRead + 100)
+		--self:updateLastRead(self.config.lastRead)
 		return nil,nil,'error'
 	end
 end
@@ -95,18 +82,6 @@ function Sensor:lightLevel(reading)
 		end
 	end
 	return level
-end
-
-function Sensor:setID(id)
-	if self.config.id then lightsensorIDs[self.config.id] = nil end
-	self.config.id = id
-	lightsensorIDs[self.config.id] = self
-end
-
-function Sensor:setName(name)
-	if self.config.name then lightsensors[self.config.name] = nil end
-	self.config.name = name
-	lightsensors[self.config.name] = self
 end
 
 function Sensor:getLastRead()

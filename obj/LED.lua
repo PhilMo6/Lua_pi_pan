@@ -8,17 +8,13 @@ local LED			= Cloneable:clone()
 LED.updateCmd = "Request LEDUp"
 LED.location = 'LEDs'
 
-function LED:initialize(pin)
-	if not _G.LEDs then _G.LEDs = {name='LEDs'} _G.LEDIDs = {} table.insert(objects,LEDs) objects["LEDs"] = LEDs end
-	if not LEDs['LED_'..pin] then
-		self.config = {blinking=false}
-		self:setID(pin)
-		self:setName('LED_'..pin)
-		table.insert(LEDs,self)
-		self.gpio = RPIO(pin)
-		self.gpio:set_direction('out')
-		self.gpio:write(0)
-	end
+function LED:setup(options)
+	local pin = options.pin
+	self.config.blinking = false
+	self.config.pin = pin
+	self.gpio = RPIO(pin)
+	self.gpio:set_direction('out')
+	self.gpio:write(0)
 end
 
 function LED:getHTMLcontrol()
@@ -32,17 +28,6 @@ function LED:getHTMLcontrol()
 	)
 end
 
-function LED:setID(id)
-	if self.config.id then LEDIDs[self.config.id] = nil end
-	self.config.id = id
-	LEDIDs[self.config.id] = self
-end
-
-function LED:setName(name)
-	if self.config.name then LEDs[self.config.name] = nil end
-	self.config.name = name
-	LEDs[self.config.name] = self
-end
 
 function LED:on(client)
 	self:forceCheck()

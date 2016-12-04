@@ -22,58 +22,52 @@ MacScanner.knownMacs = {
 	]]
 MacScanner.location = 'macScanners'
 
---- Constructor for instance-style clones.
-function MacScanner:initialize(id,options)
-	if not _G.macScanners then _G.macTable = {} _G.macScanners = {name="macScanners"} table.insert(objects,macScanners) objects["macScanners"] = macScanners end
-	if not macScanners[id] then
 
-		table.insert(macScanners,self)
+function MacScanner:setup(options)
+	if not _G.macTable then _G.macTable = {} end
+	self.foundMacs = {}
+	self.lostMacs = {}
+	self.config.knownMacs = {}
+	self.config.macTable = {}
+	self.config.wlan	 						= (options and options.wlan or MacScanner.config.wlan)
+	self.config.updateTime						= (options and options.updateTime or MacScanner.config.updateTime)
+	self.config.timeout							= (options and options.timeout or MacScanner.config.timeout)
+	self.config.scanTime						= (options and options.scanTime or MacScanner.config.scanTime)
+	os.execute(("sudo ifconfig %s down" .. ";" .. "sudo iw dev %s set monitor none" .. ";" .. "sudo ifconfig %s up"):format(self:getWlan(),self:getWlan(),self:getWlan()))
+	local conn = env:connect(SQLFile)
+	--conn:execute([[DROP TABLE IF EXISTS MacScanner;]])
+	conn:execute([[CREATE TABLE MacScanner (mac TEXT, date TEXT, time TIME, event TEXT)]])
+	--macscannerLoad(conn)
+	conn:close()
 
-		self.config = {}
-
-		self:setID(id)
-		self:setName('macScanner_'..id)
-
-		self.config.wlan	 						= (options and options.wlan or MacScanner.config.wlan)
-		self.config.updateTime						= (options and options.updateTime or MacScanner.config.updateTime)
-		self.config.timeout							= (options and options.timeout or MacScanner.config.timeout)
-		self.config.scanTime						= (options and options.scanTime or MacScanner.config.scanTime)
-
-		self.macTable = {}
-		self.foundMacs = {}
-		self.lostMacs = {}
-		self.knownMacs = {}
-		for i,v in ipairs(MacScanner.knownMacs) do
-			self.knownMacs[v[1]]=v[2]
-			self.knownMacs[v[2]]=v[1]
-		end
-		self:setState()
-
-		os.execute(("sudo ifconfig %s down" .. ";" .. "sudo iw dev %s set monitor none" .. ";" .. "sudo ifconfig %s up"):format(self:getWlan(),self:getWlan(),self:getWlan()))
-		local conn = env:connect(SQLFile)
-		--conn:execute([[DROP TABLE IF EXISTS MacScanner;]])
-		conn:execute([[CREATE TABLE MacScanner (mac TEXT, date TEXT, time TIME, event TEXT)]])
-		--macscannerLoad(conn)
-		conn:close()
-
-
-		Scheduler:queue(Event:new(function()--trigger event that runs the MacScanners logic
-			local MS = self
-			self.updateLogic = Event:new(function()--trigger event that runs the MacScanners logic
-				MS:runLogic()
-				MS.updateLogic.repeatInterval = MS:getUpTime()
-			end, MS:getUpTime(), true, 0)
-			Scheduler:queue(self.updateLogic)
+	Scheduler:queue(Event:new(function()--event that starts the MacScanners logic
+		local MS = self
+		self.updateLogic = Event:new(function()--event that runs the MacScanners logic
 			MS:runLogic()
-			MS.started = true
-			for i,v in ipairs(MacScanner.knownMacs) do
-				MS.knownMacs[v[1]]=v[2]
-				MS.knownMacs[v[2]]=v[1]
-			end
-		end, 10, false))
-	end
-
+			MS.updateLogic.repeatInterval = MS:getUpTime()
+		end, MS:getUpTime(), true, 0)
+		Scheduler:queue(self.updateLogic)
+		MS:runLogic()
+		MS.started = true
+		for i,v in ipairs(MacScanner.knownMacs) do
+			MS.config.knownMacs[v[1]]=v[2]
+			MS.config.knownMacs[v[2]]=v[1]
+		end
+	end, 10, false))
 end
+
+function MacScanner:getConfig(firstUp)
+	if self.config then
+		if firstUp then
+			return string.format('%s,foundMacs=%s,lostMacs=%s',table.savetoString(self.config),table.savetoString(self.foundMacs),table.savetoString(self.lostMacs))
+		else
+			return table.savetoString(self.config)
+		end
+	else
+		return "nil"
+	end
+end
+
 
 function MacScanner:archive(mac,d,t,e)
 	local conn = env:connect(SQLFile)
@@ -111,12 +105,12 @@ function MacScanner:runLogic()
 						update = true
 					end
 				end
-				for i,v in pairs(self.macTable) do
-					if not currentScan[i] then self.macTable[i] = self.macTable[i] + 1 end
-					if self.macTable[i] >= self:getTimeout() then self:removeAddr(i) update = true end
+				for i,v in pairs(self.config.macTable) do
+					if not currentScan[i] then self.config.macTable[i] = self.config.macTable[i] + 1 end
+					if self.config.macTable[i] >= self:getTimeout() then self:removeAddr(i) update = true end
 				end
 				local c1 = 0
-				for i,v in pairs(self.macTable) do
+				for i,v in pairs(self.config.macTable) do
 					c1 = c1 + 1
 				end
 				local c2 = 0
@@ -128,7 +122,7 @@ function MacScanner:runLogic()
 					c3 = c3 + 1
 				end
 				print('!!!!!!!!!!!!!!!','Current:'..c1,'Found:'..c2,'Lost:'..c3)
-				for i,v in pairs(self.knownMacs) do print(i, v, self.macTable[i]) end
+				for i,v in pairs(self.config.knownMacs) do print(i, v, self.config.macTable[i]) end
 				if update then
 					self:updateMasters()
 				end
@@ -140,22 +134,22 @@ function MacScanner:runLogic()
 end
 
 function MacScanner:addAddr(addr)
-	if not self.macTable[addr] then print(addr,'added to mac list') end
+	if not self.config.macTable[addr] then print(addr,'added to mac list') end
 	local date = os.date()
 	local stamp = os.time(os.date("*t"))
 	self:archive(addr,date,stamp,'Found')
 	if not self.foundMacs[addr] then
 		self.foundMacs[addr] = {stamp}
-	elseif not self.macTable[addr] then
+	elseif not self.config.macTable[addr] then
 		table.insert(self.foundMacs[addr],stamp)
 	end
 	macTable[addr] = self:getName()
-	self.macTable[addr] = 0
+	self.config.macTable[addr] = 0
 end
 
 function MacScanner:removeAddr(addr)
 	print(addr,'removed from mac list')
-	self.macTable[addr] = nil
+	self.config.macTable[addr] = nil
 	macTable[addr] = nil
 	local date = os.date()
 	local stamp = os.time(os.date("*t"))
@@ -168,11 +162,11 @@ function MacScanner:removeAddr(addr)
 end
 
 function MacScanner:isAddr(addr)
-	return self.macTable[addr]
+	return self.config.macTable[addr]
 end
 function MacScanner:isID(id)
-	if self.knownMacs[id] and not self.macTable[id] then id = self.knownMacs[id] end
-	if self.macTable[id] then
+	if self.config.knownMacs[id] and not self.config.macTable[id] then id = self.config.knownMacs[id] end
+	if self.config.macTable[id] then
 		return true
 	end
 	return false
@@ -195,6 +189,31 @@ function MacScanner:setConfig(config)
 	end
 	if up then	self:updateMasters() end
 end
+
+
+
+
+
+
+
+
+function MacScanner:getConfig(firstUp)
+	if self.config then
+		return table.savetoString(self.config)
+	else
+		return "nil"
+	end
+end
+
+
+
+
+
+
+
+
+
+
 
 function MacScanner:setWlan(id)
 	self.config.wlan = id
@@ -236,18 +255,6 @@ function MacScanner:getScantime()
 	return self.config.scanTime
 end
 
-function MacScanner:setID(id)
-	if self.config.id then macScanners[self.config.id] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setID:' .. id) end
-	self.config.id = id
-	macScanners[self.config.id] = self
-end
-
-function MacScanner:setName(name)
-	if self.config.name then macScanners[self.config.name] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setName:' .. name) end
-	self.config.name = name
-	macScanners[self.config.name] = self
-end
-
 function MacScanner:setState(state)
 	local states = {
 	['passive']=function() end,
@@ -268,7 +275,6 @@ function MacScanner:setState(state)
 	end
 end
 
-
 function MacScanner:getHTMLcontrol()
 	local name = self:getName()
 	return ('<div style="font-size:15px">%s %s %s %s %s %s %s<br>%s</div>'):format(
@@ -286,7 +292,6 @@ end
 function MacScanner:getState()
 	return self.config.state or 'off'
 end
-
 
 function MacScanner:read()
 	return self:getState()
@@ -315,9 +320,8 @@ function MacScanner:getStatus()
 end
 
 function MacScanner:getMacTable()
-	return table.writetoString(self.macTable)
+	return table.writetoString(self.config.macTable)
 end
-
 
 function MacScanner:getFoundStatus(id)
 	local tab = self.foundMacs
@@ -333,22 +337,22 @@ function MacScanner:getLostStatus(id)
 end
 function MacScanner:getKnownStatus(id)
 	if id then
-		if self.knownMacs[id] then return string.format("\n%s %s %s",id,self.knownMacs[id],self.macTable[i] and 'Found' or 'Lost') end
+		if self.config.knownMacs[id] then return string.format("\n%s %s %s",id,self.config.knownMacs[id],self.config.macTable[i] and 'Found' or 'Lost') end
 	end
 	local re = ""
-	for i,v in pairs(self.knownMacs) do re = string.format("%s\n%s %s %s",re,i,v,self.macTable[i] and 'Found' or 'Lost') end
+	for i,v in pairs(self.config.knownMacs) do re = string.format("%s\n%s %s %s",re,i,v,self.config.macTable[i] and 'Found' or 'Lost') end
 	return re
 end
 function MacScanner:getIDInfo(id)
 	if not id then
 		return 'Must supply ID!'
 	else
-		if self.knownMacs[id] and not self.macTable[id] then id = self.knownMacs[id] end
+		if self.config.knownMacs[id] and not self.config.macTable[id] then id = self.config.knownMacs[id] end
 	end
 	local re = ""
-	if self.knownMacs[id] then
-		local ForL = self.macTable[id] and 'Found' or 'Lost'
-		re = string.format("%s\n%s %s %s",re,id,self.knownMacs[id],ForL)
+	if self.config.knownMacs[id] then
+		local ForL = self.config.macTable[id] and 'Found' or 'Lost'
+		re = string.format("%s\n%s %s %s",re,id,self.config.knownMacs[id],ForL)
 	end
 	if  self.foundMacs[id] then
 		re = string.format("%s\nLast found %s ago",re,SecondsToClock(os.time(os.date("*t")) - self.foundMacs[id][#self.foundMacs[id]]))
@@ -365,7 +369,7 @@ end
 --- Stringifier for Cloneables.
 function MacScanner:toString()
 	local c1 = 0
-	for i,v in pairs(self.macTable) do
+	for i,v in pairs(self.config.macTable) do
 		c1 = c1 + 1
 	end
 	local c2 = 0

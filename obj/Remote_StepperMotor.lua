@@ -1,8 +1,10 @@
-local Cloneable			= require("obj.StepperMotor")
+local Cloneable			= require("obj.Remote_Common")
 local Stepper			= Cloneable:clone()
 --[[
 	Object used to drive stepper motors. Must be connect though a driver board.
 ]]
+
+Stepper.location = 'stepperMotors'
 
 --- Constructor for instance-style clones.
 function Stepper:initialize(id,name,node)

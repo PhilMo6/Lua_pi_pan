@@ -10,17 +10,12 @@ local Relay			= Cloneable:clone()
 Relay.updateCmd = "Request RlUp"
 Relay.location = 'relays'
 
-function Relay:initialize(pin)
-	if not _G.relays then _G.relays = {name='relays'} _G.relayIDs = {} table.insert(objects,relays) objects["relays"] = relays end
-	if not relays['relay_'..pin] then
-		self.config = {}
-		self:setID(pin)
-		self:setName('relay_'..pin)
-		table.insert(relays,self)
-		self.gpio = RPIO(pin)
-		self.gpio:set_direction('out')
-		self.gpio:write(1)
-	end
+function Relay:setup(options)
+	local pin = options.pin
+	self.config.pin = pin
+	self.gpio = RPIO(pin)
+	self.gpio:set_direction('out')
+	self.gpio:write(1)
 end
 
 function Relay:getHTMLcontrol()
@@ -31,19 +26,6 @@ function Relay:getHTMLcontrol()
 	([[<button onclick="myFunction('r %s re','%s')">Rename</button >]]):format(name,name),
 	name
 	)
-end
-
-
-function Relay:setID(id)
-	if self.config.id then relayIDs[self.config.id] = nil end
-	self.config.id = id
-	relayIDs[self.config.id] = self
-end
-
-function Relay:setName(name)
-	if self.config.name then relays[self.config.name] = nil end
-	self.config.name = name
-	relays[self.config.name] = self
 end
 
 function Relay:toggle()

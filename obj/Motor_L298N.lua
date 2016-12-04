@@ -11,35 +11,20 @@ Driver.config.speeds = {'crawl','slow','mid','fast','full'}
 Driver.config.values = {crawl=100,slow=125,mid=150,fast=175,full=200}
 Driver.config.speed = 1
 
---- Constructor for instance-style clones.
-function Driver:initialize(pin1,pin2,pwm)
-	if not _G.motors then require("source.wpiLuaWrap") _G.motors = {name='motors'} table.insert(objects,motors) objects["motors"] = motors end
-	if not motors[pin1..','..pin2] then
-		self.config = {moving=false}
-		if pwm then self.pwm = false end
-		self:setID(pin1..','..pin2)
-		self:setName('Driver_'..pin1..','..pin2)
-		table.insert(motors,self)
-		self.pins = {RPIO(pin1),RPIO(pin2)}
-		self:setupPins()
-		self:test()
-	end
+
+function Driver:setup(options)
+	local pin1,pin2,pmw = options[1],options[2],options.pmw
+	if pwm then self.pwm = false end
+	self.pins = {RPIO(pin1),RPIO(pin2)}
+	self.config.pin1 = pin1
+	self.config.pin2 = pin2
+	self.config.moving = false
+	self:setupPins()
 end
+
 
 function Driver:getDirection()
 	return (self.config.moving or 'stopped')
-end
-
-function Driver:setID(id)
-	if self.config.id then motors[self.config.id] = nil end
-	self.config.id = id
-	motors[self.config.id] = self
-end
-
-function Driver:setName(name)
-	if self.config.name then motors[self.config.name] = nil end
-	self.config.name = name
-	motors[self.config.name] = self
 end
 
 function Driver:getHTMLcontrol()
@@ -47,7 +32,7 @@ function Driver:getHTMLcontrol()
 end
 
 function Driver:read()
-	local r = self:getDirectionA() .. " " .. self:getDirectionB()
+	local r = self:getDirection()
 	return r
 end
 

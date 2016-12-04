@@ -16,36 +16,22 @@ Stepper.seq = {{1,0,0,1},
        {0,0,1,1},
        {0,0,0,1}}
 
---- Constructor for instance-style clones.
-function Stepper:initialize(pin1,pin2,pin3,pin4)
-	if not _G.stepperMotors then _G.stepperMotors = {name='stepperMotors'} table.insert(objects,stepperMotors) objects["stepperMotors"] = stepperMotors end
-	if not stepperMotors[pin1..','..pin2..','..pin3..','..pin4] then
-		self.config = {speed=.001,step=1,stepping=false}
-		self.step = 1
-		self:setID(pin1..','..pin2..','..pin3..','..pin4)
-		self:setName('stepper_'..pin1..','..pin2..','..pin3..','..pin4)
-		table.insert(stepperMotors,self)
-		self.pins = {RPIO(pin1),RPIO(pin2),RPIO(pin3),RPIO(pin4)}
-		self:setupPins()
-		self:off()
-		--self:test()
-	end
+function Stepper:setup(options)
+	local pin1,pin2,pin3,pin4 = options.pin1,options.pin2,options.pin3,options.pin4
+	self.config.pin1 = pin1
+	self.config.pin2 = pin2
+	self.config.pin3 = pin3
+	self.config.pin4 = pin4
+	self.step = 1
+	table.insert(stepperMotors,self)
+	self.pins = {RPIO(pin1),RPIO(pin2),RPIO(pin3),RPIO(pin4)}
+	self:setupPins()
+	self:off()
 end
+
 
 function Stepper:getDirection()
 	return (self.stepping and self.stepping.direction or 'stopped')
-end
-
-function Stepper:setID(id)
-	if self.config.id then stepperMotors[self.config.id] = nil end
-	self.config.id = id
-	stepperMotors[self.config.id] = self
-end
-
-function Stepper:setName(name)
-	if self.config.name then stepperMotors[self.config.name] = nil end
-	self.config.name = name
-	stepperMotors[self.config.name] = self
 end
 
 function Stepper:getHTMLcontrol()

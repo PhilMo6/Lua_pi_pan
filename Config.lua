@@ -44,9 +44,9 @@ Config.buttonPins 		= {8,24,25,23}
 Config.relayPins			= {9,10,20,21}
 Config.DHT22Pins			= {11}
 Config.stepperPins			= {{23,22,27,17}}
-Config.thermostatStartup	= {{'room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
-Config.motionSensorStartup = {{'roomLight',19}}
-Config.macScannerStartup	= {{'macScanner'}}
+Config.thermostatStartup	= {{id='room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
+Config.motionSensorStartup = {{id='roomLight',pin=19}}
+Config.macScannerStartup	= {{id='macScanner'}}
 ]]
 
 Config.tcpPort						= 9696

@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Button")
+local Cloneable			= require("obj.Remote_Common")
 local Button			= Cloneable:clone()
 --[[
 	Remote object for buttons/switchs/motion sensors attached to nodes.
@@ -6,24 +6,13 @@ local Button			= Cloneable:clone()
 	A press can be simulated with the press function and will be pushed to node.
 ]]
 
-function Button:initialize(id,name,node)
-	if not _G[self.location] then _G[self.location] = {name=self.location} table.insert(objects,_G[self.location]) objects[self.location] = _G[self.location] end
-	if not _G[self.location][id] then
-		self.config = {edge=false}
-		self:setID(id)
-		self:setName(name..'_'..node:getID())
-		table.insert(buttons,self)
-		node:addObject(self)
-	end
-end
-
-function Button:setID(id)
-	self.config.id = id
-end
-
-function Button:read()
-	return self:getLastRead()
-end
+Button.location = 'buttons'
+Button.states = {
+	[0]='released'
+	[1]='open',
+	[2]='pressed',
+	[3]='held',
+}
 
 function Button:press(f,client)
 	if not self.pressed then

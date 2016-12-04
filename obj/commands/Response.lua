@@ -234,15 +234,15 @@ Response.orders["MASUp"] = function(input,user)
 	return false
 end
 
-Response.orders["objectUpdate"] = function(input,loc,user)
-	if user.node and user.node[loc] then
+Response.orders["objectUpdate"] = function(input,user)
+	if user.node then
 		local data = string.match(input, '|(.+)|')
 		if data then
 			local loadedData = boxLoad(data)
 			if loadedData then
 				for i,v in ipairs(loadedData) do
 					if v.id and v.config then
-						local obj = user.node.[loc][v.id]
+						local obj = user.node.objectIds[v.id]
 						if obj then
 							obj.lastup = tonumber(loadedData.stamp)
 							obj:setConfig(v.config)
@@ -327,12 +327,11 @@ Response.orders["objects"] = function(input,user)
 				if objects.macScanners then
 					for i,v in ipairs(objects.macScanners) do
 						if type(v) == "table" then
-							RemoteMacAddressScanner:new(v.id,{},v.macTable,v.foundMacs,v.lostMacs,v.knownMacs,user.node)
+							RemoteMacAddressScanner:new(v.id,v.name,v.config,v.foundMacs,v.lostMacs,user.node)
+							--RemoteMacAddressScanner:new(v.id,v.name,{},v.macTable,v.foundMacs,v.lostMacs,v.knownMacs,user.node)
 						end
 					end
 				end
-
-
 				updateSensorLinks()
 			end
 		end

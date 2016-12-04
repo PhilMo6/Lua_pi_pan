@@ -5,14 +5,8 @@ local sensor			= Cloneable:clone()
 	Base object for sensors.
 ]]
 
-function sensor:initialize(id)
-	if not _G.sensors then _G.sensors = {name='sensors'} table.insert(objects,sensors) objects["sensors"] = sensors end
-	if not sensors[id] then
-		self.config = {lastRead=false}
-		self:setID(id)
-		self:setName('sensor_'..id)
-		table.insert(sensors,self)
-	end
+function sensor:setup(options)
+	self:read()
 end
 
 function sensor:getHTMLcontrol()

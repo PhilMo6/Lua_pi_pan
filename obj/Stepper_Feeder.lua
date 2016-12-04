@@ -7,16 +7,14 @@ local Feeder			= Cloneable:clone()
 Feeder.updateCmd = "Request Feeder"
 Feeder.location = 'feeders'
 
---- Constructor for instance-style clones.
-function Feeder:initialize(id,count,stepper,timing)
-	if not _G.feeder then _G.feeders = {name='feeders'} table.insert(objects,feeders) objects["feeders"] = feeders end
-	if not feeders[id] then
-		self.config = {count=count,stepper=stepper,timing=timing,lastfeed={},feeding=false}
-		self:setID(id)
-		self:setName('Feeder_'..id)
-		table.insert(feeders,self)
-		self:startTimer()
-	end
+function Feeder:setup(options)
+	local count,stepper,timing = options.count,options.stepper,options.timing
+	self.config.count = count
+	self.config.stepper = stepper
+	self.config.timing = timing
+	self.config.lastfeed = {}
+	self.config.feeding=false
+	self:startTimer()
 end
 
 function Feeder:startTimer()
@@ -32,18 +30,6 @@ function Feeder:startTimer()
 		end, 60, true, 0)
 		Scheduler:queue(self.timer)
 	end
-end
-
-function Feeder:setID(id)
-	if self.config.id then feeders[self.config.id] = nil end
-	self.config.id = id
-	feeders[self.config.id] = self
-end
-
-function Feeder:setName(name)
-	if self.config.name then feeders[self.config.name] = nil end
-	self.config.name = name
-	feeders[self.config.name] = self
 end
 
 function Feeder:getHTMLcontrol()

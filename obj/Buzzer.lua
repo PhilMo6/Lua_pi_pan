@@ -8,17 +8,12 @@ local Buzzer			= Cloneable:clone()
 
 Buzzer.location = 'buzzers'
 
-function Buzzer:initialize(pin)
-	if not _G.buzzers then _G.buzzers = {name='buzzers'} _G.buzzerIDs = {} table.insert(objects,buzzers) objects["buzzers"] = buzzers end
-	if not buzzers['Buzzer_'..pin] then
-		self.config = {beeping=false}
-		self:setID(pin)
-		self:setName('Buzzer_'..pin)
-		table.insert(buzzers,self)
-		self.gpio = RPIO(pin)
-		self.gpio:set_direction('out')
-		self.gpio:write(0)
-	end
+function Buzzer:setup(options)
+	local pin = options[1]
+	self.gpio = RPIO(pin)
+	self.gpio:set_direction('out')
+	self.gpio:write(0)
+	self.config.beeping = false
 end
 
 function Buzzer:getHTMLcontrol()
@@ -31,18 +26,6 @@ function Buzzer:getHTMLcontrol()
 	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
 	name
 	)
-end
-
-function Buzzer:setID(id)
-	if self.config.id then buttonIDs[self.config.id] = nil end
-	self.config.id = id
-	buttonIDs[self.config.id] = self
-end
-
-function Buzzer:setName(name)
-	if self.config.name then buzzers[self.config.name] = nil end
-	self.config.name = name
-	buzzers[self.config.name] = self
 end
 
 function Buzzer:buzz(leng)
@@ -65,14 +48,13 @@ function Buzzer:beep(num,leng)
 	return false
 end
 
+function Buzzer:read()
+	return self.gpio:read()
+end
+
 function Buzzer:test()
 	self.stayOff = nil
 	self:beep()
-end
-
-function Buzzer:read()
-	self:updateLastRead(self.gpio:read())
-	return self.config.lastRead
 end
 
 function Buzzer:toggle()

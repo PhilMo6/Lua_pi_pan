@@ -22,37 +22,27 @@ Thermostat.config.tempSensor					= 'inside'
 Thermostat.config.heatingRelay					= 'heater'
 Thermostat.config.coolingRelay					= 'fan'
 
---- Constructor for instance-style clones.
-function Thermostat:initialize(id,config)
-	if not _G.thermostats then _G.thermostats = {name="thermostats"} table.insert(objects,thermostats) objects["thermostats"] = thermostats end
-	if not thermostats[id] then
-		self.config = {}
-		table.insert(thermostats,self)
 
-		self:setID(id)
-		self:setName('thermostat_'..id)
-
-		self.config.temperature 					= (config and config.temperature or Thermostat.config.temperature)
-		self.config.temperatureThreshold			= (config and config.temperatureThreshold or Thermostat.config.temperatureThreshold)
-		self.config.heatThreshold					= (config and config.heatThreshold or Thermostat.config.heatThreshold)
-		self.config.coolThreshold					= (config and config.coolThreshold or Thermostat.config.coolThreshold)
-		self.config.updateTime						= (config and config.updateTime or Thermostat.config.updateTime)
-		self.config.tempSensor						= (config and config.tempSensor or Thermostat.config.tempSensor)
-		self.config.heatingRelay					= (config and config.heatingRelay or Thermostat.config.heatingRelay)
-		self.config.coolingRelay					= (config and config.coolingRelay or Thermostat.config.coolingRelay)
-
-		self:setState(config and config.state or 'active')
-		self:setAction()
-		local therm = self
-		Scheduler:queue(Event:new(function()
-			therm.updateLogic = Event:new(function()--trigger event that runs the thermostats logic
-				therm:runLogic()
-			end, therm:getUpTime(), true, 0)
-			Scheduler:queue(therm.updateLogic)
-			therm:setAction()
+function Thermostat:setup(options)
+	self.config.temperature 					= (options and options.temperature or Thermostat.config.temperature)
+	self.config.temperatureThreshold			= (options and options.temperatureThreshold or Thermostat.config.temperatureThreshold)
+	self.config.heatThreshold					= (options and options.heatThreshold or Thermostat.config.heatThreshold)
+	self.config.coolThreshold					= (options and options.coolThreshold or Thermostat.config.coolThreshold)
+	self.config.updateTime						= (options and options.updateTime or Thermostat.config.updateTime)
+	self.config.tempSensor						= (options and options.tempSensor or Thermostat.config.tempSensor)
+	self.config.heatingRelay					= (options and options.heatingRelay or Thermostat.config.heatingRelay)
+	self.config.coolingRelay					= (options and options.coolingRelay or Thermostat.config.coolingRelay)
+	self:setState(options and options.state or 'active')
+	self:setAction()
+	local therm = self
+	Scheduler:queue(Event:new(function()
+		therm.updateLogic = Event:new(function()--trigger event that runs the thermostats logic
 			therm:runLogic()
-		end, 15, false))
-	end
+		end, therm:getUpTime(), true, 0)
+		Scheduler:queue(therm.updateLogic)
+		therm:setAction()
+		therm:runLogic()
+	end, 15, false))
 end
 
 function Thermostat:runLogic()
@@ -194,18 +184,6 @@ end
 
 function Thermostat:getTemp()
 	return self.config.temperature
-end
-
-function Thermostat:setID(id)
-	if self.config.id then thermostats[self.config.id] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setID:' .. id) end
-	self.config.id = id
-	thermostats[self.config.id] = self
-end
-
-function Thermostat:setName(name)
-	if self.config.name then thermostats[self.config.name] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setName:' .. name) end
-	self.config.name = name
-	thermostats[self.config.name] = self
 end
 
 function Thermostat:setState(state)

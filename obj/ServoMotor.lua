@@ -14,35 +14,20 @@ Servo.config.pmwR = 192
 Servo.config.pmwC = 2000
 
 
---- Constructor for instance-style clones.
-function Servo:initialize(pmwr,pmwc)
-	if not _G.servoMotors then require("source.wpiLuaWrap") _G.servoMotors = {name='servoMotors'} table.insert(objects,servoMotors) objects["servoMotors"] = servoMotors end
-	if not servoMotors[pin] then
-		self.config = {}
-		self.pmwR = pmwr
-		self.pmwC = pmwc
-		self:setID(pin)
-		self:setName('Servo_')
-		table.insert(servoMotors,self)
-		self:test()
-	end
+function Relay:setup(options)
+	local pin,pmwr,pmwc = options.pin,options.pmwr,options.pmwc
+	self.config.pin = pin
+	self.config.pmwR = pmwr or Servo.config.pmwR
+	self.config.pmwC = pmwc or Servo.config.pmwC
+	self:setupPins()
+	--[[self.gpio = RPIO(pin)
+	self.gpio:set_direction('out')
+	self.gpio:write(1)]]
 end
 
 function Servo:getPosition()
 	local positions = self.config.positions or Servo.config.positions
 	return (self.position and positions[self.position])
-end
-
-function Servo:setID(id)
-	if self.config.id then servoMotors[self.config.id] = nil end
-	self.config.id = id
-	servoMotors[self.config.id] = self
-end
-
-function Servo:setName(name)
-	if self.config.name then servoMotors[self.config.name] = nil end
-	self.config.name = name
-	servoMotors[self.config.name] = self
 end
 
 function Servo:getHTMLcontrol()

@@ -23,42 +23,36 @@ Sensor.config.buzzer			= "alarm"
 Sensor.config.sensitivity 		= 35
 Sensor.config.timeOut			= 30
 
---- Constructor for instance-style clones.
-function Sensor:initialize(id,pin,config)
-	if not _G.motionSensors then _G.motionSensors = {name='motionSensors'} table.insert(objects,motionSensors) objects["motionSensors"] = motionSensors end
-	if not motionSensors['MotionSensor_'..id] then
-		local button
-		if pin then
-			button = Button:new(pin)
-		end
-		self.config = {}
-		self.config.lightSensor 		= config and config.lightSensor or Sensor.config.lightSensor
-		self.config.lightSensitivity	= config and config.lightSensitivity or Sensor.config.lightSensitivity
-		self.config.button 				= config and config.button or button and button:getName() or Sensor.config.button
-		self.config.relay  				= config and config.relay or Sensor.config.relay
-		self.config.LED	   				= config and config.LED or Sensor.config.LED
-		self.config.buzzer		 		= config and config.buzzer or Sensor.config.buzzer
-		self.config.sensitivity 		= config and config.sensitivity or Sensor.config.sensitivity
-		self.config.timeOut		 		= config and config.timeOut or Sensor.config.timeOut
 
-		self.checks = 0
-		self.onTime = os.time()
-		self:setID(id)
-		self:setName('MotionSensor_'..id)
-		table.insert(motionSensors,self)
-
-		self.config.state = (config and config.state or 'active')
-		self.config.action = 'standby'
-
-		local sen = self
-		Scheduler:queue(Event:new(function()
-			sen.checkEvent = Event:new(function()--trigger event that runs the sensors logic
-				sen:runLogic()
-			end, .1, true, 0)
-			Scheduler:queue(sen.checkEvent)
-		end, 15, false))
+function MacScanner:setup(options)
+	local pin = options.pin
+	local button
+	if pin then
+		button = Button:new(pin)
 	end
+	self.config.lightSensor 		= options and options.lightSensor or Sensor.config.lightSensor
+	self.config.lightSensitivity	= options and options.lightSensitivity or Sensor.config.lightSensitivity
+	self.config.button 				= options and options.button or button and button:getName() or Sensor.config.button
+	self.config.relay  				= options and options.relay or Sensor.config.relay
+	self.config.LED	   				= options and options.LED or Sensor.config.LED
+	self.config.buzzer		 		= options and options.buzzer or Sensor.config.buzzer
+	self.config.sensitivity 		= options and options.sensitivity or Sensor.config.sensitivity
+	self.config.timeOut		 		= options and options.timeOut or Sensor.config.timeOut
+	self.config.state = (options and options.state or 'active')
+	self.config.action = 'standby'
+
+	self.checks = 0
+	self.onTime = os.time()
+
+	local sen = self
+	Scheduler:queue(Event:new(function()
+		sen.checkEvent = Event:new(function()--trigger event that runs the sensors logic
+			sen:runLogic()
+		end, .1, true, 0)
+		Scheduler:queue(sen.checkEvent)
+	end, 15, false))
 end
+
 
 function Sensor:runLogic()
 	if self:getAction() == 'on' then
@@ -343,18 +337,6 @@ function Sensor:getHTMLcontrol()
 	([[<button style="font-size:15px" onclick="myFunction('Mos %s sBz','%s')">Set Buzzer</button >]]):format(name,name),
 	([[<form id="%s"> Set To:<input type="text" name='com'></form>]]):format(name)
 	)
-end
-
-function Sensor:setID(id)
-	if self.config.id then motionSensors[self.config.id] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setID:'..id) end
-	self.config.id = id
-	motionSensors[self.config.id] = self
-end
-
-function Sensor:setName(name)
-	if self.config.name then motionSensors[self.config.name] = nil self:updateMasters() logEvent(self:getName(),self:getName() .. ' setName:'..name) end
-	self.config.name = name
-	motionSensors[self.config.name] = self
 end
 
 function Sensor:getStatus()

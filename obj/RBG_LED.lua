@@ -19,34 +19,30 @@ LED.colors = {
 {1,1,0}
 }
 
-function LED:initialize(pinR,pinB,pinG)
-	if not _G.LEDs then _G.LEDs = {name='LEDs'} _G.LEDIDs = {} table.insert(objects,LEDs) objects["LEDs"] = LEDs end
-	if not LEDs['LED_'..pinR..','..pinB..','..pinG] then
-		self.config = {
-			blinking=false,
-			cycling=false,
-			random=false,
-			pinRed = pinR,
-			pinBlue = pinB,
-			pinGreen = pinG,
-			r = 1,
-			b = 1,
-			g = 1
-		}
-		self:setID(pinR..','..pinB..','..pinG)
-		self:setName('RBG_LED_'..self:getID())
-		table.insert(LEDs,self)
-		self.gpioR = RPIO(pinR)
-		self.gpioR:set_direction('out')
-		self.gpioR:write(0)
-		self.gpioB = RPIO(pinB)
-		self.gpioB:set_direction('out')
-		self.gpioB:write(0)
-		self.gpioG = RPIO(pinG)
-		self.gpioG:set_direction('out')
-		self.gpioG:write(0)
-	end
+function LED:setup(options)
+	local pinR,pinB,pinG = options.pinR,options.pinB,options.pinG
+	self.config = {
+		blinking=false,
+		cycling=false,
+		random=false,
+		pinRed = pinR,
+		pinBlue = pinB,
+		pinGreen = pinG,
+		r = 1,
+		b = 1,
+		g = 1
+	}
+	self.gpioR = RPIO(pinR)
+	self.gpioR:set_direction('out')
+	self.gpioR:write(0)
+	self.gpioB = RPIO(pinB)
+	self.gpioB:set_direction('out')
+	self.gpioB:write(0)
+	self.gpioG = RPIO(pinG)
+	self.gpioG:set_direction('out')
+	self.gpioG:write(0)
 end
+
 
 function LED:getHTMLcontrol()
 	local name = self:getName()
@@ -58,18 +54,6 @@ function LED:getHTMLcontrol()
 	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
 	name
 	)
-end
-
-function LED:setID(id)
-	if self.config.id then LEDIDs[self.config.id] = nil end
-	self.config.id = id
-	LEDIDs[self.config.id] = self
-end
-
-function LED:setName(name)
-	if self.config.name then LEDs[self.config.name] = nil end
-	self.config.name = name
-	LEDs[self.config.name] = self
 end
 
 function LED:read()

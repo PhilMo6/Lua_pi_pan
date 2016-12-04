@@ -5,6 +5,8 @@ local DHT22			= Cloneable:clone()
 	Node will update the remote sensors last read as the sensors tempature/humidity changes.
 ]]
 
+DHT22.location = 'DHTs'
+
 function DHT22:initialize(id,name,node)
 	if not _G.DHT22s then _G.DHT22s = {name='DHT22s'} table.insert(objects,DHT22s) objects["DHT22s"] = DHT22s end
 	if not DHT22s[name..'_'..node:getID()] then

@@ -1,10 +1,12 @@
-local Cloneable			= require("obj.MotionSensor")
+local Cloneable			= require("obj.Remote_Common")
 local Sensor			= Cloneable:clone()
 --[[
 	Remote object for motion sensors attached to nodes.
 	Node will update the remote sensors config as changes are detected.
 	This also updates its current state and action.
 ]]
+
+Sensor.location = 'motionSensors'
 
 function Sensor:initialize(id,config,node)
 	if not _G.motionSensors then _G.motionSensors = {name='motionSensors'} table.insert(objects,motionSensors) objects["motionSensors"] = motionSensors end
@@ -34,16 +36,6 @@ function Sensor:removeSensor()
 	motionSensors[self:getID()] = nil
 	while table.removeValue(motionSensors, self) do end
 	if self.node then local node=self.node self.node=nil node:removeMotionSensor(self) end
-end
-
---remote so these functions run on the node and on this object must do nil
-function Sensor:runLogic()
-end
-function Sensor:checkLight()
-end
-function Sensor:checkMotion()
-end
-function Sensor:setAction()
 end
 
 function Sensor:setState(state)
@@ -104,6 +96,16 @@ end
 --- Stringifier for Cloneables.
 function Sensor:toString()
 	return string.format("[Remote_MotionSensor] %s %s %s %s",self:getID(),self:getName(),self:getState(),self:getAction())
+end
+
+--remote so these functions run on the node and on this object must do nil
+function Sensor:runLogic()
+end
+function Sensor:checkLight()
+end
+function Sensor:checkMotion()
+end
+function Sensor:setAction()
 end
 
 return Sensor

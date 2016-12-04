@@ -30,6 +30,33 @@ Objects can request a boost in frequency but must also reset the boost after wha
 Each step increse in frequency doubles the percent of needed processor to manage events.
 Only set frequency with boostFrequency() function.
 ]]
+
+_G.objectIDs = {}
+function _G.getNewID(length)
+	math.random()
+	length = length or 1
+	if length < 1 then return nil end
+	local function randomID()
+		local array = {}
+		local ns = 0
+		for i = 1, length do
+			if ns == 0 then
+				ns = 1
+				local n = math.random(0,9)
+				array[i] = n
+			else
+				ns = 0
+				local s = string.char(math.random(48, 122))
+				if not string.find(s,'%p') then array[i] = s else array[i] = '0' end
+			end
+		end
+		return table.concat(array)
+	end
+	local id = randomID()
+	while objectIDs[id] do id = randomID() end
+	return id
+end
+
 local freqs = {[1]=0.1,[2]=0.01,[3]=0.001,[4]=0.0001}
 local frequency = 1
 local frequencyBoost = {}
@@ -127,56 +154,66 @@ function _G.loadObjects(conn,c)
 	--setup all devices/pins
 	for i,pin in ipairs(buttonPins) do
 		if type(pin) == 'number' then
-			Button:new(pin)
+			Button:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then--options are pin and edge
 			Button:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(buzzerPins) do
 		if type(pin) == 'number' then
-			Buzzer:new(pin)
+			Buzzer:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
 			Buzzer:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(LEDPins) do
 		if type(pin) == 'number' then
-			LED:new(pin)
+			LED:new(pin,{pin=pin})
+		elseif type(pin) == 'table' then
+			LED:new(pin.pin,pin)
 		end
 	end
 	for i,op in ipairs(RBG_LEDPins) do
-		if type(op[1]) == 'number' then
-			RBG_LED:new(op[1],op[2],op[3])
+		if type(op) == 'table' then
+			RBG_LED:new(op.pinR..','..op.pinB..','..op.pinG,op)
 		end
 	end
 	for i,pin in ipairs(relayPins) do
 		if type(pin) == 'number' then
-			Relay:new(pin)
+			Relay:new(pin,{pin=pin})
+		elseif type(pin) == 'table' then
+			Relay:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(lightSensorPins) do
 		if type(pin) == 'number' then
-			LightSensor:new(pin)
+			LightSensor:new(pin,{pin=pin})
+		elseif type(pin) == 'table' then
+			LightSensor:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(DHT22Pins) do
 		if type(pin) == 'number' then
-			DHT22:new(pin)
+			DHT22:new(pin,{pin=pin})
+		elseif type(pin) == 'table' then
+			DHT22:new(pin.pin,pin)
 		end
 	end
-	for i,pins in ipairs(stepperPins) do
-		if type(pins) == 'table' then
-			StepperMotor:new(pins[1],pins[2],pins[3],pins[4])
+	for i,op in ipairs(stepperPins) do
+		if type(op) == 'table' then
+			StepperMotor:new(op.pin1..','..op.pin2..','..op.pin3..','..op.pin4,op)
 		end
 	end
 	for i,pin in ipairs(servoPins) do
 		if type(pin) == 'number' then
-			ServorMotor:new(pin)
+			ServorMotor:new(pin,{pin=pin})
+		elseif type(pin) == 'table' then
+			ServorMotor:new(pin.pin,pin)
 		end
 	end
-	for i,pins in ipairs(motorPins) do
-		if type(pins) == 'table' then
-			Motor:new(pins[1],pins[2],pins.pwm)
+	for i,op in ipairs(motorPins) do
+		if type(op) == 'table' then
+			Motor:new(op.pin1..','..op.pin2,op)
 		end
 	end
 
@@ -190,13 +227,19 @@ function _G.loadObjects(conn,c)
 
 	--start up higher logic objects after all required objects are loaded
 	for i,op in ipairs(thermostatStartup) do
-		Thermostat:new(op[1],op[2])
+		if type(op) == 'table' then
+			Thermostat:new(op.id,op)
+		end
 	end
 	for i,op in ipairs(motionSensorStartup) do
-		MotionSensor:new(op[1],op[2],op[3])
+		if type(op) == 'table' then
+			MotionSensor:new(op.id,op)
+		end
 	end
 	for i,op in ipairs(macScannerStartup) do
-		MacScanner:new(op[1],op[2])
+		if type(op) == 'table' then
+			MacScanner:new(op.id,op)
+		end
 	end
 
 	--for easier object lookup

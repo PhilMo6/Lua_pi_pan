@@ -218,16 +218,16 @@ Request.orders["MASUp"] = function(MASID,_,user)
 end
 
 
-Request.orders["objectUpdate"] = function(loc,ID,user)
-	if objects[loc] and objects[loc][ID] then
+Request.orders["objectUpdate"] = function(ID,user)
+	if objectIDs[ID] then
 		local data = "Response objectUpdate "
 		local time = os.date('*t')
 		local date = time.year.."-"..time.month.."-"..time.day
 		time = time.hour..":"..time.min..":"..time.sec
 		local stamp = os.time(os.date("*t"))
-		data = ("%s |return {stamp='%s',date='%s',time='%s',loc='%s'"):format(data,stamp,date,time,loc)
-		local obj = objects[loc][ID]
-		data = ([[%s,{id='%s',config=%s}]]):format(data,obj:getID(),table.savetoString(obj.config))
+		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
+		local obj = objectIDs[ID]
+		data = ([[%s,{id='%s',config=%s}]]):format(data,obj:getID(),obj:getConfig())
 		data = ("%s}|"):format(data)
 	return data
 	end
@@ -255,7 +255,7 @@ Request.orders["objects"] = function(objs,_,user)
 			data = ("%s,%s={'void'"):format(obj.name)
 			for i,v in ipairs(v) do
 				if not user.node or not v:isNode(user.node) then
-					data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID(),v:getConfig())
+					data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID(),v:getConfig(true))
 					if user.master then user.master:addObject(v) end
 				end
 			end

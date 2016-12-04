@@ -1,4 +1,4 @@
-local Cloneable			= require("obj.Relay")
+local Cloneable			= require("obj.Remote_Common")
 local Relay			= Cloneable:clone()
 --[[
 	Remote object for relay attached to nodes.

@@ -15,7 +15,7 @@ Button.states = {
 }
 
 function Button:setup(options)
-	local pin,edge = options.pin,options.edge
+	local pin,edge = options[1],options.edge
 	self.gpio = RPIO(pin)
 	self.gpio:set_direction('in')
 	self.config.pin = pin

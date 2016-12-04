@@ -1,10 +1,13 @@
-local Cloneable			= require("obj.Thermostat")
+local Cloneable			= require("obj.Remote_Common")
 local Thermostat			= Cloneable:clone()
 --[[
 	Remote object for thermostats attached to nodes.
 	Node will update the thermostats config as changes are detected.
 	This also updates its current state and action.
 ]]
+
+
+Thermostat.location = 'thermostats'
 
 function Thermostat:initialize(id,config,node)
 	if not _G.thermostats then _G.thermostats = {name="thermostats"} table.insert(objects,thermostats) objects["thermostats"] = thermostats end
@@ -28,21 +31,7 @@ function Thermostat:initialize(id,config,node)
 	end
 end
 
-function Thermostat:removeThermostat()
-	thermostats[self:getName()] = nil
-	while table.removeValue(thermostats, self) do end
-	if self.node then local node=self.node self.node=nil node:removeThermostat(self) end
-end
-
 --remote so these functions run on the node and on this object must do nil
-function Thermostat:runLogic()
-end
-function Thermostat:runCoolLogic()
-end
-function Thermostat:runHeatLogic()
-end
-function Thermostat:setAction()
-end
 
 function Thermostat:setUpTime(ut)
 	if self.node then self.node:send(([[Therm %s uptime %s]]):format(self:getID(),ut)) end
