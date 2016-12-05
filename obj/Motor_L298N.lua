@@ -5,7 +5,6 @@ local Driver			= Cloneable:clone()
 ]]
 
 Driver.location = 'motors'
-Driver.updateCmd = "Request DriverMs"
 Driver.config = {}
 Driver.config.speeds = {'crawl','slow','mid','fast','full'}
 Driver.config.values = {crawl=100,slow=125,mid=150,fast=175,full=200}
@@ -14,7 +13,7 @@ Driver.config.speed = 1
 
 function Driver:setup(options)
 	local pin1,pin2,pmw = options[1],options[2],options.pmw
-	if pwm then self.pwm = false end
+	if pwm then require("source.wpiLuaWrap") self.pwm = false end
 	self.pins = {RPIO(pin1),RPIO(pin2)}
 	self.config.pin1 = pin1
 	self.config.pin2 = pin2
@@ -82,6 +81,7 @@ function Driver:forward()
 		self.config.moving = 'forward'
 		self.pins[2]:write(0)
 		self.pins[1]:write(1)
+		self:updateMasters()
 		return true
 	end
 	return false
@@ -93,6 +93,7 @@ function Driver:reverse()
 		self.config.moving = 'reverse'
 		self.pins[1]:write(0)
 		self.pins[2]:write(1)
+		self:updateMasters()
 		return true
 	end
 	return false

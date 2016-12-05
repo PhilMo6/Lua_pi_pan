@@ -4,7 +4,6 @@ local Feeder			= Cloneable:clone()
 	Object for feeding animals on a schedule.
 ]]
 
-Feeder.updateCmd = "Request Feeder"
 Feeder.location = 'feeders'
 
 function Feeder:setup(options)

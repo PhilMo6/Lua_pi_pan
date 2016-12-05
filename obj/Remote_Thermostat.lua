@@ -1,4 +1,5 @@
 local Cloneable			= require("obj.Remote_Common")
+local origin 			= require("obj.Thermostat")
 local Thermostat			= Cloneable:clone()
 --[[
 	Remote object for thermostats attached to nodes.
@@ -7,29 +8,36 @@ local Thermostat			= Cloneable:clone()
 ]]
 
 
-Thermostat.location = 'thermostats'
+Thermostat.location = origin.location
+Thermostat.getHTMLcontrol = origin.getHTMLcontrol
 
-function Thermostat:initialize(id,config,node)
-	if not _G.thermostats then _G.thermostats = {name="thermostats"} table.insert(objects,thermostats) objects["thermostats"] = thermostats end
-	if not thermostats['thermostat_'..id..'_'..node:getID()] then
-		self.config = {}
-		table.insert(thermostats,self)
-		self:setID(id)
-		self:setName(id..'_'..node:getID())
-		node:addThermostat(self)
+Thermostat.getUpTime = origin.getUpTime
+Thermostat.getTempSensor = origin.getTempSensor
+Thermostat.getHeatRelay = origin.getHeatRelay
+Thermostat.getCoolRelay = origin.getCoolRelay
+Thermostat.getCoolTh = origin.getCoolTh
+Thermostat.getHeatTh = origin.getHeatTh
+Thermostat.getTempTh = origin.getTempTh
+Thermostat.getTemp = origin.getTemp
+Thermostat.read = origin.read
+Thermostat.getStatus = origin.getStatus
+Thermostat.getState = origin.getState
+Thermostat.getAction = origin.getAction
+Thermostat.toggle = origin.toggle
 
-		self.config.temperature 					= (config and config.temperature or Thermostat.config.temperature)
-		self.config.temperatureThreshold			= (config and config.temperatureThreshold or Thermostat.config.temperatureThreshold)
-		self.config.heatThreshold					= (config and config.heatThreshold or Thermostat.config.heatThreshold)
-		self.config.coolThreshold					= (config and config.coolThreshold or Thermostat.config.coolThreshold)
-		self.config.updateTime						= (config and config.updateTime or Thermostat.config.updateTime)
-		self.config.tempSensor						= (config and config.tempSensor or 'null')
-		self.config.heatingRelay					= (config and config.heatingRelay or 'null')
-		self.config.coolingRelay					= (config and config.coolingRelay or 'null')
-		self.config.state 			= ""
-		self.config.action 			= ""
-	end
+function Thermostat:setup(options)
+	self.config.temperature 					= (options and options.temperature or Thermostat.config.temperature)
+	self.config.temperatureThreshold			= (options and options.temperatureThreshold or Thermostat.config.temperatureThreshold)
+	self.config.heatThreshold					= (options and options.heatThreshold or Thermostat.config.heatThreshold)
+	self.config.coolThreshold					= (options and options.coolThreshold or Thermostat.config.coolThreshold)
+	self.config.updateTime						= (options and options.updateTime or Thermostat.config.updateTime)
+	self.config.tempSensor						= (options and options.tempSensor or 'null')
+	self.config.heatingRelay					= (options and options.heatingRelay or 'null')
+	self.config.coolingRelay					= (options and options.coolingRelay or 'null')
+	self.config.state 			= ""
+	self.config.action 			= ""
 end
+
 
 --remote so these functions run on the node and on this object must do nil
 

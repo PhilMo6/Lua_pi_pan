@@ -34,7 +34,7 @@ Buzzer.orders = {}
 Buzzer.orders["rename"] = function(buzzer,name)
 	if name then
 		buzzer:setName(name)
-		updateBuzzerNames()
+		saveObjectsInfo()
 		return string.format("Buzzer %s has been renamed %s.",buzzer:getID(),buzzer:getName())
 	else
 		return "Must supply a name to rename a buzzer."

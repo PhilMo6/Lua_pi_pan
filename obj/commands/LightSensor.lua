@@ -34,7 +34,7 @@ Sensor.orders = {}
 Sensor.orders["rename"] = function(sensor,name)
 	if name then
 		sensor:setName(name)
-		updateLSensorNames()
+		saveObjectsInfo()
 		return string.format("Sensor %s has been renamed %s.",sensor:getID(),sensor:getName())
 	else
 		return "Must supply a name to rename a sensor."

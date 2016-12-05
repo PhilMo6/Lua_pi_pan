@@ -34,7 +34,7 @@ LED.orders = {}
 LED.orders["rename"] = function(led,name)
 	if name then
 		led:setName(name)
-		updateLEDNames()
+		saveObjectsInfo()
 		return string.format("LED %s has been renamed %s.",led:getID(),led:getName())
 	else
 		return "Must supply a name to rename a LED."

@@ -1,4 +1,5 @@
 local Cloneable			= require("obj.Remote_Common")
+local origin 			= require("obj.Button")
 local Button			= Cloneable:clone()
 --[[
 	Remote object for buttons/switchs/motion sensors attached to nodes.
@@ -6,13 +7,10 @@ local Button			= Cloneable:clone()
 	A press can be simulated with the press function and will be pushed to node.
 ]]
 
-Button.location = 'buttons'
-Button.states = {
-	[0]='released'
-	[1]='open',
-	[2]='pressed',
-	[3]='held',
-}
+Button.location = origin.location
+Button.getHTMLcontrol = origin.getHTMLcontrol
+Button.states = origin.states
+Button.getState = origin.getState
 
 function Button:press(f,client)
 	if not self.pressed then

@@ -67,9 +67,10 @@ local mainEvents = {}
 local mainEvents = {
 	Event:new(function()--button event
 		if buttons then
+			for i,v in ipairs(buttons) do v:read() end
 			local b1,b2 = nil
 			if buttons[1] and not SHUTTINGDOWN then--button1 toggles fanHigh and windowClosed flags
-				if buttons[1]:read() == 0 then
+				if buttons[1]:getState() == 'pressed' then
 					b1 = true
 					if thermostats and thermostats['room'] then
 						thermostats['room']:setTemp(thermostats['room']:getTemp() - 1)
@@ -82,7 +83,7 @@ local mainEvents = {
 				end
 			end
 			if buttons[2] and not SHUTTINGDOWN then--button2 mutes all buzzers
-				if buttons[2]:read() == 0 then
+				if buttons[2]:getState() == 'pressed' then
 					b2 = true
 					if thermostats and thermostats['room'] then
 						thermostats['room']:setTemp(thermostats['room']:getTemp() + 1)
@@ -95,11 +96,11 @@ local mainEvents = {
 				end
 			end
 			if buttons[3] and not SHUTTINGDOWN then--fan on off toggle
-				if buttons[3]:read() == 0 then
+				if buttons[3]:getState() == 'pressed' then
 					if relays[1] then relays[1]:toggle() sleep(.5) end
 				end
 			elseif buttons[3] and SHUTTINGDOWN then--if shutdown in progress then set reset flag
-				if buttons[3]:read() == 0 then
+				if buttons[3]:getState() == 'pressed' then
 					resetC = (resetC or 0) + 1
 					if resetC > 3 then
 						print('Reseting!')
@@ -109,14 +110,14 @@ local mainEvents = {
 				end
 			end
 			if buttons[4] and not SHUTTINGDOWN then--print status
-				if buttons[4]:read() == 0 then
+				if buttons[4]:getState() == 'pressed' then
 					print('')
 					print(getStatus())
 					print('')
 					sleep(.5)
 				end
 			elseif  buttons[4] and SHUTTINGDOWN then--if shutdown in progress then stop shutdown
-				if buttons[4]:read() == 0 then
+				if buttons[4]:getState() == 'pressed' then
 					resetC = (resetC or 0) + 1
 					if resetC > 3 then
 						Scheduler:dequeue(SHUTTINGDOWN)
@@ -128,10 +129,24 @@ local mainEvents = {
 				end
 			end
 
-			if buttonIDs[14] and not SHUTTINGDOWN then--for testing capacitive multibutton
-				local re,button = buttonIDs[14]:read()
-				if button then
-					print(re,button)
+			if buttonIDs[14] and not SHUTTINGDOWN then
+				if buttonIDs[14]:getState() == 'pressed' then
+					if thermostats and thermostats['room'] then
+						thermostats['doghouse']:setTemp(thermostats['doghouse']:getTemp() - 1)
+						thermostats['doghouse']:runLogic()
+						print(thermostats['doghouse']:getStatus())
+					end
+					sleep(.5)
+				end
+			end
+			if buttonIDs[16] and not SHUTTINGDOWN then
+				if buttonIDs[16]:getState() == 'pressed' then
+					if thermostats and thermostats['room'] then
+						thermostats['doghouse']:setTemp(thermostats['doghouse']:getTemp() + 1)
+						thermostats['doghouse']:runLogic()
+						print(thermostats['doghouse']:getStatus())
+					end
+					sleep(.5)
 				end
 			end
 

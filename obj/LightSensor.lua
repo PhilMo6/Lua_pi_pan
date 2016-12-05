@@ -14,7 +14,6 @@ local Sensor			= Cloneable:clone()
 ]]
 
 Sensor.updateCmd = "Request SenLight"
-
 Sensor.calibration = 1--must be as least 1
 Sensor.accuracy = 7--must be as least 2
 Sensor.maxRead = 4000--highest starting value for read
@@ -25,8 +24,8 @@ If you dont need to detect low light conditions and want faster readings you can
 Sensor.location = 'lightsensors'
 
 function Sensor:setup(options)
-	self.config.calibration=options.calibration or Sensor.calibration,
-	self.config.accuracy=options.accuracy or Sensor.accuracy,
+	self.config.calibration=options.calibration or Sensor.calibration
+	self.config.accuracy=options.accuracy or Sensor.accuracy
 	self.config.maxRead=options.maxRead or Sensor.maxRead
 	local pin = options.pin
 	self.config.pin = pin

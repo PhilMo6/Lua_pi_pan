@@ -16,6 +16,7 @@ function Common:initialize(id,options)
 end
 
 function Common:removeSelf()
+	if objectIDs[self:getID()] then objectIDs[self:getID()] = nil end
 	if _G[self.location] then
 		_G[self.location][self:getName()] = nil
 		while table.removeValue(_G[self.location], self) do end
@@ -33,7 +34,7 @@ function Common:getName()
 end
 
 function Common:setID(id)
-	if not id then id = randomID(12) end
+	if not id then id = getNewID(12) end
 	if self.config.id and self.config.id ~= id then
 		--_G[self.location][self.config.id] = nil
 		objectIDs[id] = nil

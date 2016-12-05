@@ -23,14 +23,6 @@ local RBG_LED = require("obj.RBG_LED")
 local Buzzer = require("obj.Buzzer")
 local Button = require("obj.Button")
 
-
---[[
-The speed that the program runs events at is gotten with the getFrequency() function.
-Objects can request a boost in frequency but must also reset the boost after whatever task is compleated.
-Each step increse in frequency doubles the percent of needed processor to manage events.
-Only set frequency with boostFrequency() function.
-]]
-
 _G.objectIDs = {}
 function _G.getNewID(length)
 	math.random()
@@ -56,6 +48,14 @@ function _G.getNewID(length)
 	while objectIDs[id] do id = randomID() end
 	return id
 end
+
+
+--[[
+The speed that the program runs events at is gotten with the getFrequency() function.
+Objects can request a boost in frequency but must also reset the boost after whatever task is compleated.
+Each step increse in frequency doubles the percent of needed processor to manage events.
+Only set frequency with boostFrequency() function.
+]]
 
 local freqs = {[1]=0.1,[2]=0.01,[3]=0.001,[4]=0.0001}
 local frequency = 1
@@ -221,7 +221,7 @@ function _G.loadObjects(conn,c)
 	--only temp sensors for now
 	for i,v in ipairs(scandir("/sys/bus/w1/devices",true)) do
 		if v ~= "." and v ~= ".." and v ~= "w1_bus_master1" then
-			TempSensor:new(v)
+			TempSensor:new(v,{w_id=v})
 		end
 	end
 
@@ -251,125 +251,18 @@ end
 
 function _G.objectUpdate(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
-	updateButtonNames(conn)
-	updateBuzzerNames(conn)
-	updateLEDNames(conn)
-	updateRelayNames(conn)
-	updateLSensorNames(conn)
-	updateSensorNames(conn)
-	updateThermostatInfo(conn)
-	updateMotionSensorsInfo(conn)
+	saveObjectsInfo(conn)
 	updateSiteLinks(conn)
 	updateSensorLinks(conn)
-	updateMacScannerInfo(conn)
-	updateDHTInfo(conn)
-	updateStepperMotorInfo(conn)
 	if not c then conn:close() else return conn end
 end
 
 function _G.objectLoad(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
-
-	--retrieve saved names for objects
-	local cursor,errorString = conn:execute([[select * from Buttons]])
-	if cursor then
-		local row = cursor:fetch ({}, "a")
-		while row do
-			if buttonIDs and buttonIDs[tonumber(row.id)] then
-				buttonIDs[tonumber(row.id)]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from LightSensors]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if lightsensorIDs and lightsensorIDs[tonumber(row.id)] then
-				lightsensorIDs[tonumber(row.id)]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from Buzzers]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if buzzerIDs and buzzerIDs[tonumber(row.id)] then
-				buzzerIDs[tonumber(row.id)]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from LEDs]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if LEDIDs and LEDIDs[tonumber(row.id)] then
-				LEDIDs[tonumber(row.id)]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from Relays]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if relayIDs and relayIDs[tonumber(row.id)] then
-				relayIDs[tonumber(row.id)]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from TempSensors]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if sensors and sensors[row.id] then
-				sensors[row.id]:setName(row.name)
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from Thermostats]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if thermostats and thermostats[row.id] then
-				local bl = boxLoad(row.config)
-				if bl then thermostats[row.id]:setConfig(bl) end
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	cursor,errorString = conn:execute([[select * from MotionSensors]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if motionSensors and motionSensors[row.id] then
-				local bl = boxLoad(row.config)
-				if bl then motionSensors[row.id]:setConfig(bl) end
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	macscannerLoad(conn)
-	StepperMotorInfoLoad(conn)
-	DHTInfoLoad(conn)
-
+	--retrieve saved info for all objects
+	loadObjectsInfo(conn)
 	if not c then conn:close() else return conn end
 end
-
-
-
 
 function _G.HTMLcontrols()
 	local html = [[--Controls--<br><select id="selectControls" onchange="divChange(this)">]]
@@ -457,7 +350,6 @@ function _G.updateSensorLinks(conn,c)
 	if not c then conn:close() else return conn end
 end
 
-
 function _G.removeSensorLink(senId)
 	local conn = env:connect(SQLFile)
 	local re = nil
@@ -478,332 +370,44 @@ function _G.removeSensorLink(senId)
 	return re
 end
 
-
-
-function _G.setMaster(masterIP,conn,c)
-	if masters == nil then _G.masters = {} end
+function _G.saveObjectsInfo(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
-	local status,errorString1 = conn:execute([[CREATE TABLE Masters (ip TEXT);]])
-	local cursor,errorString2 = conn:execute(("select * from Masters where ip='%s';"):format(masterIP))
-	local row = cursor:fetch ({}, "a")
-	if row then
-		local status,errorString = conn:execute(([[UPDATE Masters SET ip="%s" WHERE ip="%s";]]):format(masterIP,masterIP))
-	else
-		local com = "INSERT INTO Masters values('"..masterIP.."');"
-		local status,errorString = conn:execute(com)
-	end
-	cursor:close()
-	if not c then conn:close() else return conn end
-end
-
-function _G.setNode(nodeIP,conn,c)
-	if nodes == nil then _G.nodes = {} end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	local status,errorString1 = conn:execute([[CREATE TABLE Nodes (ip TEXT);]])
-	local cursor,errorString2 = conn:execute(("select * from Nodes where ip='%s';"):format(nodeIP))
-	local row = cursor:fetch ({}, "a")
-	if row then
-		local status,errorString = conn:execute(([[UPDATE Nodes SET ip="%s" WHERE ip="%s";]]):format(nodeIP,nodeIP))
-	else
-		local com = "INSERT INTO Nodes values('"..nodeIP.."');"
-		local status,errorString = conn:execute(com)
-	end
-	cursor:close()
-	if not c then conn:close() else return conn end
-end
-
-
---functions for updating names of objects
---runs each function at startup to save any new objects into database
-function _G.updateButtonNames(conn,c)
-	if not buttons then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS Buttons;]])
-	conn:execute([[CREATE TABLE Buttons (id TEXT, name TEXT, config TEXT)]])
-	for i,v in ipairs(buttons) do
-		local cursor,errorString = conn:execute(("select * from Buttons where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE Buttons SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO Buttons values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+	for i,tab in ipairs(objects) do
+		--conn:execute([[DROP TABLE IF EXISTS LEDs;]])
+		conn:execute(([[CREATE TABLE %s (id TEXT, name TEXT, config TEXT)]]):format(string.upper(tab.name)))
+		for i,v in ipairs(tab) do
+			local cursor,errorString = conn:execute(("select * from %s where name='%s';"):format(v:getName(),string.upper(tab.name)))
+			if cursor then
+				local row = cursor:fetch ({}, "a")
+				if row then
+					conn:execute(([[UPDATE %s SET id='%s',config='%s' WHERE name='%s';]]):format(v:getID(),v:getConfig(),v:getName(),string.upper(tab.name)))
+				else
+					conn:execute(([[INSERT INTO %s values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig(),string.upper(tab.name)))
+				end
+				cursor:close()
 			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO Buttons values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
 		end
 	end
 	if not c then conn:close() else return conn end
 end
-function _G.updateBuzzerNames(conn,c)
-	if not buzzers then return end
+function _G.loadObjectsInfo(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS Buzzers;]])
-	conn:execute([[CREATE TABLE Buzzers (id TEXT, name TEXT, config TEXT)]])
-	for i,v in ipairs(buzzers) do
-		local cursor,errorString = conn:execute(("select * from Buzzers where id='%s';"):format(v:getID()))
+	for i,tab in ipairs(objects) do
+		local cursor,errorString = conn:execute(([[select * from %s]]):format(string.upper(tab.name)))
 		if cursor then
 			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE Buzzers SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO Buzzers values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO Buzzers values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.updateLEDNames(conn,c)
-	if not LEDs then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS LEDs;]])
-	conn:execute([[CREATE TABLE LEDs (id TEXT, name TEXT, config TEXT)]])
-	for i,v in ipairs(LEDs) do
-		local cursor,errorString = conn:execute(("select * from LEDs where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE LEDs SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO LEDs values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
+			while row do
+				if tab[row.name] then
+					local bl = boxLoad(row.config)
+					if bl then buttons[row.name]:setConfig(bl) end
+				end
+				row = cursor:fetch (row, "a")
 			end
 			cursor:close()
 		end
 	end
 	if not c then conn:close() else return conn end
 end
-function _G.updateRelayNames(conn,c)
-	if not relays then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS Relays;]])
-	conn:execute([[CREATE TABLE Relays (id TEXT, name TEXT, config TEXT);]])
-	for i,v in ipairs(relays) do
-		local cursor,errorString = conn:execute(("select * from Relays where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE Relays SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO Relays values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO Relays values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.updateSensorNames(conn,c)
-	if not sensors then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS TempSensors;]])
-	conn:execute([[CREATE TABLE TempSensors (id TEXT, name TEXT, config TEXT);]])
-	for i,v in ipairs(sensors) do
-		local cursor,errorString = conn:execute(("select * from TempSensors where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE TempSensors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO TempSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO TempSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-
-function _G.updateDHTInfo(conn,c)
-	if not DHTs then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS DHTSensors;]])
-	conn:execute([[CREATE TABLE DHTSensors (id TEXT, name TEXT, config TEXT);]])
-	for i,v in ipairs(DHTs) do
-		local cursor,errorString = conn:execute(("select * from DHTSensors where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE DHTSensors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO DHTSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO DHTSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.DHTInfoLoad(conn,c)
-	if not DHTs then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--retrieve saved info for macscanner
-	local cursor,errorString = conn:execute([[select * from DHTSensors;]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if DHTs[row.id] then
-				local bl = boxLoad(row.config)
-				if bl then DHTs[row.id]:setConfig(bl) end
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	if not c then conn:close() else return conn end
-end
-
-function _G.updateLSensorNames(conn,c)
-	if not lightsensors then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS LightSensors;]])
-	conn:execute([[CREATE TABLE LightSensors (id TEXT, name TEXT, config TEXT);]])
-	for i,v in ipairs(lightsensors) do
-		local cursor,errorString = conn:execute(("select * from LightSensors where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE LightSensors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO LightSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO LightSensors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-
-function _G.updateStepperMotorInfo(conn,c)
-	if not stepperMotors then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS DHTSensors;]])
-	conn:execute([[CREATE TABLE StepperMotors (id TEXT, name TEXT, config TEXT);]])
-	for i,v in ipairs(stepperMotors) do
-		local cursor,errorString = conn:execute(("select * from StepperMotors where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE StepperMotors SET name='%s',config='%s' WHERE id='%s';]]):format(v:getName(),v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO StepperMotors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO StepperMotors values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.StepperMotorInfoLoad(conn,c)
-	if not stepperMotors then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--retrieve saved info for macscanner
-	local cursor,errorString = conn:execute([[select * from StepperMotors;]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if stepperMotors[row.id] then
-				local bl = boxLoad(row.config)
-				if bl then stepperMotors[row.id]:setConfig(bl) end
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-	if not c then conn:close() else return conn end
-end
-
-function _G.updateThermostatInfo(conn,c)
-	if not thermostats then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS Thermostats;]])
-	conn:execute([[CREATE TABLE Thermostats (id TEXT, config TEXT);]])
-	for i,v in ipairs(thermostats) do
-		local cursor,errorString = conn:execute(("select * from Thermostats where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE Thermostats SET config='%s' WHERE id='%s';]]):format(v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO Thermostats values('%s','%s');]]):format(v:getID(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO Thermostats values('%s','%s');]]):format(v:getID(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.updateMotionSensorsInfo(conn,c)
-	if not motionSensors then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--conn:execute([[DROP TABLE IF EXISTS MotionSensors;]])
-	conn:execute([[CREATE TABLE MotionSensors (id TEXT, config TEXT);]])
-	for i,v in ipairs(motionSensors) do
-		local cursor,errorString = conn:execute(("select * from MotionSensors where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE MotionSensors SET config='%s' WHERE id='%s';]]):format(v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO MotionSensors values('%s','%s');]]):format(v:getID(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO MotionSensors values('%s','%s');]]):format(v:getID(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-
-function _G.updateMacScannerInfo(conn,c)
-	if not macScanners then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	conn:execute([[CREATE TABLE macScanners (id TEXT, config TEXT);]])
-	for i,v in ipairs(macScanners) do
-		local cursor,errorString = conn:execute(("select * from macScanners where id='%s';"):format(v:getID()))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			if row then
-				conn:execute(([[UPDATE macScanners SET config='%s' WHERE id='%s';]]):format(v:getConfig(),v:getID()))
-			else
-				conn:execute(([[INSERT INTO macScanners values('%s','%s');]]):format(v:getID(),v:getConfig()))
-			end
-			cursor:close()
-		else
-			conn:execute(([[INSERT INTO macScanners values('%s','%s');]]):format(v:getID(),v:getConfig()))
-		end
-	end
-	if not c then conn:close() else return conn end
-end
-function _G.macscannerLoad(conn,c)
-	if not macScanners then return end
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	--retrieve saved info for macscanner
-	local cursor,errorString = conn:execute([[select * from macScanners;]])
-	if cursor then
-		row = cursor:fetch ({}, "a")
-		while row do
-			if macScanners[row.id] then
-				local bl = boxLoad(row.config)
-				if bl then macScanners[row.id]:setConfig(bl) end
-			end
-			row = cursor:fetch (row, "a")
-		end
-		cursor:close()
-	end
-
-	if not c then conn:close() else return conn end
-end
-
 
 function _G.startPollSensorEvent()
 	if not _G.pollSensorEvent then
@@ -848,8 +452,8 @@ function _G.pollSensors(p,log)
 			conn:execute([[CREATE TABLE humidity (id TEXT, name TEXT, stamp time, tdate date, ttime time, hum INTEGER)]])
 			for i,v in ipairs(DHTs) do
 				local t1,t2 = v:read()
-				local t3 = (t2 * 9 / 5  + 32)
 				if t1 then
+					local t3 = (t2 * 9 / 5  + 32)
 					if log then
 						local status,errorString = conn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName()..'_t' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t2 .. "','" .. t3 .. "')")
 						local status,errorString = conn:execute("INSERT INTO humidity values('" .. v:getID() .. "','" .. v:getName()..'_h' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")

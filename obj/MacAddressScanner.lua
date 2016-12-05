@@ -4,7 +4,7 @@ local MacScanner			= Cloneable:clone()
 	Object module handling wlan scanning and logging of mac addresses and maintaining a list of known addresses
 ]]
 
-MacScanner.updateCmd = "Request MASUp"
+MacScanner.location = 'macScanners'
 MacScanner.config = {}
 MacScanner.config.wlan 					=  "wlan0"
 MacScanner.config.updateTime 			=  120
@@ -20,7 +20,6 @@ MacScanner.knownMacs = {
 			{'01:e0:b0:19:32:14','rpi_greenhouse'}
 		}
 	]]
-MacScanner.location = 'macScanners'
 
 
 function MacScanner:setup(options)

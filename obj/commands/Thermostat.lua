@@ -34,14 +34,14 @@ Thermostat.orders={}
 
 Thermostat.orders["toggle"] = function(thermostat)
 	thermostat:toggle()
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return thermostat:toString()
 end
 
 Thermostat.orders["heatRelay"] = function(thermostat,relayID)
 	if relayID then
 		thermostat:setHeatRelay(relayID)
-		updateThermostatInfo()
+		saveObjectsInfo()
 		return ("Thermostat heating relay now set to %s."):format(thermostat:getTempSensor())
 	else
 		return "Must supply a relay ID."
@@ -51,7 +51,7 @@ end
 Thermostat.orders["coldRelay"] = function(thermostat,relayID)
 	if relayID then
 		thermostat:setCoolRelay(relayID)
-		updateThermostatInfo()
+		saveObjectsInfo()
 		return ("Thermostat cooling relay now set to %s."):format(thermostat:getCoolRelay())
 	else
 		return "Must supply a relay ID."
@@ -61,7 +61,7 @@ end
 Thermostat.orders["sensor"] = function(thermostat,sensorID)
 	if sensorID then
 		thermostat:setTempSensor(sensorID)
-		updateThermostatInfo()
+		saveObjectsInfo()
 		return ("Thermostat temp sensor now set to %s."):format(thermostat:getTempSensor())
 	else
 		return "Must supply a sensorID."
@@ -71,7 +71,7 @@ end
 Thermostat.orders["uptime"] = function(thermostat,uptime)
 	if uptime then
 		thermostat:setUpTime(tonumber(uptime))
-		updateThermostatInfo()
+		saveObjectsInfo()
 		return ("Thermostat now set to %s F."):format(thermostat:getTemp())
 	else
 		return "Must supply an uptime."
@@ -91,7 +91,7 @@ end
 Thermostat.orders["rename"] = function(thermostat,name)
 	if name then
 		thermostat:setName(name)
-		updateThermostatInfo()
+		saveObjectsInfo()
 		return string.format("Thermostat %s has been renamed %s.",relay:getID(),relay:getName())
 	else
 		return "Must supply a name to rename a Relay."
@@ -114,21 +114,21 @@ Thermostat.orders['s'] = Thermostat.orders['stat']
 
 Thermostat.orders['up'] = function(thermostat,amt)
 	thermostat:setTemp(thermostat:getTemp() + (amt or  1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat now set to %s F."):format(thermostat:getTemp())
 end
 Thermostat.orders['u'] = Thermostat.orders['up']
 
 Thermostat.orders['down'] = function(thermostat,amt)
 	thermostat:setTemp(thermostat:getTemp() - (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat now set to %s F."):format(thermostat:getTemp())
 end
 Thermostat.orders['d'] = Thermostat.orders['down']
 
 Thermostat.orders['tempset'] = function(thermostat,amt)
 	if amt then thermostat:setTemp(amt) else return "Please enter ammount with command..." end
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getTemp())
 end
 Thermostat.orders['tps'] = Thermostat.orders['tempset']
@@ -136,21 +136,21 @@ Thermostat.orders['tps'] = Thermostat.orders['tempset']
 
 Thermostat.orders['thresholdup'] = function(thermostat,amt)
 	thermostat:setTempTh(thermostat:getTempTh() + (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getTempTh())
 end
 Thermostat.orders['thu'] = Thermostat.orders['thresholdup']
 
 Thermostat.orders['thresholddown'] = function(thermostat,amt)
 	thermostat:setTempTh(thermostat:getTempTh() - (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getTempTh())
 end
 Thermostat.orders['thd'] = Thermostat.orders['thresholddown']
 
 Thermostat.orders['thresholdset'] = function(thermostat,amt)
 	if amt then thermostat:setTempTh(amt) else return "Please enter ammount with command..." end
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getTempTh())
 end
 Thermostat.orders['ths'] = Thermostat.orders['thresholdset']
@@ -158,21 +158,21 @@ Thermostat.orders['ths'] = Thermostat.orders['thresholdset']
 
 Thermostat.orders['coolthresholdup'] = function(thermostat,amt)
 	thermostat:setCoolTh(thermostat:getCoolTh() + (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getCoolTh())
 end
 Thermostat.orders['ctu'] = Thermostat.orders['coolthresholdup']
 
 Thermostat.orders['coolthresholddown'] = function(thermostat,amt)
 	thermostat:setCoolTh(thermostat:getCoolTh() - (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat cooling threshold now set to %s"):format(thermostat:getCoolTh())
 end
 Thermostat.orders['ctd'] = Thermostat.orders['coolthresholddown']
 
 Thermostat.orders['coolthresholdset'] = function(thermostat,amt)
 	if amt then thermostat:setCoolTh(amt) else return "Please enter ammount with command..." end
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat cooling threshold now set to %s"):format(thermostat:getCoolTh())
 end
 Thermostat.orders['cts'] = Thermostat.orders['coolthresholdset']
@@ -180,21 +180,21 @@ Thermostat.orders['cts'] = Thermostat.orders['coolthresholdset']
 
 Thermostat.orders['heatthresholdup'] = function(thermostat,amt)
 	thermostat:setHeatTh(thermostat:getHeatTh() + (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat threshold now set to %s"):format(thermostat:getHeatTh())
 end
 Thermostat.orders['htu'] = Thermostat.orders['heatthresholdup']
 
 Thermostat.orders['heatthresholddown'] = function(thermostat,amt)
 	thermostat:setHeatTh(thermostat:getHeatTh() - (amt or 1))
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat heating threshold now set to %s"):format(thermostat:getHeatTh())
 end
 Thermostat.orders['htd'] = Thermostat.orders['heatthresholddown']
 
 Thermostat.orders['heatthresholdset'] = function(thermostat,amt)
 	if amt then thermostat:setHeatTh(amt) else return "Please enter ammount with command..." end
-	updateThermostatInfo()
+	saveObjectsInfo()
 	return ("Thermostat heating threshold now set to %s"):format(thermostat:getHeatTh())
 end
 Thermostat.orders['hts'] = Thermostat.orders['heatthresholdset']

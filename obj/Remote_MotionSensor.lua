@@ -1,4 +1,5 @@
 local Cloneable			= require("obj.Remote_Common")
+local origin 			= require("obj.MotionSensor")
 local Sensor			= Cloneable:clone()
 --[[
 	Remote object for motion sensors attached to nodes.
@@ -6,36 +7,32 @@ local Sensor			= Cloneable:clone()
 	This also updates its current state and action.
 ]]
 
-Sensor.location = 'motionSensors'
 
-function Sensor:initialize(id,config,node)
-	if not _G.motionSensors then _G.motionSensors = {name='motionSensors'} table.insert(objects,motionSensors) objects["motionSensors"] = motionSensors end
-	if not motionSensors[id..'_'..node:getID()] then
-		self.config = {}
-		self.config.lightSensor 		= config and config.lightSensor or Sensor.config.lightSensor
-		self.config.lightSensitivity	= config and config.lightSensitivity or Sensor.config.lightSensitivity
-		self.config.button 				= config and config.button or Sensor.config.button
-		self.config.relay  				= config and config.relay or Sensor.config.relay
-		self.config.LED	   				= config and config.LED or Sensor.config.LED
-		self.config.buzzer		 		= config and config.buzzer or Sensor.config.buzzer
-		self.config.sensitivity 		= config and config.sensitivity or Sensor.config.sensitivity
-		self.config.timeOut		 		= config and config.timeOut or Sensor.config.timeOut
-		self.config.state 			= ""
-		self.config.action 			= ""
+Sensor.location = origin.location
 
+Sensor.getState = origin.getState
+Sensor.getAction = origin.getAction
+Sensor.getLightSensor = origin.getLightSensor
+Sensor.getLightSensitivity = origin.getLightSensitivity
+Sensor.getRelay = origin.getRelay
+Sensor.getLED = origin.getLED
+Sensor.getBuzzer = origin.getBuzzer
+Sensor.getSensitivity = origin.getSensitivity
+Sensor.getTimeOut = origin.getTimeOut
+Sensor.toggle = origin.toggle
+Sensor.getHTMLcontrol = origin.getHTMLcontrol
 
-		self:setID(id)
-		self:setName(id..'_'..node:getID())
-		table.insert(motionSensors,self)
-		node:addMotionSensor(self)
-	end
-end
-
-function Sensor:removeSensor()
-	motionSensors[self:getName()] = nil
-	motionSensors[self:getID()] = nil
-	while table.removeValue(motionSensors, self) do end
-	if self.node then local node=self.node self.node=nil node:removeMotionSensor(self) end
+function Sensor:setup(options)
+	self.config.lightSensor 		= config and config.lightSensor or Sensor.config.lightSensor
+	self.config.lightSensitivity	= config and config.lightSensitivity or Sensor.config.lightSensitivity
+	self.config.button 				= config and config.button or Sensor.config.button
+	self.config.relay  				= config and config.relay or Sensor.config.relay
+	self.config.LED	   				= config and config.LED or Sensor.config.LED
+	self.config.buzzer		 		= config and config.buzzer or Sensor.config.buzzer
+	self.config.sensitivity 		= config and config.sensitivity or Sensor.config.sensitivity
+	self.config.timeOut		 		= config and config.timeOut or Sensor.config.timeOut
+	self.config.state 			= ""
+	self.config.action 			= ""
 end
 
 function Sensor:setState(state)
@@ -68,29 +65,6 @@ end
 
 function Sensor:setTimeOut(amt)
 	if self.node then self.node:send(([[Mos %s setTimeOut %s]]):format(self:getID(),sensorID)) end
-end
-
-function Sensor:setID(id)
-	if self.config.id then
-		if self.node then
-			self.node.motionSensors[self.config.id] = nil
-			self.node.motionSensors[id] = self
-		end
-	end
-	self.config.id = id
-end
-
-function Sensor:setName(name)
-	if self.config.name then
-		motionSensors[self.config.name] = nil
-		if self.node then
-			self.node:send(([[Mos %s rename %s]]):format(self:getID(),name))
-			self.node.motionSensors[self.config.name] = nil
-			self.node.motionSensors[name] = self
-		end
-	end
-	self.config.name = name
-	motionSensors[self.config.name] = self
 end
 
 --- Stringifier for Cloneables.

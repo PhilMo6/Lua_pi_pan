@@ -9,7 +9,7 @@ local Buzzer			= Cloneable:clone()
 Buzzer.location = 'buzzers'
 
 function Buzzer:setup(options)
-	local pin = options[1]
+	local pin = options.pin
 	self.gpio = RPIO(pin)
 	self.gpio:set_direction('out')
 	self.gpio:write(0)

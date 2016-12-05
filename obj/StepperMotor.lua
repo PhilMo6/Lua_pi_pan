@@ -5,7 +5,6 @@ local Stepper			= Cloneable:clone()
 ]]
 
 Stepper.location = 'stepperMotors'
-Stepper.updateCmd = "Request StepMs"
 
 Stepper.seq = {{1,0,0,1},
        {1,0,0,0},

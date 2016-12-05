@@ -34,7 +34,7 @@ Feeder.orders = {}
 Feeder.orders["rename"] = function(feeder,name)
 	if name then
 		feeder:setName(name)
-		--updateFeederinfo()
+		saveObjectsInfo()
 		return string.format("Feeder %s has been renamed %s.",feeder:getID(),feeder:getName())
 	else
 		return "Must supply a name to rename a Feeder."

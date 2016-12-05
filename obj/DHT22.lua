@@ -7,7 +7,6 @@ local DHT22			= Cloneable:clone()
 	NOT APPLICABLE TO DHT11. will work on that in the future.
 ]]
 
-DHT22.updateCmd = "Request SenDHT22"
 DHT22.location = 'DHTs'
 
 function DHT22:setup(options)

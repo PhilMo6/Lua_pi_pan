@@ -1,16 +1,19 @@
 local Cloneable			= require("obj.Remote_Common")
+local origin 			= require("obj.LED")
 local LED			= Cloneable:clone()
 --[[
 	Remote object for 1 color LEDs attached to nodes.
 	Node will update the LED whenever change is detected.
 ]]
 
-LED.location = 'LEDs'
+LED.location = origin.location
+LED.toggle = origin.toggle
+LED.getHTMLcontrol = origin.getHTMLcontrol
 
 function LED:updateLastRead(v)
 	local lastread = self.lastRead
 	self.lastRead = v
-	if not self.config.blinking then self.masters and lastread ~= self.lastRead then
+	if not self.config.blinking and lastread ~= self.lastRead then
 		self:updateMasters()
 	end
 end
@@ -36,16 +39,6 @@ end
 
 function LED:test()
 	if self.node then self.node:send(([[LED %s test]]):format(self:getID())) end
-end
-
-function LED:toggle(client)
-	if self:read() == 0 then
-		self:on(client)
-		return 'on'
-	else
-		self:off(client)
-		return 'off'
-	end
 end
 
 function LED:off()

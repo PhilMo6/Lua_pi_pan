@@ -34,7 +34,7 @@ MacScanner.orders = {}
 MacScanner.orders["rename"] = function(macscanner,name)
 	if name then
 		macscanner:setName(name)
-		updateMacScannerInfo()
+		saveObjectsInfo()
 		return string.format("MacScanner %s has been renamed %s.",macscanner:getID(),macscanner:getName())
 	else
 		return "Must supply a name to rename a MacScanner."
@@ -68,7 +68,7 @@ end
 
 MacScanner.orders["toggle"] = function(macscanner)
 	macscanner:toggle()
-	updateMacScannerInfo()
+	saveObjectsInfo()
 	return macscanner:toString()
 end
 
@@ -84,7 +84,7 @@ end
 MacScanner.orders["uptime"] = function(macscanner,uptime)
 	if uptime then
 		macscanner:setUpTime(tonumber(uptime))
-		updateMacScannerInfo()
+		saveObjectsInfo()
 		return ("Macscanner update time now set to %s"):format(macscanner:getUpTime())
 	else
 		return "Must supply an uptime."
@@ -94,7 +94,7 @@ end
 MacScanner.orders["scanTime"] = function(macscanner,newtime)
 	if newtime then
 		macscanner:setScantime(tonumber(newtime))
-		updateMacScannerInfo()
+		saveObjectsInfo()
 		return ("Macscanner scan time now set to %s"):format(macscanner:getScantime())
 	else
 		return "Must supply an uptime."
@@ -104,7 +104,7 @@ end
 MacScanner.orders["timeout"] = function(macscanner,newtime)
 	if newtime then
 		macscanner:setTimeout(tonumber(newtime))
-		updateMacScannerInfo()
+		saveObjectsInfo()
 		return ("Macscanner time out now set to %s"):format(macscanner:getTimeout())
 	else
 		return "Must supply an time."
@@ -114,7 +114,7 @@ end
 MacScanner.orders["wlan"] = function(macscanner,wlan)
 	if wlan then
 		macscanner:setWlan(wlan)
-		updateMacScannerInfo()
+		saveObjectsInfo()
 		return ("Macscanner wlan now set to %s"):format(macscanner:getWlan())
 	else
 		return "Must supply an wlan."

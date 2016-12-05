@@ -19,7 +19,7 @@ Config.SQLFile						= "/home/pi/luaTest.db"
 Config.sensorUpdateTime 			= 30--how often do sensors update
 Config.sensorLogTime 				= 60*5--how often do sensors have their data logged into sql database
 Config.mailCheckTime 				= 60--if setup how often does mail get checked fro commands
---default gpio mode is Board so assign pins accordingly
+--pins are assigned by gpio number
 --see modules at obj/"name".lua for options
 Config.lightSensorPins				= {}--pinValue
 Config.LEDPins 						= {}--pinValue
@@ -36,17 +36,21 @@ Config.thermostatStartup			= {}--table value containing id and optional config t
 Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
 Config.macScannerStartup			= {}--table value containing id and optional config table
 --[[examples:WARNING DO NOT SET ANY GIVEN PIN ON MORE THEN 1 OBJECT
-Config.lightSensorPin		= {15}
-Config.LEDPins 			= {18,27}
-Config.RBG_LEDPins 		= {{14,17,27}}
-Config.buzzerPins 		= {22}
-Config.buttonPins 		= {8,24,25,23}
-Config.relayPins			= {9,10,20,21}
-Config.DHT22Pins			= {11}
-Config.stepperPins			= {{23,22,27,17}}
-Config.thermostatStartup	= {{id='room'},{'house',{tempSensor="house",heatingRelay='houseHeater',coolingRelay='none',state='heating'}}}
-Config.motionSensorStartup = {{id='roomLight',pin=19}}
-Config.macScannerStartup	= {{id='macScanner'}}
+Config.lightSensorPins				= {15}--pinValue
+Config.LEDPins 						= {17,27}--pinValue
+Config.RBG_LEDPins 					= {}--tableValue containing 3 pins
+Config.buzzerPins 					= {22}--pinValue
+Config.buttonPins 					= {{11,0},{13,0},{12,0},{10,0},{14,1},{16,1}}--pinValue or table with pinValue and options. options are pin and edge
+Config.M_buttonPins 				= {}--table value containing 1 pin and number of buttons
+Config.relayPins					= {20,21,24,25}--pinValue
+Config.DHT22Pins					= {}--pinValue
+Config.stepperPins					= {}--table value containing 4 pins
+Config.servoPins					= {}--pinValue
+Config.motorPins					= {}--table value containing 2 pins and optional pmw setting
+Config.thermostatStartup			= {{'room'},{'doghouse',{tempSensor="doghouse",heatingRelay='doghouseHeater',coolingRelay='none',state='heating'}}}--table value containing id and optional config table
+Config.motionSensorStartup			= {{'test',18}}--table value containing id, sensor pin, and optional config table
+Config.macScannerStartup			= {}--table value containing id and optional config table
+
 ]]
 
 Config.tcpPort						= 9696

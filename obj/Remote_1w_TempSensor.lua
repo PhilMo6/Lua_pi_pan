@@ -1,11 +1,13 @@
-local Cloneable			= require("obj.1w_TempSensor")
+local Cloneable			= require("obj.Remote_Common")
+local origin			= require("obj.1w_TempSensor")
 local Sensor			= Cloneable:clone()
 --[[
 	Remote object for 1 wire sensors attached to nodes.
 	Node will update the remote sensors last read as the sensors tempature changes.
 ]]
 
-Sensor.location = 'sensors'
+Sensor.location = origin.location
+Sensor.getHTMLcontrol = origin.getHTMLcontrol
 
 --- Stringifier for Cloneables.
 function Sensor:toString()

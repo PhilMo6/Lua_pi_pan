@@ -7,7 +7,6 @@ local Relay			= Cloneable:clone()
 	Functions provided are on, off, toggle, forceOn and forceOff(in baseObj module)
 ]]
 
-Relay.updateCmd = "Request RlUp"
 Relay.location = 'relays'
 
 function Relay:setup(options)

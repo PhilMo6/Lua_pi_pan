@@ -5,7 +5,6 @@ local LED			= Cloneable:clone()
 	Several functions are provided such as basic on, off, toggle, and blink functions and also force on and off which is located in the baseObj
 ]]
 
-LED.updateCmd = "Request LEDUp"
 LED.location = 'LEDs'
 
 function LED:setup(options)
@@ -23,7 +22,7 @@ function LED:getHTMLcontrol()
 	([[<button onclick="myFunction('L %s on')">On</button >]]):format(name),
 	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(name),
 	([[<button onclick="myFunction('L %s test')">Test</button >]]):format(name),
-	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
+	([[<button onclick="myFunction('L %s re','%s')">Rename</button >]]):format(name,name),
 	name
 	)
 end

@@ -27,7 +27,7 @@ function Node:initialize(client)
 	end, 10, false))
 	table.insert(nodes,self)
 	nodes[addr] = self
-	setNode(addr)
+	--setNode(addr)
 end
 
 function Node:getHTMLcontrol()
@@ -41,7 +41,6 @@ end
 function Node:addObject(obj)
 	if self.objects[obj.location] == nil then
 		self.objects[obj.location] = {}
-		--self:send('Request StepMs')
 	end
 	if self.objectIDs[obj:getID()] == nil then
 		self.objectIDs[obj:getID()] = obj

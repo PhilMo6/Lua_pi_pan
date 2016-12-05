@@ -1,61 +1,15 @@
 local Cloneable			= require("obj.Remote_Common")
+local origin 			= require("obj.StepperMotor")
 local Stepper			= Cloneable:clone()
 --[[
 	Object used to drive stepper motors. Must be connect though a driver board.
 ]]
 
-Stepper.location = 'stepperMotors'
-
---- Constructor for instance-style clones.
-function Stepper:initialize(id,name,node)
-	if not _G.stepperMotors then _G.stepperMotors = {name='stepperMotors'} table.insert(objects,stepperMotors) objects["stepperMotors"] = stepperMotors end
-	if not stepperMotors[name..'_'..node:getID()] then
-		self.config = {speed=.001}
-		self.step = 1
-		self:setID(id)
-		self:setName(name..'_'..node:getID())
-		node:addStepperMotors(self)
-		table.insert(stepperMotors,self)
-	end
-end
-
-function Stepper:removeSelf()
-	stepperMotors[self:getName()] = nil
-	while table.removeValue(stepperMotors, self) do end
-	if self.node then local node=self.node self.node=nil node:removeStepperMotor(self) end
-end
+Stepper.location = origin.location
+Stepper.getHTMLcontrol = origin.getHTMLcontrol
 
 function Stepper:getDirection()
 	return (self.stepping or 'stopped')
-end
-
-function Stepper:setID(id)
-	if self.config.id then
-		if self.node then
-			self.node.stepperMotors[self.config.id] = nil
-			self.node.stepperMotors[id] = self
-		end
-	end
-	self.config.id = id
-end
-
-function Stepper:setName(name)
-	if self.config.name then
-		stepperMotors[self.config.name] = nil
-		if self.node then
-			self.node:send(([[Stm %s rename %s]]):format(self:getID(),name))
-			self.node.stepperMotors[self.config.name] = nil
-			self.node.stepperMotors[name] = self
-		end
-	end
-	self.config.name = name
-	stepperMotors[self.config.name] = self
-end
-
-function Stepper:setupPins()
-end
-
-function Stepper:setPins()
 end
 
 function Stepper:off()

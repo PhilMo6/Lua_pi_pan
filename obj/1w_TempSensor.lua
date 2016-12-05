@@ -8,10 +8,14 @@ local Sensor			= Cloneable:clone()
 
 Sensor.location = 'sensors'
 
+function Sensor:setup(options)
+	self.config.w_id = options.w_id
+end
+
 function Sensor:read()
 	local tempC = 0
 	local tempF = 0
-	local sensor = io.open("/sys/bus/w1/devices/" .. self:getID() .. "/w1_slave","r")
+	local sensor = io.open("/sys/bus/w1/devices/" .. self.config.w_id .. "/w1_slave","r")
 	if sensor then
 		local raw = sensor:read('*all')
 		sensor:close()
@@ -20,7 +24,7 @@ function Sensor:read()
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
 			tempF = tempC * 9 / 5  + 32
-			return tempC,tempF,(tempF <= 32 and "read error low" or tempF >= 180 and "read error high" or nil)
+			return tempC,tempF
 		else
 			return tempC,tempF,"read error"
 		end

@@ -39,7 +39,6 @@ function Scheduler:isWaiting()
 	return #Scheduler.events > 0
 end
 
-
 --- Empties the Scheduler.
 function Scheduler:clear()
 	Scheduler.events = {}

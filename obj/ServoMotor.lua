@@ -4,7 +4,6 @@ local Servo			= Cloneable:clone()
 	Object used to drive 3 position Servo motors.
 ]]
 
-Servo.updateCmd = "Request ServoMs"
 Servo.location = 'servoMotors'
 
 Servo.config = {}
@@ -14,7 +13,8 @@ Servo.config.pmwR = 192
 Servo.config.pmwC = 2000
 
 
-function Relay:setup(options)
+function Servo:setup(options)
+	require("source.wpiLuaWrap")
 	local pin,pmwr,pmwc = options.pin,options.pmwr,options.pmwc
 	self.config.pin = pin
 	self.config.pmwR = pmwr or Servo.config.pmwR

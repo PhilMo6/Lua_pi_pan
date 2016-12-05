@@ -33,7 +33,7 @@ Relay.orders = {}
 Relay.orders["rename"] = function(relay,name,void,user)
 	if name then
 		relay:setName(name)
-		updateRelayNames()
+		saveObjectsInfo()
 		return string.format("Relay %s has been renamed %s.",relay:getID(),relay:getName())
 	else
 		return "Must supply a name to rename a Relay."

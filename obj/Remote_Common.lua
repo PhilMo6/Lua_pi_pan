@@ -17,7 +17,7 @@ function Common:initialize(id,config,node)
 end
 
 function Common:read()
-	if not self.config.lastRead then
+	if not self:getLastRead() then
 		return 'error'
 	end
 	return self:getLastRead()

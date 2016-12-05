@@ -1,14 +1,15 @@
 local Cloneable			= require("obj.Remote_Common")
-local lsensor 			= require("obj.LightSensor")
+local origin 			= require("obj.LightSensor")
 local Sensor			= Cloneable:clone()
 --[[
 	Remote object for light sensors attached to nodes.
 	Node will update the remote sensors last read as the sensors light level changes.
 ]]
 
-Sensor.location = 'lightsensors'
+Sensor.location = origin.location
+Sensor.getHTMLcontrol = origin.getHTMLcontrol
+Sensor.lightLevel = origin.lightLevel --use function from non remote object to save memory
 
-Sensor.lightLevel = lsensor.lightLevel --use function from non remote object to save memory
 
 function Sensor:getLastRead()
 	return self.lastRead,self:lightLevel(self.lastRead),self.lastError

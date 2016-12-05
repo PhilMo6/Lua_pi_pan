@@ -1,11 +1,27 @@
 local Cloneable			= require("obj.Remote_Common")
-local mscanner			= require("obj.MacScanner")
+local origin 			= require("obj.MacAddressScanner")
 local MacScanner			= Cloneable:clone()
 --[[
 	Object module handling responses from remote mac address scanners
 ]]
 
-MacScanner.location = 'macScanners'
+MacScanner.location = origin.location
+MacScanner.getHTMLcontrol = origin.getHTMLcontrol
+MacScanner.getConfig = origin.getConfig
+MacScanner.archive = origin.archive
+MacScanner.getWlan = origin.getWlan
+MacScanner.getUpTime = origin.getUpTime
+MacScanner.getTimeout = origin.getTimeout
+MacScanner.getScantime = origin.getScantime
+MacScanner.getState = origin.getState
+MacScanner.getStatus = origin.getStatus
+MacScanner.getMacTable = origin.getMacTable
+MacScanner.getFoundStatus = origin.getFoundStatus
+MacScanner.getLostStatus = origin.getLostStatus
+MacScanner.getKnownStatus = origin.getKnownStatus
+MacScanner.getIDInfo = origin.getIDInfo
+MacScanner.read = origin.read
+
 
 function MacScanner:setup(options)
 	if not _G.macTable then _G.macTable = {} end
@@ -18,22 +34,6 @@ function MacScanner:setup(options)
 	self.config.timeout							= (options and options.timeout or MacScanner.config.timeout)
 	self.config.scanTime						= (options and options.scanTime or MacScanner.config.scanTime)
 end
-
-MacScanner.getConfig = mscanner.getConfig
-MacScanner.archive = mscanner.archive
-MacScanner.getWlan = mscanner.getWlan
-MacScanner.getUpTime = mscanner.getUpTime
-MacScanner.getTimeout = mscanner.getTimeout
-MacScanner.getScantime = mscanner.getScantime
-MacScanner.getState = mscanner.getState
-MacScanner.getStatus = mscanner.getStatus
-MacScanner.getMacTable = mscanner.getMacTable
-MacScanner.getFoundStatus = mscanner.getFoundStatus
-MacScanner.getLostStatus = mscanner.getLostStatus
-MacScanner.getKnownStatus = mscanner.getKnownStatus
-MacScanner.getIDInfo = mscanner.getIDInfo
-MacScanner.read = mscanner.read
-
 
 function MacScanner:runLogic(newMacs)
 	for addr,timeout in pairs(newMacs) do

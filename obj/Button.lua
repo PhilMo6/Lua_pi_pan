@@ -8,18 +8,19 @@ local Button			= Cloneable:clone()
 
 Button.location = 'buttons'
 Button.states = {
-	[0]='released'
+	[0]='released',
 	[1]='open',
 	[2]='pressed',
 	[3]='held',
 }
 
 function Button:setup(options)
-	local pin,edge = options[1],options.edge
+	local pin,edge = options.pin,options.edge
 	self.gpio = RPIO(pin)
 	self.gpio:set_direction('in')
 	self.config.pin = pin
 	self.config.edge = edge
+	self.config.state = 1
 end
 
 function Button:getHTMLcontrol()
@@ -38,10 +39,10 @@ end
 function Button:resetState()
 	if self.config.state > 1 then
 		self.config.state = 0
-		logEvent(self:getName(),self:getName() .. ' '..self:getState()
+		logEvent(self:getName(),self:getName() .. ' '..self:getState())
 	elseif self.config.state ~= 1 then
 		self.config.state = 1
-		logEvent(self:getName(),self:getName() .. ' '..self:getState()
+		logEvent(self:getName(),self:getName() .. ' '..self:getState())
 	end
 end
 
@@ -57,7 +58,7 @@ function Button:read()
 		self:resetState()
 	end
 	self:updateLastRead(r)
-	return self:getLastRead()
+	return self:getState(),self:getLastRead()
 end
 
 function Button:press(f,client)
@@ -65,7 +66,7 @@ function Button:press(f,client)
 	if not self.pressed then
 		self.read = function()
 			self.read = Button.read
-			self.config.lastRead = self.config.edge == 0 and 1 or 0
+			self.config.lastRead = self.config.edge
 			self.pressed = nil
 			logEvent(self:getName(),self:getName() .. ' press:pressed')
 			if self.masters then
@@ -83,8 +84,8 @@ end
 
 --- Stringifier for Cloneables.
 function Button:toString()
-	local r = self:read()
-	return string.format("[Button] %s %s %s",self:getID(),self:getName(),r)
+	local r,s = self:getLastRead(),self:getState()
+	return string.format("[Button] %s %s %s %s",self:getID(),self:getName(),r,s)
 end
 
 return Button

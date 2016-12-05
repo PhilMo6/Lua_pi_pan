@@ -12,7 +12,6 @@ local Button = require("obj.Button")
 ]]
 
 Sensor.location = 'motionSensors'
-Sensor.updateCmd = "Request MosUp"
 Sensor.config = {}--default config
 Sensor.config.lightSensor 		= "lightSensor"
 Sensor.config.lightSensitivity 	= 300
@@ -24,11 +23,11 @@ Sensor.config.sensitivity 		= 35
 Sensor.config.timeOut			= 30
 
 
-function MacScanner:setup(options)
+function Sensor:setup(options)
 	local pin = options.pin
 	local button
 	if pin then
-		button = Button:new(pin)
+		button = Button:new(pin,{pin=pin,edge=0})
 	end
 	self.config.lightSensor 		= options and options.lightSensor or Sensor.config.lightSensor
 	self.config.lightSensitivity	= options and options.lightSensitivity or Sensor.config.lightSensitivity
@@ -211,27 +210,6 @@ end
 
 function Sensor:getAction()
 	return self.config.action or 'standby'
-end
-
-
-function Sensor:setConfig(config)
-	if not config then return end
-	local up = nil
-	for i,v in pairs(self.config) do
-		if config[i] and config[i] ~= v then
-			if i == 'name' then
-				self:setName(config[i])
-			elseif i == 'id' then
-				self:setID(config[i])
-			else
-				--logEvent(self:getName(),self:getName() .. ' setOptions:'..i..:options[i])
-				self.config[i] = config[i]
-			end
-			up = true
-		end
-	end
-	self:setAction()
-	if up then	self:updateMasters() end
 end
 
 function Sensor:setLightSensor(sensorID)

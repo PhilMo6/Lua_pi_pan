@@ -11,7 +11,7 @@ function Button:execute(input,user,par)
 	local input1, input2, input3 ,input4 = words[1],words[2],words[3],words[4]
 
 	if input2 then--input2 should be the id(pin) or index of a Button
-		local button = buttons[input2] or buttons[tonumber(input2)] or buttonPins[tonumber(input2)] and buttons[buttonPins[tonumber(input2)]]
+		local button = buttons[input2] or buttons[tonumber(input2)]
 		if button then --That is a vaild Button
 			if input3 then--input3 should be the order to execute
 				if Button.orders[input3] then--This is a valid order
@@ -34,7 +34,7 @@ Button.orders = {}
 Button.orders["rename"] = function(button,name)
 	if name then
 		button:setName(name)
-		updateButtonNames()
+		saveObjectsInfo()
 		return string.format("Button %s has been renamed %s.",button:getID(),button:getName())
 	else
 		return "Must supply a name to rename a Button."
