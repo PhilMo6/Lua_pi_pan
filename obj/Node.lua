@@ -1,5 +1,5 @@
 local Cloneable						= require("obj.Cloneable")
-local Node						= Cloneable.clone()
+local Node							= Cloneable.clone()
 --[[
 	Node client object.
 	Applied by a master to a client object when a client ip address matches a configured node in the main config file.
@@ -44,9 +44,9 @@ function Node:addObject(obj)
 	end
 	if self.objectIDs[obj:getID()] == nil then
 		self.objectIDs[obj:getID()] = obj
-		self.objects[obj.location][v:getName()] = obj
+		self.objects[obj.location][obj:getName()] = obj
 		table.insert(self.objects[obj.location], obj)
-		motor.node = self
+		obj.node = self
 	end
 end
 function Node:removeObject(obj)
@@ -54,7 +54,8 @@ function Node:removeObject(obj)
 		self.objectIDs[obj:getID()] = nil
 		self.objects[obj.location][obj:getName()] = nil
 		while table.removeValue(self.objects[obj.location], obj) do end
-		if obj.node then obj.node = nil obj:removeSelf() end
+		if obj.masters then obj:removeMaster(self) end
+		if obj.node and obj.node == self then obj.node = nil obj:removeSelf() end
 		if #self.objects[obj.location] == 0 then
 			self.objects[obj.location] = nil
 		end

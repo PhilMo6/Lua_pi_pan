@@ -9,6 +9,7 @@ local Sensor			= Cloneable:clone()
 Sensor.location = 'sensors'
 
 function Sensor:setup(options)
+	startPollSensorEvent()
 	self.config.w_id = options.w_id
 end
 

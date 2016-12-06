@@ -29,7 +29,7 @@ function Response:subexecute(input,user,par)
 	local words = string.Words(input)
 	local input1, input2, input3 ,input4,input5 = words[1],words[2],words[3],words[4],words[5]
 	if Response.orders[input2] then--This is a valid order
-		return Response.orders[input2](input,input1,user)
+		return Response.orders[input2](input,user)
 	else
 		return "That is not a vaild order."
 	end
@@ -42,11 +42,11 @@ Response.orders["objectUpdate"] = function(input,user)
 	if user.node then
 		local data = string.match(input, '|(.+)|')
 		if data then
-			local loadedData = boxLoad(data)
+			local loadedData = loadData(data)
 			if loadedData then
 				for i,v in ipairs(loadedData) do
 					if v.id and v.config then
-						local obj = user.node.objectIds[v.id]
+						local obj = user.node.objectIDs[v.id]
 						if obj then
 							obj.lastup = tonumber(loadedData.stamp)
 							obj:setConfig(v.config)
@@ -63,7 +63,7 @@ Response.orders["objects"] = function(input,user)
 	if user.node then
 		local data = string.match(input, '|(.+)|')
 		if data then
-			local objects = boxLoad(data)
+			local objects = loadData(data)
 			if objects then
 				if objects.stepperMotors then
 					for i,v in ipairs(objects.stepperMotors) do

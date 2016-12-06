@@ -6,6 +6,7 @@ local sensor			= Cloneable:clone()
 ]]
 
 function sensor:setup(options)
+	startPollSensorEvent()
 	self:read()
 end
 

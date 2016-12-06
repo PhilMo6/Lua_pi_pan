@@ -8,6 +8,7 @@ local Sensor			= Cloneable:clone()
 
 Sensor.location = origin.location
 Sensor.getHTMLcontrol = origin.getHTMLcontrol
+Sensor.getLastRead = origin.getLastRead
 
 --- Stringifier for Cloneables.
 function Sensor:toString()

@@ -9,7 +9,8 @@ function Common:initialize(id,options)
 	if not _G[self.location][id] then
 		self.config = {lastRead=false}
 		self:setID()
-		self:setName(self.location..'_'..id)
+		self:setName(options and options.name or self.location..'_'..id)
+		self.sID = 'sID'..id
 		table.insert(_G[self.location],self)
 		if self.setup then self:setup(options) end
 	end

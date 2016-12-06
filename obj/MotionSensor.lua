@@ -320,8 +320,9 @@ end
 function Sensor:getStatus()
 	local status = ""
 	for i,v in pairs(self.config) do
+		local ty = type(v)
 		status = string.format([[%s
-%s:%s]],status,i,v)
+%s:%s]],status,i,(ty == 'string' and v or ty == 'number' and v or ty == 'boolean' and (v == true and 'true' or 'false') ))
 	end
 	return string.format("%s%s",self:toString(),status)
 end

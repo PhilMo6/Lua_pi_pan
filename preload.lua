@@ -373,18 +373,22 @@ end
 function _G.saveObjectsInfo(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
 	for i,tab in ipairs(objects) do
+		local tabName = string.upper(tab.name)
 		--conn:execute([[DROP TABLE IF EXISTS LEDs;]])
-		conn:execute(([[CREATE TABLE %s (id TEXT, name TEXT, config TEXT)]]):format(string.upper(tab.name)))
+		conn:execute(([[CREATE TABLE %s (sID TEXT, id TEXT, name TEXT, config TEXT)]]):format(tabName))
 		for i,v in ipairs(tab) do
-			local cursor,errorString = conn:execute(("select * from %s where name='%s';"):format(v:getName(),string.upper(tab.name)))
-			if cursor then
-				local row = cursor:fetch ({}, "a")
-				if row then
-					conn:execute(([[UPDATE %s SET id='%s',config='%s' WHERE name='%s';]]):format(v:getID(),v:getConfig(),v:getName(),string.upper(tab.name)))
-				else
-					conn:execute(([[INSERT INTO %s values('%s','%s','%s');]]):format(v:getID(),v:getName(),v:getConfig(),string.upper(tab.name)))
+			if not v.node then
+				sID = v.sID
+				local cursor,errorString = conn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
+				if cursor then
+					local row = cursor:fetch ({}, "a")
+					if row then
+						conn:execute(([[UPDATE %s SET id='%s',name='%s',config='%s' WHERE sID='%s';]]):format(tabName,v:getID(),v:getName(),v:getConfig(),sID))
+					else
+						conn:execute(([[INSERT INTO %s values('%s','%s','%s','%s');]]):format(tabName,sID,v:getID(),v:getName(),v:getConfig()))
+					end
+					cursor:close()
 				end
-				cursor:close()
 			end
 		end
 	end
@@ -393,17 +397,20 @@ end
 function _G.loadObjectsInfo(conn,c)
 	if not conn then conn = env:connect(SQLFile) else c = true end
 	for i,tab in ipairs(objects) do
-		local cursor,errorString = conn:execute(([[select * from %s]]):format(string.upper(tab.name)))
-		if cursor then
-			local row = cursor:fetch ({}, "a")
-			while row do
-				if tab[row.name] then
-					local bl = boxLoad(row.config)
-					if bl then buttons[row.name]:setConfig(bl) end
+		local tabName = string.upper(tab.name)
+		for i,v in ipairs(tab) do
+			if not v.node then
+				sID = v.sID
+				local cursor,errorString = conn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
+				if cursor then
+					local row = cursor:fetch ({}, "a")
+					if row then
+						local bl = loadData(row.config)
+						if bl then v:setConfig(bl) end
+					end
+					cursor:close()
 				end
-				row = cursor:fetch (row, "a")
 			end
-			cursor:close()
 		end
 	end
 	if not c then conn:close() else return conn end

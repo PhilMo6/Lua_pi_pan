@@ -236,12 +236,12 @@ function Server:ping(client)
 	client:send('Ping')
 	if client.node and not client.node.ping then
 		client.node.ping = Event:new(function()--wait 30 seconds for response
-			client.node:removeNode()
+			client.node:removeSelf()
 		end, 30, false)
 		Scheduler:queue(client.node.ping)
 	elseif client.master and not client.master.ping then
 		client.master.ping = Event:new(function()--wait 30 seconds for response
-			client.master:removeMaster()
+			client.master:removeSelf()
 		end, 30, false)
 		Scheduler:queue(client.master.ping)
 	end

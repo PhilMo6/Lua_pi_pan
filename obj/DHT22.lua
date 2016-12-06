@@ -14,6 +14,7 @@ function DHT22:setup(options)
 	self.config.pin = pin
 	require("source.wpiLuaWrap")
 	self:read()
+	startPollSensorEvent()
 end
 
 function DHT22:read()

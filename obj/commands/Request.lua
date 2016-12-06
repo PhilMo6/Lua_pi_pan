@@ -35,12 +35,13 @@ Request.orders["objectUpdate"] = function(ID,user)
 		local date = time.year.."-"..time.month.."-"..time.day
 		time = time.hour..":"..time.min..":"..time.sec
 		local stamp = os.time(os.date("*t"))
-		data = ("%s |return {stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
+		data = ("%s |{stamp='%s',date='%s',time='%s'"):format(data,stamp,date,time)
 		local obj = objectIDs[ID]
 		data = ([[%s,{id='%s',config=%s}]]):format(data,obj:getID(),obj:getConfig())
 		data = ("%s}|"):format(data)
-	return data
+		return data
 	end
+	return false
 end
 
 Request.orders["objects"] = function(objs,_,user)
@@ -57,13 +58,13 @@ Request.orders["objects"] = function(objs,_,user)
 			objs[v.name] = true
 		end
 	end
-	local data = ("Response objects |return {id='%s'"):format(mainID)
-	for i,obj in ipairs(objects) do
-		if objs[obj.name] then
-			data = ("%s,%s={'void'"):format(obj.name)
-			for i,v in ipairs(v) do
+	local data = ("Response objects |{id='%s'"):format(mainID)
+	for i,tab in ipairs(objects) do
+		if objs[tab.name] then
+			data = ("%s,%s={'void'"):format(data,tab.name)
+			for i,v in ipairs(tab) do
 				if not user.node or not v:isNode(user.node) then
-					data = ("%s,{name='%s',id='%s',config='%s'}"):format(data,v:getName(),v:getID(),v:getConfig(true))
+					data = ("%s,{name='%s',id='%s',config=%s}"):format(data,v:getName(),v:getID(),v:getConfig(true))
 					if user.master then user.master:addObject(v) end
 				end
 			end

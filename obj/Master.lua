@@ -1,5 +1,5 @@
 local Cloneable						= require("obj.Node")
-local Master						= Cloneable.clone()
+local Master						= Cloneable:clone()
 --[[
 	Master client object.
 	Applied by a node to a client object when a clients ip address matches a configured master in the main config file.
@@ -17,6 +17,22 @@ function Master:initialize(client)
 	table.insert(masters,self)
 	masters[addr] = self
 	runningServer:ping(self)
+end
+
+function Master:addObject(obj)
+	if self.objects[obj.location] == nil then
+		self.objects[obj.location] = {}
+	end
+	if self.objectIDs[obj:getID()] == nil then
+		self.objectIDs[obj:getID()] = obj
+		self.objects[obj.location][obj:getName()] = obj
+		table.insert(self.objects[obj.location], obj)
+		obj:addMaster(self)
+	end
+end
+
+function Master:getID()
+	return masterList[self.ip].id
 end
 
 function Master:toString()

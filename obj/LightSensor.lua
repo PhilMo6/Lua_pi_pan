@@ -30,6 +30,7 @@ function Sensor:setup(options)
 	local pin = options.pin
 	self.config.pin = pin
 	self.gpio = RPIO(pin)
+	startPollSensorEvent()
 end
 
 function Sensor:read()

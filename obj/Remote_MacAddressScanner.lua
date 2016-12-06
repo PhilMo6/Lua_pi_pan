@@ -23,6 +23,21 @@ MacScanner.getIDInfo = origin.getIDInfo
 MacScanner.read = origin.read
 
 
+function MacScanner:initialize(id,name,config,foundMacs,lostMacs,node)
+	if not _G[self.location] then _G[self.location] = {name=self.location} table.insert(objects,_G[self.location]) objects[self.location] = _G[self.location] end
+	if not _G[self.location][id] then
+		self.config = config
+		self.foundMacs = foundMacs
+		self.lostMacs = lostMacs
+		self:setID(id)
+		self:setName(confg.name..'_'..node:getID())
+		self.sID = 'sID'..id
+		table.insert(_G[self.location],self)
+		node:addObject(self)
+		if self.setup then self:setup(config) end
+	end
+end
+
 function MacScanner:setup(options)
 	if not _G.macTable then _G.macTable = {} end
 	self.foundMacs = {}
@@ -98,16 +113,12 @@ function MacScanner:setConfig(config,foundMacs,lostMacs)
 	if lostMacs then self.lostMacs = lostMacs end
 	for i,v in pairs(self.config) do
 		if config[i] and config[i] ~= v then
-			if i == 'id' then
-				macScanners[self.config.id] = nil
-				macScanners[config[i]] = self
-				self.node.macScanners[self.config.id] = nil
-				self.node.macScanners[config[i]] = self
-			elseif i == 'name' then
-				macScanners[self.config.name] = nil
-				macScanners[config[i]] = self
-				self.node.macScanners[self.config.name] = nil
-				self.node.macScanners[config[i]] = self
+			if i == 'name' and v ~= config[i]..'_'..self.node:getID() then
+				self:setName(config[i])
+			elseif i == 'id' then
+				self:setID(config[i])
+			elseif i == 'lastRead' then
+				self:updateLastRead(config[i])
 			elseif i == 'macTable' then
 				self:runLogic(config[i])
 			else
