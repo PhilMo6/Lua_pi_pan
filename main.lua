@@ -44,7 +44,7 @@ if sensors then
 			local t1,t2,er = v:read()
 			if er then erC = erC + 1 end
 		end
-		if erC == 4 then sensors[i] = nil sensors[v:getID()] = nil sensors[v:getName()] = nil v = nil end
+		if erC == 4 then v:removeSelf() end
 	end
 end
 
