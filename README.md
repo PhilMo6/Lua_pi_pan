@@ -31,7 +31,7 @@ MacAddressScanner.lua (uses monitor mode capable wifi to capture packets with ts
 MotionSensor.lua (creates button for PIR motion sensor and starts event to look for trigger events on button, if set this module will turn on relay/led/buzzer upon being triggered)
 Multi_Button.lua (single pin capacitive button. This is still in testing but the concept is mostly in place.)
 Relay.lua (basic relay with reverse on off pin logic(high pin = off low pin = on))
-Stepper.lua (stepper motor, NOT COMPLETED!)
+Stepper.lua
 Thermostat.lua (checks for temperature and runs logic to maintain temperature to within its parameters)
 
 For more info on loading modules see the config.lua file for its specific configuration requirements and examples
@@ -58,8 +58,8 @@ sqlite https://sqlite.org/
 
 As well as the following libraries.
 lua-sql-sqlite3
-lua-socket
-rpi-gpio
+lua-socket  
+lua-rpio
 lua-pop3
 lua-imap4
 
