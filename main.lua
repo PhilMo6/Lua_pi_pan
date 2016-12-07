@@ -38,7 +38,9 @@ conn:close() -- Close the database file connection object
 --do 4 reads on all sensors to prep them for accurate readings
 --weed out non functional sensors
 if sensors then
-	for i,v in ipairs(sensors) do
+local scheck = {}
+for i,v in ipairs(sensors) do scheck[i] = v end
+	for i,v in ipairs(scheck) do
 		local erC = 0
 		for i=1,4 do
 			local t1,t2,er = v:read()
@@ -47,7 +49,6 @@ if sensors then
 		if erC == 4 then v:removeSelf() end
 	end
 end
-
 
 --send message to main email to clear command buffer
 local msg = ("Startup time:%s\n"):format(os.date('%c'))

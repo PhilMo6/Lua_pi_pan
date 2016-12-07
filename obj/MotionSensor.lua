@@ -27,7 +27,7 @@ function Sensor:setup(options)
 	local pin = options.pin
 	local button
 	if pin then
-		button = Button:new(pin,{pin=pin,edge=0})
+		button = Button:new(pin,{pin=pin,edge=1})
 	end
 	self.config.lightSensor 		= options and options.lightSensor or Sensor.config.lightSensor
 	self.config.lightSensitivity	= options and options.lightSensitivity or Sensor.config.lightSensitivity
@@ -41,7 +41,6 @@ function Sensor:setup(options)
 	self.config.action = 'standby'
 
 	self.checks = 0
-	self.onTime = os.time()
 
 	local sen = self
 	Scheduler:queue(Event:new(function()

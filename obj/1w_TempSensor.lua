@@ -11,6 +11,7 @@ Sensor.location = 'sensors'
 function Sensor:setup(options)
 	startPollSensorEvent()
 	self.config.w_id = options.w_id
+	_G[self.location][self.config.w_id] = self
 end
 
 function Sensor:read()
@@ -21,6 +22,7 @@ function Sensor:read()
 		local raw = sensor:read('*all')
 		sensor:close()
 		tempC = string.match(raw,'t=(%d+)')
+		if not tempC then tempC = string.match(raw,'t=([%+%-]%d+)') end
 		if tempC then
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)

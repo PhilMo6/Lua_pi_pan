@@ -58,7 +58,7 @@ function Button:read()
 		self:resetState()
 	end
 	self:updateLastRead(r)
-	return self:getState(),self:getLastRead()
+	return self:getLastRead()
 end
 
 function Button:press(f,client)
