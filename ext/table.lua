@@ -31,35 +31,6 @@ function table.savetoString(t)
 	return txt
 end
 
-function table.writetoString(t,pre)
-	if not pre then pre = '' end
-	local txt = pre.."{"
-	local start = nil
-	for i,v in pairs(t) do
-		if start then txt = ([[%s, %s ]]):format(txt,'\n') else start = true end
-		local t1 = type(i)
-		if t1 == "string" then
-			txt = ([[%s%s%s = ]]):format(txt,pre,i)
-		elseif t1 == "number" then
-			txt = ([[%s%s[%s] = ]]):format(txt,pre,i)
-		end
-		local t2 = type(v)
-		if t2 ~= "table" then
-			if t2 == "string" then
-				txt = ([[%s"%s"]]):format(txt,v)
-			elseif t2 == "number" then
-				txt = ([[%s%s]]):format(txt,v)
-			elseif t2 == "boolean" then
-				txt = ([[%s%s]]):format(txt,v==true and 'true' or 'false')
-			end
-		else
-			txt = ([[%s%s]]):format(txt,table.writetoString(v,pre..' '))
-		end
-	end
-	txt = ([[%s}]]):format(txt,i)
-	return txt
-end
-
 function table.sortpairs(myTable)
 	local t = {}
 	for i=1,26 do
@@ -97,7 +68,6 @@ function table.median(t)
     return temp[math.ceil(#temp/2)]
   end
 end
-
 
 --- Provides a hard copy of a table, meaning all indexes within the table are copied.
 function table.copy(t)

@@ -38,8 +38,7 @@ conn:close() -- Close the database file connection object
 --do 4 reads on all sensors to prep them for accurate readings
 --weed out non functional sensors
 if sensors then
-local scheck = {}
-for i,v in ipairs(sensors) do scheck[i] = v end
+	local scheck = table.copy(sensors)
 	for i,v in ipairs(scheck) do
 		local erC = 0
 		for i=1,4 do

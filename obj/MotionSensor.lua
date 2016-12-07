@@ -31,14 +31,14 @@ function Sensor:setup(options)
 	end
 	self.config.lightSensor 		= options and options.lightSensor or Sensor.config.lightSensor
 	self.config.lightSensitivity	= options and options.lightSensitivity or Sensor.config.lightSensitivity
-	self.config.button 				= options and options.button or button and button:getName() or Sensor.config.button
+	self.config.button 				= options and options.button or button and button:getID() or Sensor.config.button
 	self.config.relay  				= options and options.relay or Sensor.config.relay
 	self.config.LED	   				= options and options.LED or Sensor.config.LED
 	self.config.buzzer		 		= options and options.buzzer or Sensor.config.buzzer
 	self.config.sensitivity 		= options and options.sensitivity or Sensor.config.sensitivity
 	self.config.timeOut		 		= options and options.timeOut or Sensor.config.timeOut
-	self.config.state = (options and options.state or 'active')
-	self.config.action = 'standby'
+	self.config.state 				= (options and options.state or 'active')
+	self.config.action 				= 'standby'
 
 	self.checks = 0
 

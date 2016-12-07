@@ -9,7 +9,7 @@ local Sensor			= Cloneable:clone()
 
 
 Sensor.location = origin.location
-
+Sensor.config = origin.config
 Sensor.getState = origin.getState
 Sensor.getAction = origin.getAction
 Sensor.getLightSensor = origin.getLightSensor
@@ -23,16 +23,16 @@ Sensor.toggle = origin.toggle
 Sensor.getHTMLcontrol = origin.getHTMLcontrol
 
 function Sensor:setup(options)
-	self.config.lightSensor 		= config and config.lightSensor or Sensor.config.lightSensor
-	self.config.lightSensitivity	= config and config.lightSensitivity or Sensor.config.lightSensitivity
-	self.config.button 				= config and config.button or Sensor.config.button
-	self.config.relay  				= config and config.relay or Sensor.config.relay
-	self.config.LED	   				= config and config.LED or Sensor.config.LED
-	self.config.buzzer		 		= config and config.buzzer or Sensor.config.buzzer
-	self.config.sensitivity 		= config and config.sensitivity or Sensor.config.sensitivity
-	self.config.timeOut		 		= config and config.timeOut or Sensor.config.timeOut
-	self.config.state 			= ""
-	self.config.action 			= ""
+	self.config.lightSensor 		= options.lightSensor or Sensor.config.lightSensor
+	self.config.lightSensitivity	= options.lightSensitivity or Sensor.config.lightSensitivity
+	self.config.button 				= options.button or Sensor.config.button
+	self.config.relay  				= options.relay or Sensor.config.relay
+	self.config.LED	   				= options.LED or Sensor.config.LED
+	self.config.buzzer		 		= options.buzzer or Sensor.config.buzzer
+	self.config.sensitivity 		= options.sensitivity or Sensor.config.sensitivity
+	self.config.timeOut		 		= options.timeOut or Sensor.config.timeOut
+	self.config.state 				= options.state
+	self.config.action 				= options.action
 end
 
 function Sensor:setState(state)

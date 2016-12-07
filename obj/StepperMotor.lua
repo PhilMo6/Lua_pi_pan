@@ -95,7 +95,7 @@ function Stepper:getSpeed()
 	return self.config.speed
 end
 
-function Stepper:stepF(count,ondone)
+function Stepper:stepF(count,ondone,up)
 	if not self.stepping then
 		boostFrequency(self,3)
 		local motor = self
@@ -113,18 +113,18 @@ function Stepper:stepF(count,ondone)
 		motor.stepping.onDone = function()
 			motor.stepping = nil
 			self.config.stepping = false
-			motor:off()
+			motor:off(up)
 			if ondone then ondone() end
 		end
 		motor.stepping.direction = "forward"
 		Scheduler:queue(motor.stepping)
-		self:updateMasters()
+		if not up then self:updateMasters() end
 		return true
 	end
 	return false
 end
 
-function Stepper:stepB(count,ondone)
+function Stepper:stepB(count,ondone,up)
 	if not self.stepping then
 		boostFrequency(self,3)
 		local motor = self
@@ -142,12 +142,12 @@ function Stepper:stepB(count,ondone)
 		motor.stepping.onDone = function()
 			motor.stepping = nil
 			self.config.stepping = false
-			motor:off()
+			motor:off(up)
 			if ondone then ondone() end
 		end
 		motor.stepping.direction = "backward"
 		Scheduler:queue(motor.stepping)
-		self:updateMasters()
+		if not up then self:updateMasters() end
 		return true
 	end
 	return false
@@ -155,7 +155,7 @@ end
 
 function Stepper:test(c)
 if not c then c = 0 end
-print('test',c)
+print('stepper test',c)
 	self:stepF(2000,function()
 		if c <= 20 then
 			c = c + 1

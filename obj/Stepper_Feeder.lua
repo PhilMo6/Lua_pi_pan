@@ -36,7 +36,7 @@ function Feeder:getHTMLcontrol()
 end
 
 function Feeder:read()
-	return (self.feeding == true and 'feeding' or 'standby')
+	return (self.config.feeding == true and 'feeding' or 'standby')
 end
 
 function Feeder:feed()
@@ -49,13 +49,14 @@ function Feeder:feed()
 			stepper:stepF(2000,function()
 				if c <= f.config.count then
 					c = c + 1
-					stepper:stepB(500,function() f.feeding(c) end)
+					stepper:stepB(500,function() f.feeding(c) end,true)
 				else
-					stepper:stepB(2000,function() stepper:off() f.feeding = nil f.config.feeding=false end)
+					stepper:stepB(2000,function() stepper:off() f.feeding = nil f.config.feeding=false f:updateMasters() end)
 				end
-			end)
+			end,(c ~= 0 and true or nil))
 		end
 		f.feeding()
+		self:updateMasters()
 	end
 end
 
@@ -65,6 +66,7 @@ end
 
 --- Stringifier for Cloneables.
 function Feeder:toString()
+	local last,next
 	return string.format("[Feeder] %s %s",self:getID(),self:getName())
 end
 
