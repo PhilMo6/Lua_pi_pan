@@ -10,14 +10,14 @@ function Feeder:setup(options)
 	local count,stepper,timing = options.count,options.stepper,options.timing
 	self.config.count = count
 	self.config.stepper = stepper
-	self.config.timing = timing
+	self.config.timing = timing or {}
 	self.config.lastfeed = {}
 	self.config.feeding=false
 	self:startTimer()
 end
 
 function Feeder:startTimer()
-	if self.config.timing and not self.timer then
+	if self.config.timing and #self.config.timing > 0 and not self.timer then
 		self.timer = Event:new(function()
 			local hour,day = tonumber(os.date("%H")),tonumber(os.date("%d"))
 			for i,v in ipairs(self.config.timing) do
@@ -64,10 +64,17 @@ function Feeder:test(c)
 	self:feed()
 end
 
---- Stringifier for Cloneables.
 function Feeder:toString()
-	local last,next
-	return string.format("[Feeder] %s %s",self:getID(),self:getName())
+	local next
+	if self.config.timing and #self.config.timing > 0 and
+		local hour,day = tonumber(os.date("%H")),tonumber(os.date("%d"))
+		for i,v in ipairs(self.config.timing) do
+			if (next == nil or next < v) and v < hour and self.config.lastfeed[v] and self.config.lastfeed[v] ~= day then
+				next = v
+			end
+		end
+	end
+	return string.format("[Feeder] %s %s %s Next feed at:%s",self:getID(),self:getName(),self.config.feeding and 'feeding' or 'standby',next or 'tommorow')
 end
 
 return Feeder

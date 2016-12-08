@@ -17,13 +17,13 @@ function LED:setup(options)
 end
 
 function LED:getHTMLcontrol()
-	local name = self:getName()
+	local id = self:getID()
 	return ([[%s %s %s %s <form id="%s"><input type="text" name='com'></form>]]):format(
-	([[<button onclick="myFunction('L %s on')">On</button >]]):format(name),
-	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(name),
-	([[<button onclick="myFunction('L %s test')">Test</button >]]):format(name),
-	([[<button onclick="myFunction('L %s re','%s')">Rename</button >]]):format(name,name),
-	name
+	([[<button onclick="myFunction('obj %s on')">On</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s off')">Off</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s test')">Test</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s re','%s')">Rename</button >]]):format(id,id),
+	id
 	)
 end
 

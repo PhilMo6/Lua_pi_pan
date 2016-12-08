@@ -17,14 +17,14 @@ function Buzzer:setup(options)
 end
 
 function Buzzer:getHTMLcontrol()
-	local name = self:getName()
+	local id = self:getID()
 	return ([[%s %s %s %s %s <form id="%s"><input type="text" name='com'></form>]]):format(
-	([[<button onclick="myFunction('B %s on')">On</button >]]):format(name),
-	([[<button onclick="myFunction('B %s off')">Off</button >]]):format(name),
-	([[<button onclick="myFunction('B %s stop')">Stop</button >]]):format(name),
-	([[<button onclick="myFunction('B %s test')">Test</button >]]):format(name),
-	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
-	name
+	([[<button onclick="myFunction('obj %s on')">On</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s off')">Off</button >]]):format(id),
+	([[<button onclick="myFunction('B %s stop')">Stop</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s test')">Test</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s re','%s')">Rename</button >]]):format(id,id),
+	id
 	)
 end
 

@@ -18,21 +18,9 @@ function LED:updateLastRead(v)
 	end
 end
 
-function LED:getHTMLcontrol()
-	return ('%s %s %s'):format(
-	([[<button onclick="myFunction('L %s on')">On</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('L %s off')">Off</button >]]):format(self:getName()),
-	([[<button onclick="myFunction('L %s test')">Test</button >]]):format(self:getName())
-	)
-end
-
-
 function LED:blink(dir,count,client)
 	if not self.config.blinking then
 		self.node:send(([[LED %s blink %s %s]]):format(self:getID(),dir or "",count or ""))
-		if self.masters then
-			self:updateMasters()
-		end
 	end
 	return false
 end
@@ -44,7 +32,6 @@ end
 function LED:off()
 	if not self.config.blinking and self:read() == 1 then
 		self.node:send(([[LED %s off]]):format(self:getID()))
-		self:updateMasters()
 		return true
 	end
 	return false

@@ -49,7 +49,7 @@ Response.orders["objectUpdate"] = function(input,user)
 						local obj = user.node.objectIDs[v.id]
 						if obj then
 							obj.lastup = tonumber(loadedData.stamp)
-							obj:setConfig(v.config)
+							obj:setConfig(v.config,user)
 						end
 					end
 				end

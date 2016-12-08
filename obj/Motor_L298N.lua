@@ -27,7 +27,8 @@ function Driver:getDirection()
 end
 
 function Driver:getHTMLcontrol()
-	return ([[<button onclick="myFunction('Som %s test')">Test</button >]]):format(self:getName())
+	local id = self:getID()
+	return ([[<button onclick="myFunction('obj %s test')">Test</button >]]):format(id)
 end
 
 function Driver:read()

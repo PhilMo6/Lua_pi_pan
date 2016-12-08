@@ -40,11 +40,11 @@ function Common:setID(id)
 	objectIDs[id] = self
 end
 
-function Common:setName(name)
+function Common:setName(name,user)
 	if self.config.name and self.config.name ~= name then
 		_G[self.location][self.config.name] = nil
 		if self.node then
-			--self.node:send(([[S %s rename %s]]):format(self:getID(),name))
+			if user and user.node and user.node ~= self.node then self.node:send(([[obj %s rename %s]]):format(self:getID(),name)) end
 			self.node.objects[self.location][self.config.name] = nil
 			self.node.objects[self.location][name] = self
 		end
@@ -53,15 +53,15 @@ function Common:setName(name)
 	_G[self.location][self.config.name] = self
 end
 
-function Common:setConfig(config)
+function Common:setConfig(config,user)
 	if not config or not self.config then return end
 	--local up = nil
 	for i,v in pairs(self.config) do
 		if config[i] and config[i] ~= v then
 			if i == 'name' and v ~= config[i]..'_'..self.node:getID() then
-				self:setName(config[i])
+				self:setName(config[i],user)
 			elseif i == 'id' then
-				self:setID(config[i])
+				self:setID(config[i],user)
 			elseif i == 'lastRead' then
 				self:updateLastRead(config[i])
 			else

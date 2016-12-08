@@ -189,31 +189,6 @@ function MacScanner:setConfig(config)
 	if up then	self:updateMasters() end
 end
 
-
-
-
-
-
-
-
-function MacScanner:getConfig(firstUp)
-	if self.config then
-		return table.savetoString(self.config)
-	else
-		return "nil"
-	end
-end
-
-
-
-
-
-
-
-
-
-
-
 function MacScanner:setWlan(id)
 	self.config.wlan = id
 	logEvent(self:getName(),self:getName() .. ' setWlan:'..id)
@@ -275,16 +250,16 @@ function MacScanner:setState(state)
 end
 
 function MacScanner:getHTMLcontrol()
-	local name = self:getName()
+	local id = self:getID()
 	return ('<div style="font-size:15px">%s %s %s %s %s %s %s<br>%s</div>'):format(
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s stat')">Status</button >]]):format(name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s MacTable','%s')">Current Mac List</button >]]):format(name,name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statKnown','%s')">Know Status</button >]]):format(name,name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statFound','%s')">Found Status</button >]]):format(name,name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statLost','%s')">Lost Status</button >]]):format(name,name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s IDinfo','%s')">ID Info</button >]]):format(name,name),
-	([[<button style="font-size:15px" onclick="myFunction('MacScan %s toggle')">Toggle</button >]]):format(name),
-	([[<form id="%s"> find:<input type="text" name='com'></form>]]):format(name)
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s stat')">Status</button >]]):format(id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s MacTable','%s')">Current Mac List</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statKnown','%s')">Know Status</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statFound','%s')">Found Status</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s statLost','%s')">Lost Status</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s IDinfo','%s')">ID Info</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('MacScan %s toggle')">Toggle</button >]]):format(id),
+	([[<form id="%s"> find:<input type="text" name='com'></form>]]):format(id)
 	)
 end
 

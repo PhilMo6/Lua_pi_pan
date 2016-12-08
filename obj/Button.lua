@@ -24,11 +24,11 @@ function Button:setup(options)
 end
 
 function Button:getHTMLcontrol()
-	local name = self:getName()
+	local id = self:getID()
 	return ([[%s %s <form id="%s"><input type="text" name='com'></form>]]):format(
-	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(name),
-	([[<button onclick="myFunction('s %s re','%s')">Rename</button >]]):format(name,name),
-	name
+	([[<button onclick="myFunction('button %s press')">Press</button >]]):format(id),
+	([[<button onclick="myFunction('obj %s re','%s')">Rename</button >]]):format(id,id),
+	id
 	)
 end
 

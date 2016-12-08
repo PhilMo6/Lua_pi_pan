@@ -18,12 +18,12 @@ function Relay:setup(options)
 end
 
 function Relay:getHTMLcontrol()
-	local name = self:getName()
+	local id = self:getID()
 	return ([[%s %s %s <form id="%s"><input type="text" name='com'></form> ]]):format(
-	([[<button onclick="myFunction('r %s on','%s')">On</button >]]):format(name,name),
-	([[<button onclick="myFunction('r %s off','%s')">Off</button >]]):format(name,name),
-	([[<button onclick="myFunction('r %s re','%s')">Rename</button >]]):format(name,name),
-	name
+	([[<button onclick="myFunction('obj %s on','%s')">On</button >]]):format(id,id),
+	([[<button onclick="myFunction('obj %s off','%s')">Off</button >]]):format(id,id),
+	([[<button onclick="myFunction('obj %s re','%s')">Rename</button >]]):format(id,id),
+	id
 	)
 end
 

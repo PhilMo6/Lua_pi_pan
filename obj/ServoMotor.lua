@@ -20,9 +20,6 @@ function Servo:setup(options)
 	self.config.pmwR = pmwr or Servo.config.pmwR
 	self.config.pmwC = pmwc or Servo.config.pmwC
 	self:setupPins()
-	--[[self.gpio = RPIO(pin)
-	self.gpio:set_direction('out')
-	self.gpio:write(1)]]
 end
 
 function Servo:getPosition()
