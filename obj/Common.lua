@@ -79,7 +79,7 @@ end
 
 function Common:setConfig(config)
 	if not config or not self.config then return end
-	--local up = nil
+	local up = nil
 	for i,v in pairs(self.config) do
 		if config[i] and config[i] ~= v then
 			if i == 'name' then
@@ -91,10 +91,20 @@ function Common:setConfig(config)
 			else
 				self.config[i] = config[i]
 			end
-			--up = true
+			up = true
 		end
 	end
-	--if up then	self:updateMasters() end
+	if up then	self:updateMasters() end
+end
+
+function Common:getStatus()
+	local status = ""
+	for i,v in pairs(self.config) do
+		local ty = type(v)
+		status = string.format([[%s
+%s:%s]],status,i,(ty == 'string' and v or ty == 'number' and v or ty == 'boolean' and (v == true and 'true' or 'false') or ty == 'table' and v:toString()))
+	end
+	return string.format("%s%s",self:toString(),status)
 end
 
 function Common:addMaster(master)
@@ -132,11 +142,16 @@ function Common:isNode(node)
 end
 
 function Common:updateMasters()
-	if self.masters then
-		local cmd = "Request objectUpdate "..self:getID() --self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
-		for i,v in ipairs(self.masters) do
-			runningServer:parseCmd(cmd,v.client)
-		end
+	if self.masters and not self.masterUpdate then
+		local obj = self
+		obj.masterUpdate = Event:new(function()
+			local cmd = "Request objectUpdate "..obj:getID() --self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
+			for i,v in ipairs(obj.masters) do
+				runningServer:parseCmd(cmd,v.client)
+			end
+			obj.masterUpdate = nil
+		end, 2, false)
+		Scheduler:queue(obj.masterUpdate)
 	end
 end
 

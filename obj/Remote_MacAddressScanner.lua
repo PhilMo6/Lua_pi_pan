@@ -117,8 +117,6 @@ function MacScanner:setConfig(config,foundMacs,lostMacs)
 				self:setName(config[i])
 			elseif i == 'id' then
 				self:setID(config[i])
-			elseif i == 'lastRead' then
-				self:updateLastRead(config[i])
 			elseif i == 'macTable' then
 				self:runLogic(config[i])
 			else

@@ -10,6 +10,7 @@ function Common:initialize(id,name,config,node)
 		self.config = config
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
+		self:setConfig(config,user,true)
 		self.sID = 'sID'..id..node:getID()
 		table.insert(_G[self.location],self)
 		node:addObject(self)
@@ -26,7 +27,7 @@ end
 
 function Common:setID(id)
 	if self.config.id and self.config.id ~= id then
-		_G[self.location][self.config.id] = nil
+		--_G[self.location][self.config.id] = nil
 		objectIDs[id] = nil
 		if self.node then
 			self.node.objects[self.location][self.config.id] = nil
@@ -53,11 +54,11 @@ function Common:setName(name,user)
 	_G[self.location][self.config.name] = self
 end
 
-function Common:setConfig(config,user)
+function Common:setConfig(config,user,firstUpdate)
 	if not config or not self.config then return end
-	--local up = nil
+	local up = nil
 	for i,v in pairs(self.config) do
-		if config[i] and config[i] ~= v then
+		if firstUpdate or config[i] and config[i] ~= v then
 			if i == 'name' and v ~= config[i]..'_'..self.node:getID() then
 				self:setName(config[i],user)
 			elseif i == 'id' then
@@ -67,10 +68,10 @@ function Common:setConfig(config,user)
 			else
 				self.config[i] = config[i]
 			end
-			--up = true
+			up = true
 		end
 	end
-	--if up then	self:updateMasters() end
+	if up then	self:updateMasters() end
 end
 
 return Common

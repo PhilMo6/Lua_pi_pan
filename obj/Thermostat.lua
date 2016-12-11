@@ -58,7 +58,9 @@ end
 
 function Thermostat:runCoolLogic()
 	if sensors[self:getTempSensor()] then
+		self.config.tempSensorID = sensors[self:getTempSensor()]:getID()
 		if relays[self:getCoolRelay()] then
+			self.config.coolingRelayID = relays[self:getCoolRelay()]:getID()
 			local t1,t2 = sensors[self:getTempSensor()]:getLastRead()
 			if t2 > (self:getTemp() + self:getTempTh()) and relays[self:getCoolRelay()]:read() == 1 then
 				if relays[self:getCoolRelay()]:on() then self:setAction('cooling') end
@@ -71,7 +73,9 @@ end
 
 function Thermostat:runHeatLogic()
 	if sensors[self:getTempSensor()] then
+		self.config.tempSensorID = sensors[self:getTempSensor()]:getID()
 		if relays[self:getHeatRelay()] then
+			self.config.heatingRelayID = relays[self:getHeatRelay()]:getID()
 			local t1,t2 = sensors[self:getTempSensor()]:getLastRead()
 			if t2 < (self:getTemp() - self:getTempTh()) and relays[self:getHeatRelay()]:read() == 1 then
 				if relays[self:getHeatRelay()]:on() then self:setAction('heating') end
@@ -80,24 +84,6 @@ function Thermostat:runHeatLogic()
 			end
 		end
 	end
-end
-
-function Thermostat:setConfig(config)
-	if not config then return end
-	local up = nil
-	for i,v in pairs(self.config) do
-		if config[i] and config[i] ~= v then
-			if i == 'name' then
-				self:setName(config[i])
-			elseif i == 'id' then
-				self:setID(config[i])
-			else
-				self.config[i] = config[i]
-			end
-			up = true
-		end
-	end
-	if up then	self:updateMasters() end
 end
 
 function Thermostat:setUpTime(ut)
