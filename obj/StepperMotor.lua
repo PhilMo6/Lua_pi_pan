@@ -21,8 +21,8 @@ function Stepper:setup(options)
 	self.config.pin2 = pin2
 	self.config.pin3 = pin3
 	self.config.pin4 = pin4
-	self.step = 1
-	table.insert(stepperMotors,self)
+	self.seq = (options.seq or Stepper.seq)
+	self.config.step = 1
 	self.pins = {RPIO(pin1),RPIO(pin2),RPIO(pin3),RPIO(pin4)}
 	self:setupPins()
 	self:off()

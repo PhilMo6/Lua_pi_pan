@@ -64,10 +64,10 @@ function Sensor:read()
 	else
 		if not self.adjAccuracy then
 			self.adjAccuracy = self.config.accuracy - 1
+			self:updateLastRead((self.config.lastRead and self.config.lastRead > 500 and self.config.lastRead + 100 or 900))
 		elseif self.adjAccuracy > 2 then
 			self.adjAccuracy = self.adjAccuracy - 1
 		end
-		--self:updateLastRead(self.config.lastRead)
 		return nil,nil,'error'
 	end
 end

@@ -78,7 +78,9 @@ end
 function Sensor:checkLight()
 	if lightsensors and lightsensors[self:getLightSensor()] then
 		local lightLevel = lightsensors[self:getLightSensor()]:getLastRead()
-		if lightLevel > self:getLightSensitivity() then
+		if lightLevel and lightLevel > self:getLightSensitivity() then
+			return true
+		elseif not lightLevel then
 			return true
 		else
 			return false

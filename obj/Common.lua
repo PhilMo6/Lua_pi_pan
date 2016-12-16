@@ -122,7 +122,7 @@ function Common:removeMaster(master)
 		while table.removeValue(self.masters, master) do end
 	end
 	master:removeObject(self)
-	if self.masters == 0 then
+	if #self.masters == 0 then
 		self.masters = nil
 	end
 end

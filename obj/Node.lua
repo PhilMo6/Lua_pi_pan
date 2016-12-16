@@ -88,7 +88,7 @@ end
 
 function Node:destoy()
 	for i,v in pairs(self.objects) do
-		for i,v in ipairs(v) do
+		for i,v in pairs(v) do
 			self:removeObject(v)
 		end
 	end

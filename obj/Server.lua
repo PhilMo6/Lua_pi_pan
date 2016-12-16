@@ -175,17 +175,11 @@ print('!!DISCONNECTED CLIENT!!',client:toString())
 		table.removeValue(self.clients, client)
 		local addr, port = client:getAddress()
 		client:getSocket():close()
-		if nodeList[addr] and nodes[addr] then
-			local node = nodes[addr]
-			nodes[addr] = nil
-			for i,v in ipairs(nodes) do if v.client == client then table.remove(nodes, i) break end end
-			node:destoy()
+		if client.node then
+			client.node:destoy()
 		end
-		if masterList[addr] and masters[addr] then
-			local master = masters[addr]
-			masters[addr] = nil
-			for i,v in ipairs(masters) do if v.client == client then table.remove(masters, i) break end end
-			master:destoy()
+		if client.master then
+			client.master:destoy()
 		end
 	end
 end

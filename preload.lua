@@ -156,64 +156,64 @@ function _G.loadObjects(conn,c)
 		if type(pin) == 'number' then
 			Button:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then--options are pin and edge
-			Button:new(pin.pin,pin)
+			Button:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,pin in ipairs(buzzerPins) do
 		if type(pin) == 'number' then
 			Buzzer:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			Buzzer:new(pin.pin,pin)
+			Buzzer:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,pin in ipairs(LEDPins) do
 		if type(pin) == 'number' then
 			LED:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			LED:new(pin.pin,pin)
+			LED:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,op in ipairs(RBG_LEDPins) do
 		if type(op) == 'table' then
-			RBG_LED:new(op.pinR..','..op.pinB..','..op.pinG,op)
+			RBG_LED:new((op.name or op.pinR..','..op.pinB..','..op.pinG),op)
 		end
 	end
 	for i,pin in ipairs(relayPins) do
 		if type(pin) == 'number' then
 			Relay:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			Relay:new(pin.pin,pin)
+			Relay:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,pin in ipairs(lightSensorPins) do
 		if type(pin) == 'number' then
 			LightSensor:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			LightSensor:new(pin.pin,pin)
+			LightSensor:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,pin in ipairs(DHT22Pins) do
 		if type(pin) == 'number' then
 			DHT22:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			DHT22:new(pin.pin,pin)
+			DHT22:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,op in ipairs(stepperPins) do
 		if type(op) == 'table' then
-			StepperMotor:new(op.pin1..','..op.pin2..','..op.pin3..','..op.pin4,op)
+			StepperMotor:new((op.name or op.pin1..','..op.pin2..','..op.pin3..','..op.pin4),op)
 		end
 	end
 	for i,pin in ipairs(servoPins) do
 		if type(pin) == 'number' then
 			ServorMotor:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			ServorMotor:new(pin.pin,pin)
+			ServorMotor:new((pin.name or pin.pin),pin)
 		end
 	end
 	for i,op in ipairs(motorPins) do
 		if type(op) == 'table' then
-			Motor:new(op.pin1..','..op.pin2,op)
+			Motor:new((op.name or op.pin1..','..op.pin2),op)
 		end
 	end
 

@@ -10,11 +10,11 @@ function Common:initialize(id,name,config,node)
 		self.config = config
 		self:setID(id)
 		self:setName(name..'_'..node:getID())
-		self:setConfig(config,user,true)
 		self.sID = 'sID'..id..node:getID()
 		table.insert(_G[self.location],self)
 		node:addObject(self)
 		if self.setup then self:setup(config) end
+		self:setConfig(config,user,true)
 	end
 end
 

@@ -3,7 +3,7 @@ local Command	= require("obj.Command")
 --- test command
 local Feeder	= Command:clone()
 Feeder.name = "Feeder"
-Feeder.keywords	= {"Feeder","mot","Mot"}
+Feeder.keywords	= {"Feeder","feed","fe"}
 
 --- Execute the command
 function Feeder:execute(input,user,par)
@@ -15,7 +15,7 @@ function Feeder:execute(input,user,par)
 		if feeder then --That is a vaild Feeder
 			if input3 then--input3 should be the order to execute
 				if Feeder.orders[input3] then--This is a valid order
-					return Feeder.orders[input3](Feeder,input4,input5,par == 'tcp' and user or nil)
+					return Feeder.orders[input3](feeder,input4,input5,par == 'tcp' and user or nil)
 				else
 					return "That is not a vaild order."
 				end
@@ -31,6 +31,27 @@ function Feeder:execute(input,user,par)
 end
 
 Feeder.orders = {}
+
+Feeder.orders["setCount"] = function(feeder,value)
+	if value then
+		feeder:setCount(value)
+		saveObjectsInfo()
+		return string.format("Feeder %s has had its count set to %s.",feeder:getID(),feeder:getCount())
+	else
+		return "Must supply a value to set count on feeder."
+	end
+end
+
+Feeder.orders["setStepper"] = function(feeder,stepperID)
+	if stepperID then
+		feeder:setStepper(stepperID)
+		saveObjectsInfo()
+		return string.format("Feeder %s has had its stepper set to %s.",feeder:getID(),feeder:getStepper())
+	else
+		return "Must supply a stepper id to set stepper on feeder."
+	end
+end
+
 Feeder.orders["rename"] = function(feeder,name)
 	if name then
 		feeder:setName(name)
@@ -43,7 +64,7 @@ end
 Feeder.orders["re"] = Feeder.orders["rename"]
 
 Feeder.orders["test"] = function(feeder)
-	Feeder:test()
+	feeder:test()
 end
 
 return Feeder
