@@ -53,6 +53,7 @@ end
 Object.orders["r"] = Object.orders["read"]
 
 Object.orders["on"] = function(obj,f,multiplier,user)
+print('!!!!!!!!!!!!!!!!!!',obj, obj.on)
 	if obj.on then
 		if f then
 			f = tonumber(f)

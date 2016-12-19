@@ -92,6 +92,9 @@ function Node:destoy()
 			self:removeObject(v)
 		end
 	end
+	local addr, port = self:getAddress()
+	nodes[addr] = nil
+	while table.removeValue(nodes, self) do end
 	self = nil
 end
 

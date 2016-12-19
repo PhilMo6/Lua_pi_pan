@@ -35,6 +35,18 @@ function Master:getID()
 	return masterList[self.ip].id
 end
 
+function Master:destoy()
+	for i,v in pairs(self.objects) do
+		for i,v in pairs(v) do
+			self:removeObject(v)
+		end
+	end
+	local addr, port = self:getAddress()
+	masters[addr] = nil
+	while table.removeValue(masters, self) do end
+	self = nil
+end
+
 function Master:toString()
 	if not self.client then
 		return "Master@nil"

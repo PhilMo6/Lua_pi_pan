@@ -9,8 +9,27 @@ local CommandParser = {}
 --- List of all commands we recognized.
 CommandParser.commands	= {}
 
+--found here http://stackoverflow.com/questions/11401890/case-insensitive-lua-pattern-matching
+local function case_insensitive_pattern(pattern)
+  -- find an optional '%' (group 1) followed by any character (group 2)
+  local p = pattern:gsub("(%%?)(.)", function(percent, letter)
+    if percent ~= "" or not letter:match("%a") then
+      -- if the '%' matched, or `letter` is not a letter, return "as is"
+      return percent .. letter
+    else
+      -- else, return a case-insensitive character class of the matched letter
+      return string.format("[%s%s]", letter:lower(), letter:upper())
+    end
+  end)
+  return p
+end
+
+local bannedWords = {'execute'}--words to be scrubbed
 function CommandParser:leglizeInput(input)
 	input = string.gsub(input,'[%%%^%$%\\%<%>]','')
+	for i,v in pairs(bannedWords) do
+		input = string.gsub(input,case_insensitive_pattern(v),'')
+	end
 	--input = string.gsub(input,'[%]%[%(%)%.%%%+%-%*%?%^%$]','')
 	return input
 end
