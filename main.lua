@@ -25,15 +25,14 @@ print('Starting Lua pi Pan')
 --do setup needed to run Lua pi pan
 local luasql = require "luasql.sqlite3"
 _G.env = luasql.sqlite3() -- Create a database environment object
-local conn = env:connect(SQLFile) -- Open a database file
+_G.SQLconn = env:connect(SQLFile) -- Open a database file
 
 print('Adding objects')
-loadObjects(conn)--sets up all objects for use
+loadObjects()--sets up all objects for use
 print('Loading objects info')
-objectLoad(conn)--loads any previus names/configs into objects
+objectLoad()--loads any previus names/configs into objects
 print('Updating objects info')
-objectUpdate(conn)--updates info to add any new objects
-conn:close() -- Close the database file connection object
+objectUpdate()--updates info to add any new objects
 
 --do 4 reads on all sensors to prep them for accurate readings
 --weed out non functional sensors
@@ -48,13 +47,16 @@ if sensors then
 		if erC == 4 then v:removeSelf() end
 	end
 end
+_G.SQLconn:close() -- Close the database file connection object
+_G.SQLconn = nil
+
 
 --send message to main email to clear command buffer
-local msg = ("Startup time:%s\n"):format(os.date('%c'))
+local msg = (mainID.." Startup time:%s\n"):format(os.date('%c'))
 for i,v in ipairs(objects) do
 	msg = ("%s %s:%s"):format(msg,string.firstToUpper(v.name),#v)
 end
-sendMessage("Startup", msg ,mainEmail)
+sendMessage("Startup "..mainID, msg ,mainEmail)
 print(msg)
 msg = nil
 pollSensors(true,true)
@@ -272,8 +274,11 @@ local exe = ""
 if result then
 	exe = "sudo kill -9 " .. result .. "&"
 end
-if RESET then
-print('Restarting')
+if REBOOT then
+	print('Rebooting')
+	exe = exe.."sudo reboot"
+elseif RESET then
+	print('Restarting')
 	exe = exe.."sudo lua main.lua"
 end
 os.execute(exe)

@@ -84,8 +84,8 @@ end
 
 --- Stringifier for Cloneables.
 function Button:toString()
-	local r,s = self:getLastRead(),self:getState()
-	return string.format("[Button] %s %s %s %s",self:getID(),self:getName(),r,s)
+	local s = self:getState()
+	return string.format("[Button] %s %s %s",self:getID(),self:getName(),s)
 end
 
 return Button

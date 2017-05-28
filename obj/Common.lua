@@ -17,7 +17,7 @@ function Common:initialize(id,options)
 end
 
 function Common:removeSelf()
-	if objectIDs[self:getID()] then objectIDs[self:getID()] = nil end
+	if objectIDs[self:getID()] == self then objectIDs[self:getID()] = nil end
 	if _G[self.location] then
 		_G[self.location][self:getName()] = nil
 		while table.removeValue(_G[self.location], self) do end
@@ -36,18 +36,23 @@ end
 
 function Common:setID(id)
 	if not id then id = getNewID(12) end
-	if self.config.id and self.config.id ~= id then
-		--_G[self.location][self.config.id] = nil
-		objectIDs[id] = nil
+	if not objectIDs[id] then
+		if self.config.id and self.config.id ~= id then
+			--_G[self.location][self.config.id] = nil
+			objectIDs[id] = nil
+		end
+		self.config.id = id
+		--_G[self.location][self.config.id] = self
+		objectIDs[id] = self
+		self:updateMasters()
+		return true
 	end
-	self.config.id = id
-	--_G[self.location][self.config.id] = self
-	objectIDs[id] = self
 end
 
 function Common:setName(name)
 	if self.config.name and self.config.name ~= name then
-		_G[self.location][self.config.name] = nil
+		if _G[self.location][self.config.name] and _G[self.location][self.config.name] == self then _G[self.location][self.config.name] = nil end
+		self:updateMasters()
 	end
 	self.config.name = name
 	_G[self.location][self.config.name] = self
@@ -145,9 +150,11 @@ function Common:updateMasters()
 	if self.masters and not self.masterUpdate then
 		local obj = self
 		obj.masterUpdate = Event:new(function()
-			local cmd = "Request objectUpdate "..obj:getID() --self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
-			for i,v in ipairs(obj.masters) do
-				runningServer:parseCmd(cmd,v.client)
+			if obj.masters then
+				local cmd = "Request objectUpdate "..obj:getID() --self.updateCmd and self.updateCmd .. " " .. self:getName() or nil
+				for i,v in ipairs(obj.masters) do
+					runningServer:parseCmd(cmd,v.client)
+				end
 			end
 			obj.masterUpdate = nil
 		end, 2, false)

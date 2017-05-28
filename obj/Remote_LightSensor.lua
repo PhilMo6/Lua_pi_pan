@@ -9,11 +9,8 @@ local Sensor			= Cloneable:clone()
 Sensor.location = origin.location
 Sensor.getHTMLcontrol = origin.getHTMLcontrol
 Sensor.lightLevel = origin.lightLevel --use function from non remote object to save memory
+Sensor.getLastRead = origin.getLastRead --use function from non remote object to save memory
 
-
-function Sensor:getLastRead()
-	return self.lastRead,self:lightLevel(self.lastRead),self.lastError
-end
 
 --- Stringifier for Cloneables.
 function Sensor:toString()

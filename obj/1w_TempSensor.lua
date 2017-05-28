@@ -18,6 +18,7 @@ function Sensor:read()
 	local tempC = 0
 	local tempF = 0
 	local sensor = io.open("/sys/bus/w1/devices/" .. self.config.w_id .. "/w1_slave","r")
+	local lR = self.config.lastRead
 	if sensor then
 		local raw = sensor:read('*all')
 		sensor:close()
@@ -26,12 +27,15 @@ function Sensor:read()
 		if tempC then
 			tempC = tempC / 1000
 			self:updateLastRead(tempC)
+			if tempC == 0 and lR == 0 then runError('LAST READ ERROR '.. self:getName()) end
 			tempF = tempC * 9 / 5  + 32
 			return tempC,tempF
 		else
+			runError('NO TEMP '..self:getName())
 			return tempC,tempF,"read error"
 		end
 	else
+		runError('NO SENSOR '..self:getName())
 		return tempC,tempF,"connection error"
 	end
 	return tempC,tempF,'error'

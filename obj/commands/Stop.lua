@@ -10,7 +10,7 @@ function Stop:execute(input,user)
 	local words = string.Words(input)
 	local input1, input2 = words[1],words[2]
 
-	if input2 == "restart" or input2 == "reboot" or input2 == "re" then _G.RESET = true end
+	if input2 == "restart" or input2 == "re" then _G.RESET = true elseif input2 == "reboot" then _G.REBOOT = true end
 	run = false
 
 	return 'GHC shutting down'

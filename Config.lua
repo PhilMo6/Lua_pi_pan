@@ -18,7 +18,7 @@ Config.usersConfig					= {}--{['5555555555@vtext.com'] = {forwardTo = "adifferen
 Config.SQLFile						= "/home/pi/luaTest.db"
 Config.sensorUpdateTime 			= 30--how often do sensors update
 Config.sensorLogTime 				= 60*5--how often do sensors have their data logged into sql database
-Config.mailCheckTime 				= 60--if setup how often does mail get checked fro commands
+Config.mailCheckTime 				= 60--if setup how often does mail get checked for commands
 --pins are assigned by gpio number
 --see modules at obj/"name".lua for options
 Config.lightSensorPins				= {}--pinValue
@@ -50,7 +50,6 @@ Config.motorPins					= {}--table value containing 2 pins and optional pmw settin
 Config.thermostatStartup			= {{'room'},{'doghouse',{tempSensor="doghouse",heatingRelay='doghouseHeater',coolingRelay='none',state='heating'}}}--table value containing id and optional config table
 Config.motionSensorStartup			= {{'test',18}}--table value containing id, sensor pin, and optional config table
 Config.macScannerStartup			= {}--table value containing id and optional config table
-
 ]]
 
 Config.tcpPort						= 9696

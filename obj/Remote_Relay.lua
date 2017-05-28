@@ -12,7 +12,7 @@ Relay.getHTMLcontrol = origin.getHTMLcontrol
 
 function Relay:off(client)
 	if self:read() == 0 and not self.stayOn then
-		self.node:send(([[R %s off]]):format(self:getID()))
+		self.node:send(([[obj %s off]]):format(self:getID()))
 		return true
 	end
 	return false
@@ -20,7 +20,7 @@ end
 
 function Relay:on(client)
 	if self:read() == 1 and not self.stayOff then
-		self.node:send(([[R %s on]]):format(self:getID()))
+		self.node:send(([[obj %s on]]):format(self:getID()))
 		return true
 	end
 	return false

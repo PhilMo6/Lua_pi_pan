@@ -124,7 +124,7 @@ function Server:close()
 	if not self:isHosted() then
 		return false
 	end
-	for i,v in ipairs(self.clients) do
+	for i,v in pairs(self.clients) do
 		self:disconnectClient(v)
 	end
 	self.socket:close()

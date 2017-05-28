@@ -1,9 +1,14 @@
 
 
 --[[
-	preload loads all the global functions that are used throughout the program.
+	preload loads all the global functions that are used throughout the program and does some basic setup.
 ]]
 
+math.randomseed(os.time())
+math.random()
+for i=1,math.random(5,10) do
+	math.random()
+end
 
 _G.masters						= {}
 _G.nodes						= {}
@@ -23,11 +28,11 @@ local RBG_LED = require("obj.RBG_LED")
 local Buzzer = require("obj.Buzzer")
 local Button = require("obj.Button")
 
-_G.objectIDs = {}
+
 function _G.getNewID(length)
 	math.random()
-	length = length or 1
-	if length < 1 then return nil end
+	length = length or 10
+	if length < 1 then length = 10 end
 	local function randomID()
 		local array = {}
 		local ns = 0
@@ -46,6 +51,12 @@ function _G.getNewID(length)
 	end
 	local id = randomID()
 	while objectIDs[id] do id = randomID() end
+
+	local c
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
+	SQLconn:execute("INSERT INTO ObjectIdList values('"..id.."');")
+	if c then SQLconn:close() _G.SQLconn = nil end
+
 	return id
 end
 
@@ -119,13 +130,13 @@ function _G.sleep(t)
 	return
 end
 
-function _G.logEvent(objID,event,conn,c)
+function _G.logEvent(objID,event,c)
 	if run then
-		if not conn then conn = env:connect(SQLFile) else c = true end
+		if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 		local stamp = socket.gettime()
-		conn:execute([[CREATE TABLE EVENTS (id TEXT, stamp TEXT, event TEXT);]])
-		conn:execute("INSERT INTO EVENTS values('"..objID.."','"..stamp.."','"..event.."');")
-		if not c then conn:close() else return conn end
+		SQLconn:execute([[CREATE TABLE EVENTS (id TEXT, stamp TEXT, event TEXT);]])
+		SQLconn:execute("INSERT INTO EVENTS values('"..objID.."','"..stamp.."','"..event.."');")
+		if c then SQLconn:close() _G.SQLconn = nil end
 	end
 end
 
@@ -147,73 +158,86 @@ function _G.loadData(data)
 	return re
 end
 
-function _G.loadObjects(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.loadObjects(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	if not _G.objects then _G.objects = {} end
+	if not _G.objectIDs then--load object ids first so that no ids are assigned twice
+		_G.objectIDs = {}
+		SQLconn:execute(([[CREATE TABLE %s (id TEXT,obj TEXT)]]):format('ObjectIdList'))
+		local cursor,errorString = SQLconn:execute(("select * from %s;"):format('ObjectIdList'))
+		if cursor then
+			local row = cursor:fetch ({}, "a")
+			while row do
+				objectIDs[row.id] = true
+				row = cursor:fetch (row, "a")
+			end
+			cursor:close()
+		end
+	end
 
 	--setup all devices/pins
 	for i,pin in ipairs(buttonPins) do
 		if type(pin) == 'number' then
 			Button:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then--options are pin and edge
-			Button:new((pin.name or pin.pin),pin)
+			Button:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(buzzerPins) do
 		if type(pin) == 'number' then
 			Buzzer:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			Buzzer:new((pin.name or pin.pin),pin)
+			Buzzer:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(LEDPins) do
 		if type(pin) == 'number' then
 			LED:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			LED:new((pin.name or pin.pin),pin)
+			LED:new(pin.pin,pin)
 		end
 	end
 	for i,op in ipairs(RBG_LEDPins) do
 		if type(op) == 'table' then
-			RBG_LED:new((op.name or op.pinR..','..op.pinB..','..op.pinG),op)
+			RBG_LED:new(op.pinR..','..op.pinB..','..op.pinG,op)
 		end
 	end
 	for i,pin in ipairs(relayPins) do
 		if type(pin) == 'number' then
 			Relay:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			Relay:new((pin.name or pin.pin),pin)
+			Relay:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(lightSensorPins) do
 		if type(pin) == 'number' then
 			LightSensor:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			LightSensor:new((pin.name or pin.pin),pin)
+			LightSensor:new(pin.pin,pin)
 		end
 	end
 	for i,pin in ipairs(DHT22Pins) do
 		if type(pin) == 'number' then
 			DHT22:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			DHT22:new((pin.name or pin.pin),pin)
+			DHT22:new(pin.pin,pin)
 		end
 	end
 	for i,op in ipairs(stepperPins) do
 		if type(op) == 'table' then
-			StepperMotor:new((op.name or op.pin1..','..op.pin2..','..op.pin3..','..op.pin4),op)
+			StepperMotor:new(op.pin1..','..op.pin2..','..op.pin3..','..op.pin4,op)
 		end
 	end
 	for i,pin in ipairs(servoPins) do
 		if type(pin) == 'number' then
 			ServorMotor:new(pin,{pin=pin})
 		elseif type(pin) == 'table' then
-			ServorMotor:new((pin.name or pin.pin),pin)
+			ServorMotor:new(pin.pin,pin)
 		end
 	end
 	for i,op in ipairs(motorPins) do
 		if type(op) == 'table' then
-			Motor:new((op.name or op.pin1..','..op.pin2),op)
+			Motor:new(op.pin1..','..op.pin2,op)
 		end
 	end
 
@@ -246,22 +270,22 @@ function _G.loadObjects(conn,c)
 	for i,v in ipairs(objects) do
 		objects[v.name] = v
 	end
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
-function _G.objectUpdate(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.objectUpdate(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	saveObjectsInfo(conn)
 	updateSiteLinks(conn)
 	updateSensorLinks(conn)
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
-function _G.objectLoad(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.objectLoad(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	--retrieve saved info for all objects
 	loadObjectsInfo(conn)
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
 function _G.HTMLcontrols()
@@ -307,30 +331,30 @@ function _G.getStatus()
     return msg
 end
 
-function _G.updateSiteLinks(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
-	conn:execute([[DROP TABLE IF EXISTS MASTERLinks;]])
-	conn:execute([[CREATE TABLE MASTERLinks (link TEXT);]])
+function _G.updateSiteLinks(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
+	SQLconn:execute([[DROP TABLE IF EXISTS MASTERLinks;]])
+	SQLconn:execute([[CREATE TABLE MASTERLinks (link TEXT);]])
 	for i,link in ipairs(siteLinks) do
-		conn:execute("INSERT INTO MASTERLinks values('"..link.."');")
+		SQLconn:execute("INSERT INTO MASTERLinks values('"..link.."');")
 	end
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
-function _G.updateSensorLinks(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.updateSensorLinks(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	local function addtodatabase(index,val)
-		local cursor,errorString2 = conn:execute(([[SELECT * FROM MasterSensors WHERE name='%s';]]):format(index))
+		local cursor,errorString2 = SQLconn:execute(([[SELECT * FROM MasterSensors WHERE name='%s';]]):format(index))
 		local row = cursor:fetch ({}, "a")
 		if row then
-			local status,errorString = conn:execute(([[UPDATE MasterSensors SET (name="%s",loc="%s") WHERE name="%s";]]):format(index,val,index))
+			local status,errorString = SQLconn:execute(([[UPDATE MasterSensors SET (name="%s",loc="%s") WHERE name="%s";]]):format(index,val,index))
 		else
-			conn:execute("INSERT INTO MasterSensors values('"..index.."','"..val.."');")
+			SQLconn:execute("INSERT INTO MasterSensors values('"..index.."','"..val.."');")
 		end
 		cursor:close()
 	end
 
-	conn:execute([[CREATE TABLE MasterSensors (name TEXT, loc TEXT);]])
+	SQLconn:execute([[CREATE TABLE MasterSensors (name TEXT, loc TEXT);]])
 	if sensors then
 		for i,sensor in ipairs(sensors) do
 			addtodatabase(sensor:getName(),'temp')
@@ -347,17 +371,17 @@ function _G.updateSensorLinks(conn,c)
 			addtodatabase(sensor:getName(),'light')
 		end
 	end
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
 function _G.removeSensorLink(senId)
 	local conn = env:connect(SQLFile)
 	local re = nil
 	if senId then
-		local cursor,errorString = conn:execute(([[SELECT * FROM MasterSensors WHERE name='%s';]]):format(senId))
+		local cursor,errorString = SQLconn:execute(([[SELECT * FROM MasterSensors WHERE name='%s';]]):format(senId))
 		local row = cursor:fetch ({}, "a")
 		if row then
-			local cursor,errorString = conn:execute(([[DELETE FROM MasterSensors WHERE name='%s';]]):format(senId))
+			local cursor,errorString = SQLconn:execute(([[DELETE FROM MasterSensors WHERE name='%s';]]):format(senId))
 			re = ('Removed %s from MasterSensors database...'):format(senId)
 		else
 			re = 'Provided ID doesnt match any in MasterSensors database...'
@@ -370,50 +394,46 @@ function _G.removeSensorLink(senId)
 	return re
 end
 
-function _G.saveObjectsInfo(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.saveObjectsInfo(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	for i,tab in ipairs(objects) do
 		local tabName = string.upper(tab.name)
-		--conn:execute([[DROP TABLE IF EXISTS LEDs;]])
-		conn:execute(([[CREATE TABLE %s (sID TEXT, id TEXT, name TEXT, config TEXT)]]):format(tabName))
+		--SQLconn:execute([[DROP TABLE IF EXISTS LEDs;]])
+		SQLconn:execute(([[CREATE TABLE %s (sID TEXT, id TEXT, name TEXT, config TEXT)]]):format(tabName))
 		for i,v in ipairs(tab) do
-			if not v.node then
-				sID = v.sID
-				local cursor,errorString = conn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
-				if cursor then
-					local row = cursor:fetch ({}, "a")
-					if row then
-						conn:execute(([[UPDATE %s SET id='%s',name='%s',config='%s' WHERE sID='%s';]]):format(tabName,v:getID(),v:getName(),v:getConfig(),sID))
-					else
-						conn:execute(([[INSERT INTO %s values('%s','%s','%s','%s');]]):format(tabName,sID,v:getID(),v:getName(),v:getConfig()))
-					end
-					cursor:close()
+			sID = v.sID
+			local cursor,errorString = SQLconn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
+			if cursor then
+				local row = cursor:fetch ({}, "a")
+				if row then
+					SQLconn:execute(([[UPDATE %s SET id='%s',name='%s',config='%s' WHERE sID='%s';]]):format(tabName,v:getID(),v:getName(),v:getConfig(),sID))
+				else
+					SQLconn:execute(([[INSERT INTO %s values('%s','%s','%s','%s');]]):format(tabName,sID,v:getID(),v:getName(),v:getConfig()))
 				end
+				cursor:close()
 			end
 		end
 	end
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
-function _G.loadObjectsInfo(conn,c)
-	if not conn then conn = env:connect(SQLFile) else c = true end
+function _G.loadObjectsInfo(c)
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
 	for i,tab in ipairs(objects) do
 		local tabName = string.upper(tab.name)
 		for i,v in ipairs(tab) do
-			if not v.node then
-				sID = v.sID
-				local cursor,errorString = conn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
-				if cursor then
-					local row = cursor:fetch ({}, "a")
-					if row then
-						local bl = loadData(row.config)
-						if bl then v:setConfig(bl) end
-					end
-					cursor:close()
+			sID = v.sID
+			local cursor,errorString = SQLconn:execute(("select * from %s where sID='%s';"):format(tabName,sID))
+			if cursor then
+				local row = cursor:fetch ({}, "a")
+				if row then
+					local bl = loadData(row.config)
+					if bl then v:setConfig(bl) end
 				end
+				cursor:close()
 			end
 		end
 	end
-	if not c then conn:close() else return conn end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
 function _G.startPollSensorEvent()
@@ -434,19 +454,20 @@ end
 --polls all the sensors to update their last read
 --if p then print the readings or er
 function _G.pollSensors(p,log)
-	local conn = env:connect(SQLFile)
-	if conn then
+	local c
+	if not _G.SQLconn then _G.SQLconn = env:connect(SQLFile) c = true else c = false end
+	if SQLconn then
 		local stamp = os.time(os.date("*t"))
 		local time = os.date('*t')
 		local date = time.year.."-"..time.month.."-"..time.day
 		time = time.hour..":"..time.min..":"..time.sec
 		if sensors then
-			conn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
+			SQLconn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
 			for i,v in ipairs(sensors) do
 				local t1,t2,er = v:read()
-					if not er then
+				if not er then
 					if log then
-						local status,errorString = conn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "','" .. t2 .. "')")
+						local status,errorString = SQLconn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "','" .. t2 .. "')")
 					end
 					if p then print(v:getID(),v:getName(),t1,t2) end
 				else
@@ -455,15 +476,15 @@ function _G.pollSensors(p,log)
 			end
 		end
 		if DHTs then
-			conn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
-			conn:execute([[CREATE TABLE humidity (id TEXT, name TEXT, stamp time, tdate date, ttime time, hum INTEGER)]])
+			SQLconn:execute([[CREATE TABLE temp (id TEXT, name TEXT, stamp time, tdate date, ttime time, cel INTEGER, fah INTEGER)]])
+			SQLconn:execute([[CREATE TABLE humidity (id TEXT, name TEXT, stamp time, tdate date, ttime time, hum INTEGER)]])
 			for i,v in ipairs(DHTs) do
 				local t1,t2 = v:read()
 				if t1 then
 					local t3 = (t2 * 9 / 5  + 32)
 					if log then
-						local status,errorString = conn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName()..'_t' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t2 .. "','" .. t3 .. "')")
-						local status,errorString = conn:execute("INSERT INTO humidity values('" .. v:getID() .. "','" .. v:getName()..'_h' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")
+						local status,errorString = SQLconn:execute("INSERT INTO temp values('" .. v:getID() .. "','" .. v:getName()..'_t' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t2 .. "','" .. t3 .. "')")
+						local status,errorString = SQLconn:execute("INSERT INTO humidity values('" .. v:getID() .. "','" .. v:getName()..'_h' .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")
 					end
 					if p then print(v:getID(),v:getName(),t1,t2,t3) end
 				else
@@ -472,12 +493,12 @@ function _G.pollSensors(p,log)
 			end
 		end
 		if lightsensors then
-			conn:execute([[CREATE TABLE light (id TEXT, name TEXT, stamp time, tdate date, ttime time, lightlevel INTEGER)]])
+			SQLconn:execute([[CREATE TABLE light (id TEXT, name TEXT, stamp time, tdate date, ttime time, lightlevel INTEGER)]])
 			for i,v in ipairs(lightsensors) do
 				local t1,t2,er = v:read()
 				if not er then
 					if log then
-						local status,errorString = conn:execute("INSERT INTO light values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")
+						local status,errorString = SQLconn:execute("INSERT INTO light values('" .. v:getID() .. "','" .. v:getName() .. "','" .. stamp .. "','" .. date .. "','" .. time .. "','" .. t1 .. "')")
 					end
 					if p then print(v:getID(),v:getName(),t1,t2) end
 				else
@@ -485,13 +506,36 @@ function _G.pollSensors(p,log)
 				end
 			end
 		end
-		conn:close()
 	else
 		print('sql connect error on poll')
 	end
+	if c then SQLconn:close() _G.SQLconn = nil end
 end
 
---t is base time to be converted
+local errorsTable = {}
+function _G.runError(er)
+	if run then
+		if not er then er = "error" else logEvent('runError',er) end
+		table.insert(errorsTable,er)
+		if #errorsTable >= 4 then
+			local log = ''
+			for i,v in ipairs(errorsTable) do logs = logs..'\n'..v end
+			alert('RunError, rebooting at '.. os.date() ..'!\n'..logs)
+			_G.REBOOT = true
+			run = false
+			logEvent('runError','ERROR MAX REBOOTING!')
+		end
+	end
+end
+function _G.alert(msg)
+	msg = 'An alert has been issued by '..mainID .. (msg and '!\n' .. msg or '!')
+	for i,v in ipairs(users) do
+		sendMessage("!ALERT!", msg ,v)
+	end
+end
+
+
+--t is base time in seconds to be converted
 function _G.timeM(t,multiplier)
 	if multiplier == "m" or multiplier == "min" or multiplier == "minute" then
 		t = t * 60

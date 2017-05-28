@@ -14,7 +14,7 @@ end
 
 function Feeder:toString()
 	local next
-	if self.config.timing and #self.config.timing > 0 and
+	if self.config.timing and #self.config.timing > 0 then
 		local hour,day = tonumber(os.date("%H")),tonumber(os.date("%d"))
 		for i,v in ipairs(self.config.timing) do
 			if (next == nil or next < v) and v < hour and self.config.lastfeed[v] and self.config.lastfeed[v] ~= day then
@@ -22,7 +22,7 @@ function Feeder:toString()
 			end
 		end
 	end
-	return string.format("[Feeder] %s %s %s Next feed at:%s",self:getID(),self:getName(),self.config.feeding and 'feeding' or 'standby',next or 'tommorow')
+	return string.format("[Remote Feeder] %s %s %s Next feed at:%s",self:getID(),self:getName(),self.config.feeding and 'feeding' or 'standby',next or 'tommorow')
 end
 
 return Feeder

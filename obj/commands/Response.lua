@@ -1,4 +1,5 @@
 local Command	= require("obj.Command")
+local RemoteStepperFeeder = require("obj.Remote_Stepper_Feeder")
 local RemoteStepperMotors = require("obj.Remote_StepperMotor")
 local RemoteButton = require("obj.Remote_Button")
 local RemoteDHT22 = require("obj.Remote_DHT22")
@@ -65,6 +66,13 @@ Response.orders["objects"] = function(input,user)
 		if data then
 			local objects = loadData(data)
 			if objects then
+				if objects.feeders then
+					for i,v in ipairs(objects.feeders) do
+						if type(v) == "table" then
+							RemoteStepperFeeder:new(v.id,v.name,v.config,user.node)
+						end
+					end
+				end
 				if objects.stepperMotors then
 					for i,v in ipairs(objects.stepperMotors) do
 						if type(v) == "table" then

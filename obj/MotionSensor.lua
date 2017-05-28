@@ -28,6 +28,7 @@ function Sensor:setup(options)
 	local button
 	if pin then
 		button = Button:new(pin,{pin=pin,edge=1})
+		self.button = button
 	end
 	self.config.lightSensor 		= options and options.lightSensor or Sensor.config.lightSensor
 	self.config.lightSensitivity	= options and options.lightSensitivity or Sensor.config.lightSensitivity
@@ -92,7 +93,9 @@ function Sensor:checkLight()
 end
 
 function Sensor:checkMotion()
-	if buttons and buttons[self:getButton()] then
+	if self.button then
+		return (self.button:read() == 1 and true or false)
+	elseif buttons and buttons[self:getButton()] then
 		return (buttons[self:getButton()]:read() == 1 and true or false)
 	else
 		return false
@@ -301,20 +304,21 @@ end
 
 function Sensor:getHTMLcontrol()
 	local id = self:getID()
+	local name = self:getName()
 	return ('<div style="font-size:15px">%s %s <br> %s %s Sensitivity <br> %s %s Light Sensitivity <br> %s %s TimeOut <br> %s %s <br> %s %s <br> %s <br>%s</div>'):format(
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s stat')">Status</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s toggle')">Toggle</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sUp','%s')">+</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sDown','%s')">-</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s lsUp','%s')">+</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s lsDown','%s')">-</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s ToUp','%s')">+</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s ToDown','%s')">-</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sLS','%s')">set Light Sensor</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sB','%s')">Set Button</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sR','%s')">Set Relay</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sL','%s')">Set LED</button >]]):format(id,id),
-	([[<button style="font-size:15px" onclick="myFunction('Mos %s sBz','%s')">Set Buzzer</button >]]):format(id,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s stat')">Status</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s toggle')">Toggle</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sUp','%s')">+</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sDown','%s')">-</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s lsUp','%s')">+</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s lsDown','%s')">-</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s ToUp','%s')">+</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s ToDown','%s')">-</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sLS','%s')">set Light Sensor</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sB','%s')">Set Button</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sR','%s')">Set Relay</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sL','%s')">Set LED</button >]]):format(name,id),
+	([[<button style="font-size:15px" onclick="myFunction('Mos %s sBz','%s')">Set Buzzer</button >]]):format(name,id),
 	([[<form id="%s"> Set To:<input type="text" name='com'></form>]]):format(id)
 	)
 end

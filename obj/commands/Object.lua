@@ -31,6 +31,11 @@ function Object:execute(input,user)
 end
 
 Object.orders = {}
+Object.orders["newID"] = function(obj)
+	obj:setID()
+	return false
+end
+
 Object.orders["rename"] = function(obj,name)
 	if name then
 		obj:setName(name)
@@ -53,7 +58,6 @@ end
 Object.orders["r"] = Object.orders["read"]
 
 Object.orders["on"] = function(obj,f,multiplier,user)
-print('!!!!!!!!!!!!!!!!!!',obj, obj.on)
 	if obj.on then
 		if f then
 			f = tonumber(f)
@@ -77,10 +81,10 @@ Object.orders["off"] = function(obj,f,multiplier,user)
 			f = tonumber(f)
 			if multiplier then f = timeM(f,multiplier) end
 		end
-		local off = f and obj.forceOff and Object:forceOff(f) or Object:off(user)
+		local off = f and obj.forceOff and obj:forceOff(f) or obj:off(user)
 		if off then
 			return string.format("%s is now off%s.",obj:getName(),f and " for "..f.." seconds" or "")
-		elseif Object.stayOn then
+		elseif obj.stayOn then
 			return string.format("%s is off for %s more seconds.",obj:getName(), math.round(obj.stayOn - socket.gettime()))
 		else
 			return string.format("%s is already off%s.",obj:getName(),f and " and will stay off for "..f.." seconds" or "")

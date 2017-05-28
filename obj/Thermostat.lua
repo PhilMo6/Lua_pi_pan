@@ -57,7 +57,7 @@ function Thermostat:runLogic()
 end
 
 function Thermostat:runCoolLogic()
-	if sensors[self:getTempSensor()] then
+	if sensors and sensors[self:getTempSensor()] then
 		self.config.tempSensorID = sensors[self:getTempSensor()]:getID()
 		if relays[self:getCoolRelay()] then
 			self.config.coolingRelayID = relays[self:getCoolRelay()]:getID()
@@ -72,7 +72,7 @@ function Thermostat:runCoolLogic()
 end
 
 function Thermostat:runHeatLogic()
-	if sensors[self:getTempSensor()] then
+	if sensors and sensors[self:getTempSensor()] then
 		self.config.tempSensorID = sensors[self:getTempSensor()]:getID()
 		if relays[self:getHeatRelay()] then
 			self.config.heatingRelayID = relays[self:getHeatRelay()]:getID()
