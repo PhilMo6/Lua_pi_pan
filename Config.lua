@@ -34,22 +34,22 @@ Config.servoPins					= {}--pinValue
 Config.motorPins					= {}--table value containing 2 pins and optional pmw setting
 Config.thermostatStartup			= {}--table value containing id and optional config table
 Config.motionSensorStartup			= {}--table value containing id, sensor pin, and optional config table
-Config.macScannerStartup			= {}--table value containing id and optional config table
+Config.macScannerStartup			= {}--stringValue or tableValue containing id and other options
 --[[examples:WARNING DO NOT SET ANY GIVEN PIN ON MORE THEN 1 OBJECT
 Config.lightSensorPins				= {15}--pinValue
 Config.LEDPins 						= {17,27}--pinValue
-Config.RBG_LEDPins 					= {}--tableValue containing 3 pins
+Config.RBG_LEDPins 					= {{pinR=13,pinB=12,pinG=10}}--tableValue containing 3 pins 
 Config.buzzerPins 					= {22}--pinValue
-Config.buttonPins 					= {{11,0},{13,0},{12,0},{10,0},{14,1},{16,1}}--pinValue or table with pinValue and options. options are pin and edge
+Config.buttonPins 					= {20,{pin=11,edge=0}}--pinValue or table with pinValue and options. options are pin and edge
 Config.M_buttonPins 				= {}--table value containing 1 pin and number of buttons
-Config.relayPins					= {20,21,24,25}--pinValue
-Config.DHT22Pins					= {}--pinValue
-Config.stepperPins					= {}--table value containing 4 pins
+Config.relayPins					= {16}--pinValue
+Config.DHT22Pins					= {21}--pinValue
+Config.stepperPins					= {{pin1=20,pin2=21,pin3=24,pin4=25}}--table value containing 4 pins
 Config.servoPins					= {}--pinValue
 Config.motorPins					= {}--table value containing 2 pins and optional pmw setting
-Config.thermostatStartup			= {{'room'},{'doghouse',{tempSensor="doghouse",heatingRelay='doghouseHeater',coolingRelay='none',state='heating'}}}--table value containing id and optional config table
+Config.thermostatStartup			= {{'room'},{'doghouse',{tempSensor="doghouse",heatingRelay='doghouseHeater',coolingRelay='none',state='off'}}}--table value containing id and optional config table
 Config.motionSensorStartup			= {{'test',18}}--table value containing id, sensor pin, and optional config table
-Config.macScannerStartup			= {}--table value containing id and optional config table
+Config.macScannerStartup			= {"macScanner"}--stringValue or tableValue containing id and other options
 ]]
 
 Config.tcpPort						= 9696

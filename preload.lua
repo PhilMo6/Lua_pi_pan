@@ -261,7 +261,9 @@ function _G.loadObjects(c)
 		end
 	end
 	for i,op in ipairs(macScannerStartup) do
-		if type(op) == 'table' then
+		if type(op) == 'string' then
+			MacScanner:new(op,{id=op})
+		elseif type(op) == 'table' then
 			MacScanner:new(op.id,op)
 		end
 	end

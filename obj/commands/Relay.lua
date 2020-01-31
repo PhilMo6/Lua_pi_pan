@@ -77,7 +77,23 @@ end
 
 Relay.orders["toggle"] = function(relay,void,void2,user)
 	relay:toggle(user)
+end
 
+Relay.orders["timer"] = function(relay,f,multiplier,user)
+	if f then
+		f = tonumber(f)
+		if multiplier then f = timeM(f,multiplier) end
+	else 
+		f = 5
+	end
+	local on = relay:timerOn(f)
+	if on then
+		return string.format("%s is now on%s.",relay:getName()," for "..f.." seconds")
+	elseif relay.stayOff then
+		return string.format("%s is off for %s more seconds.",relay:getName(), math.round(relay.stayOff - socket.gettime()))
+	else
+		return string.format("%s is already on.",relay:getName())
+	end
 end
 
 return Relay

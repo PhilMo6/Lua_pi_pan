@@ -16,7 +16,7 @@ MacScanner.knownMacs = {
 
 --[[Example.knownMacs = {
 			{'34:ec:eq:ec:91:12','my_phone'},
-			{'fc:c0:b3:73:47:5e','frends_phone'},
+			{'fc:c0:b3:73:47:5e','friends_phone'},
 			{'01:e0:b0:19:32:14','rpi_greenhouse'}
 		}
 	]]

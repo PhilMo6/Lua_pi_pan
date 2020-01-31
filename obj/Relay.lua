@@ -12,16 +12,22 @@ Relay.location = 'relays'
 function Relay:setup(options)
 	local pin = options.pin
 	self.config.pin = pin
+	self.config.reverselogic = options.reverselogic or nil
 	self.gpio = RPIO(pin)
 	self.gpio:set_direction('out')
-	self.gpio:write(1)
+	self.gpio:write(0)
+	if self.config.reverselogic then
+		self.on = Relay.off
+		self.off = Relay.on
+	end
 end
 
 function Relay:getHTMLcontrol()
 	local id = self:getID()
-	return ([[%s %s %s <form id="%s"><input type="text" name='com'></form> ]]):format(
+	return ([[%s %s %s %s <form id="%s"><input type="text" name='com'></form> ]]):format(
 	([[<button onclick="myFunction('obj %s on','%s')">On</button >]]):format(id,id),
 	([[<button onclick="myFunction('obj %s off','%s')">Off</button >]]):format(id,id),
+	([[<button onclick="myFunction('r %s timer','%s')">Set timer</button >]]):format(self:getName(),id),
 	([[<button onclick="myFunction('obj %s re','%s')">Rename</button >]]):format(id,id),
 	id
 	)
@@ -37,10 +43,20 @@ function Relay:toggle()
 	end
 end
 
+--returns a 1 or 0 based off if logic is reversed for this relay(the relay is turned on by a low pin)
+--this is used for telling if the relay is on or off
+function Relay:getLogic()
+	if self.config.reverselogic then
+		return self:read() == 0 and 1 or 0
+	else
+		return self.gpio:read()
+	end
+end
+
 function Relay:off()
 	self:forceCheck()
-	if self:read() == 0 and not self.stayOn then
-		self.gpio:write(1)
+	if self:getLogic() == 1 and not self.stayOn then
+		self.gpio:write(0)
 		self:updateMasters()
 		return true
 	end
@@ -49,8 +65,8 @@ end
 
 function Relay:on()
 	self:forceCheck()
-	if self:read() == 1 and not self.stayOff then
-		self.gpio:write(0)
+	if self:getLogic() == 0 and not self.stayOff then
+		self.gpio:write(1)
 		self:updateMasters()
 		return true
 	end
@@ -77,11 +93,18 @@ function Relay:forceCheck()
 	if self.stayOn and self.stayOn <= socket.gettime() then self.stayOn = nil end
 end
 
+function Relay:timerOn(duration)
+	self:on()
+	Scheduler:queue(Event:new(function()
+		self:off()
+	end, duration, false))
+end
+
 function Relay:test()
 end
 
 function Relay:toString()
-	return string.format("[relay] %s %s %s",self:getID(),self:getName(),(self:read() == 1 and 'off' or 'on'))
+	return string.format("[relay] %s %s %s",self:getID(),self:getName(),(self:getLogic() == 0 and 'off' or 'on'))
 end
 
 return Relay
