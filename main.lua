@@ -56,7 +56,7 @@ local msg = (mainID.." Startup time:%s\n"):format(os.date('%c'))
 for i,v in ipairs(objects) do
 	msg = ("%s %s:%s"):format(msg,string.firstToUpper(v.name),#v)
 end
-sendMessage("Startup "..mainID, msg ,mainEmail)
+sendEmail("Startup "..mainID, msg ,mainEmail)
 print(msg)
 msg = nil
 pollSensors(true,true)
@@ -167,7 +167,7 @@ local mainEvents = {
 			if motionSensors and motionSensors[1] and motionSensors[1]:checkMotion() then
 				if buzzers[1] then
 					buzzers[1]:test()
-					sendMessage("Room Alarm", 'Room alarm at '.. os.date() ,'philipmowrey@gmail.com')
+					sendEmail("Room Alarm", 'Room alarm at '.. os.date() ,'philipmowrey@gmail.com')
 				end
 			end
 		end
@@ -181,21 +181,23 @@ local mainEvents = {
 	end, 60*60, true, 0)
 	,
 	Event:new(function()--check email for any commands not yet parsed and if found find and run command if available.
-		local msg = receiveMessage()
-		if msg then
-			local date = msg:date()
-			if lastCommand ~= date then
-				lastCommand = date
-				local command = msg:subject()
-				local user = msg:from()
-				local _,_,email = string.find(user,"<(.+)>")
-				print(('Email Command received: %s \nFrom: %s%s'):format(command,user,(email and " " ..email or "")))
-				if user ~= mainEmail then
-					local s,r,com = CommandParser:parse(command,(email or user),'mail')
-					if s then
-						sendMessage("Command accepted", r or "The command " .. com.name .. " has been executed." ,(email or user))
-					else
-						sendMessage("Command failed", command .. " is not a valid command." ,(email or user))
+		local msgs = receiveEmails()
+		if msgs then
+		for i,msg in ipairs(msgs) do
+				local date = msg:date()
+				if lastCommand ~= date then
+					lastCommand = date
+					local command = msg:subject()
+					local user = msg:from()
+					local _,_,email = string.find(user,"<(.+)>")
+					print(('Email Command received: %s \nFrom: %s%s'):format(command,user,(email and " " ..email or "")))
+					if user ~= mainEmail then
+						local s,r,com = CommandParser:parse(command,(email or user),'mail')
+						if s then
+							sendEmail("Command accepted", r or "The command " .. com.name .. " has been executed." ,(email or user))
+						else
+							sendEmail("Command failed", command .. " is not a valid command." ,(email or user))
+						end
 					end
 				end
 			end
@@ -246,8 +248,21 @@ _G.run = true
 --main loop
 while run == true do
 	socket.select(nil,nil,getFrequency())
-	Scheduler:poll(socket.gettime())
+	local status,re = pcall(Scheduler.poll)
+	if status == true then
+		--does it need to do anything when polling is successful?
+	else
+		--if error happens it needs to try and send a message to the main user to inform them
+		--email and/or sms and/or other?
+		--error light?
+		
+		
+		local msg = ("RunError:%s\n%s\n"):format(os.date('%c'),re)
+		alert(msg)
+		
+	end
 end
+
 print('Stopping system')
 --if main loop breaks clean up anything left over
 if runningServer then runningServer:close() print('tcp closed') end

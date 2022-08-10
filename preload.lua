@@ -532,7 +532,7 @@ end
 function _G.alert(msg)
 	msg = 'An alert has been issued by '..mainID .. (msg and '!\n' .. msg or '!')
 	for i,v in ipairs(users) do
-		sendMessage("!ALERT!", msg ,v)
+		sendEmail("!ALERT!", msg ,i)
 	end
 end
 

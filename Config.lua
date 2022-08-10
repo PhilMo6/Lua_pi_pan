@@ -10,10 +10,9 @@ Config.masterList					= {} --example:{{id = 'room',ip = '192.168.1.149',port = 9
 --when adding a node to the node list you may set an objects table that defines what objects a master will ask a given node for.
 Config.nodeList 					= {}--example:{{id = 'node1',ip = '192.168.1.111',port = 9696}}
 Config.mainEmail 					= false--'YourEmailHere@gmail.com' if false will not try sending mail.
-Config.mainEmailPass				= 'YourPasswordHere'
-Config.users						= {}--{'5555555555@vtext.com'}
-Config.usersConfigDefault			= {msgProtocol='email'}--msgProtocol = 'email' or 'sms' this will send messages as a whole or respect sms 160 char limit and split into multi msg if needed
-Config.usersConfig					= {}--{['5555555555@vtext.com'] = {forwardTo = "adifferentemail@gmail.com",msgProtocol='email'}}
+Config.mainEmailPass				= 'YourEmailPasswordHere'
+Config.users						= {{email="",txt=""}--{'5555555555@vtext.com'}
+
 
 Config.SQLFile						= "/home/pi/luaTest.db"
 Config.sensorUpdateTime 			= 30--how often do sensors update

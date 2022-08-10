@@ -13,7 +13,7 @@ local smtp = require 'socket.smtp'
 local ssl = require 'ssl'
 local https = require 'ssl.https'
 
-function _G.sendMessage(subject,msg,rec)
+function _G.sendEmail(subject,msg,rec)
 	if not mainEmail then return print('Mail send failed, email not configured') end
 	--define local functions we dont want exposed gloabaly
 	--these do the actual work of sending the message
@@ -57,28 +57,35 @@ function _G.sendMessage(subject,msg,rec)
 		end
 	end
 
-	--before sending a message we need to figure out if we are going to send this to an email or a phone.
-	--users are defined in Config.lua and can be assigned a protocol other then the default to be used.
-	--if no user found for recipent then use default
-	local protocol = usersConfigDefault.msgProtocol
-	if users[rec] and usersConfig[rec] then
-		protocol = usersConfig[rec].msgProtocol
-		if usersConfig[rec].forwardTo then rec = usersConfig[rec].forwardTo end
-	end
-	if protocol == 'email' then--if email just send the message
-		send(subject, msg,(rec or users[1]))
-	elseif protocol == "sms" then--if sms then break up into messages no more then 150 characters long and send them
-		local msgs = string.limitMsg(msg,150)
-		for i,v in ipairs(msgs) do
-			send(subject..(msgs[2] and i or ""), v,(rec or users[1]))
-			sleep(1)
+	local function sentToUser(userNum)
+		if users[userNum].email then
+			send(subject, msg, users[userNum].email)
+		end
+		if users[userNum].txt then
+			local msgs = string.limitMsg(msg,150)
+			for i,v in ipairs(msgs) do
+				send(subject..(msgs[2] and i or ""), v, users[userNum].txt)
+				sleep(5)
+			end
 		end
 	end
+	
+	
+	if rec then
+		if type(rec) == "number" then
+			sentToUser(userNum)
+		else
+			send(subject, msg, rec)
+		end
+	else
+		sentToUser(1)
+	end
+	
 end
 
 local imap4   = require "imap4"
 local Message = require "pop3.message"
-function _G.receiveMessage()
+function _G.receiveEmails()
 	if not mainEmail then return print('Mail receive failed, email not configured') end
 	local connection,er = imap4('imap.gmail.com', 993, {protocol = 'tlsv1'})
 	if connection then
@@ -86,11 +93,13 @@ function _G.receiveMessage()
 		if logged then
 			local info,er = connection:examine('controller')
 			if info then
+				local msgs = {}
 				for _,v in pairs(connection:fetch('RFC822', (info.exist)..':*')) do
 					local msg = Message(v.RFC822)
-					connection:logout()
-					return msg
+					table.insert(msgs,msg)
 				end
+				connection:logout()
+				return msgs
 			else print('examine error',er)--NEED TO ADD IN BETTER ERROR HANDLING
 			end
 		else print('loggin error',er)--NEED TO ADD IN BETTER ERROR HANDLING

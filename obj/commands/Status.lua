@@ -9,7 +9,7 @@ Status.keywords	= {"status","stat","Stat"}
 function Status:execute(input,user,parser)
 	local msg = getStatus()
 	if parser == "mail" then
-		sendMessage("Status", msg ,user)
+		sendEmail("Status", msg ,user)
 	elseif parser == "tcp" then
 		user:send(msg)
 	end

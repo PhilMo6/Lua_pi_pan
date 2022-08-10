@@ -20,7 +20,7 @@ function Log:execute(input,user,par)
 		pollSensors(true,true)
 		local msg = getStatus()
 		if par == "mail" then
-			sendMessage("Status", msg ,user)
+			sendEmail("Status", msg ,user)
 		elseif par == "tcp" then
 			user:send(msg)
 		end

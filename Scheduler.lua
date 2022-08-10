@@ -9,7 +9,8 @@ local Scheduler		= {}
 Scheduler.events	= {}
 
 --- Polls the Scheduler for events waiting to fire.
-function Scheduler:poll(timestamp)
+function Scheduler:poll()
+	local timestamp = socket.gettime()
 	for i,v in ipairs(Scheduler.events) do
 		if v:isReady(timestamp) then
 			v:execute(timestamp)
@@ -18,6 +19,7 @@ function Scheduler:poll(timestamp)
 			end
 		end
 	end
+	return true
 end
 
 --- Add an Event to the queue.
