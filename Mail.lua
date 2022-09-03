@@ -13,7 +13,7 @@ local smtp = require 'socket.smtp'
 local ssl = require 'ssl'
 local https = require 'ssl.https'
 
-function _G.sendEmail(subject,msg,rec)
+function _G.sendEmail(subject,msg,rec,txt)
 	if not mainEmail then return print('Mail send failed, email not configured') end
 	--define local functions we dont want exposed gloabaly
 	--these do the actual work of sending the message
@@ -37,14 +37,14 @@ function _G.sendEmail(subject,msg,rec)
 	local function send(subject,body,rec)
 		local msg = {
 			headers = {
-				to = '<'..(rec or users[1])..'>',
+				to = '<'.. rec ..'>',
 				subject = subject
 			},
 			body = body
 		}
 		local ok, err = smtp.send {
 			from = '<'..mainEmail..'>',
-			rcpt = '<'..(rec or users[1])..'>',
+			rcpt = '<'.. rec ..'>',
 			source = smtp.message(msg),
 			user = mainEmail,
 			password = mainEmailPass,
@@ -56,29 +56,25 @@ function _G.sendEmail(subject,msg,rec)
 			print("Mail send failed", err)
 		end
 	end
-
-	local function sentToUser(userNum)
-		if users[userNum].email then
-			send(subject, msg, users[userNum].email)
-		end
-		if users[userNum].txt then
-			local msgs = string.limitMsg(msg,150)
-			for i,v in ipairs(msgs) do
-				send(subject..(msgs[2] and i or ""), v, users[userNum].txt)
-				sleep(5)
-			end
-		end
-	end
 	
-	
-	if rec then
-		if type(rec) == "number" then
-			sentToUser(userNum)
-		else
-			send(subject, msg, rec)
-		end
+	if not txt then
+		send(subject, msg, rec)
 	else
-		sentToUser(1)
+		--break up msg and send every 5 seconds
+		local msgs = string.limitMsg(msg,140)
+		local msgCount = #msgs
+		--use event
+		local sendEvent = Event:new(function()
+			if msgs[1] then
+				send(subject.." " ..msgCount - #msgs, msgs[1], rec)
+				table.remove(msgs,1)
+			else
+				--stop event
+				self.shouldRepeat = false
+			end
+		end, 5, true, msgCount)
+		
+		Scheduler:queue(sendEvent)
 	end
 	
 end
