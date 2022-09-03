@@ -245,21 +245,21 @@ end
 print('Up and running')
 _G.lastCommand = false
 _G.run = true
+_G.REBOOT = false
+local runError = 0
 --main loop
 while run == true do
 	socket.select(nil,nil,getFrequency())
 	local status,re = pcall(Scheduler.poll)
-	if status == true then
-		--does it need to do anything when polling is successful?
-	else
-		--if error happens it needs to try and send a message to the main user to inform them
-		--email and/or sms and/or other?
-		--error light?
-		
-		
+	if status ~= true then--if error happens it needs to try and send a message to the usersd to inform them
+		runError = runError + 1
 		local msg = ("RunError:%s\n%s\n"):format(os.date('%c'),re)
 		alert(msg)
-		
+		--try and restart after 3 failed pcalls in the main loop
+		if runError >= 3 then
+			run = false
+			REBOOT = true
+		end
 	end
 end
 

@@ -54,6 +54,7 @@ function _G.sendEmail(subject,msg,rec,txt)
 		}
 		if not ok then--NEED TO ADD IN BETTER ERROR HANDLING
 			print("Mail send failed", err)
+			alert()
 		end
 	end
 	

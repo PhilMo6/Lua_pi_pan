@@ -530,13 +530,23 @@ function _G.runError(er)
 	end
 end
 function _G.alert(msg)
-	msg = 'An alert has been issued by '..mainID .. (msg and '!\n' .. msg or '!')
-	for i,v in ipairs(users) do
-		if v.email then
-			sendEmail("!ALERT!", msg ,v.email)
-		end
-		if v.txt then
-			sendEmail("!ALERT!", msg ,v.txt , true)
+
+	if relays and relays['alert'] then
+		relays['alert']:on()
+	end
+	if LEDs and LEDs['alert'] then
+		LEDs['alert']:on()
+	end
+	
+	if msg then
+		msg = 'An alert has been issued by '..mainID .. (msg and '!\n' .. msg or '!')
+		for i,v in ipairs(users) do
+			if v.email then
+				sendEmail("!ALERT!", msg ,v.email)
+			end
+			if v.txt then
+				sendEmail("!ALERT!", msg ,v.txt , true)
+			end
 		end
 	end
 end
